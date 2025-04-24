@@ -3,12 +3,19 @@
   "chat.agent.maxRequests": 128,
   "chat.edits2.enabled": true,
   "chat.tools.autoApprove": true,
-  "files.associations": { "*.json": "json" },
-  "files.exclude": { "*.db": true, "*.db-*": true },
+  "files.associations": {
+    "*.json": "json"
+  },
+  "files.exclude": {
+    "*.db": true,
+    "*.db-*": true
+  },
   "github.copilot.chat.agent.thinkingTool": true,
   "github.copilot.chat.codesearch.enabled": true,
   "github.copilot.nextEditSuggestions.enabled": true,
-  "search.exclude": { "bun.lock": true },
+  "search.exclude": {
+    "bun.lock": true
+  },
   "[typescript][javascript][css][json]": {
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "biomejs.biome",
@@ -16,5 +23,20 @@
       "source.fixAll": "explicit",
       "quickfix.biome": "explicit"
     }
-  }
+  },
+  "github.copilot.chat.commitMessageGeneration.instructions": [
+    {
+      "file": ".github/copilot-instructions.commit-message-generation.md"
+    }
+  ],
+  "github.copilot.chat.pullRequestDescriptionGeneration.instructions": [
+    {
+      "file": ".github/copilot-instructions.pull-request-description-generation.md"
+    }
+  ],
+  "github.copilot.chat.reviewSelection.instructions": [
+    {
+      "file": ".github/copilot-instructions.review-selection.md"
+    }
+  ]
 }

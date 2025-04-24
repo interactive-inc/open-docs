@@ -3,7 +3,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "format": "biome check . --fix --unsafe"
+    "format": "biome check . --fix --unsafe",
+    "init": "bun run .instructions/build.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

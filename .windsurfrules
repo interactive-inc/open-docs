@@ -256,3 +256,29 @@ UI/UXに関するメモ。
 - Define only one function or class or type per file
 - Do not use multiple exports in a single file
 - 最後に改行を追加する
+
+# 11.commit-message.md
+
+Please write in the following format:
+
+```
+update: English message
+```
+
+You can also choose from the following prefixes:
+
+- update
+- fix
+- refactor
+
+# 12.pull-request-description.md
+
+- Write in Japanese
+
+# 13.review.md
+
+Please check the following points:
+
+- Are there any misleading expressions?
+- Is the code difficult to read due to abbreviated variables or other issues?
+
