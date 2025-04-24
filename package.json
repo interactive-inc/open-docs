@@ -1,0 +1,13 @@
+{
+  "name": "open-docs",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "format": "biome check . --fix --unsafe"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/bun": "^1.2.10",
+    "typescript": "^5.8.3"
+  }
+}
