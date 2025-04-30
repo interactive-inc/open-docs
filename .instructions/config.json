@@ -21,6 +21,7 @@
     "clinerules": ".clinerules",
     "claude": "CLAUDE.md",
     "cursorRules": ".cursor/rules",
-    "devin": "devin.md"
+    "devin": "devin.md",
+    "augmentGuidelines": ".augment-guidelines"
   }
 }
