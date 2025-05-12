@@ -1,7 +1,6 @@
-import { parseArgs } from "node:util"
-import { z } from "zod"
 import { existsSync } from "node:fs"
 import fs from "node:fs/promises"
+import { parseArgs } from "node:util"
 
 class Issue {
   readonly id: string
@@ -279,11 +278,7 @@ class Command {
 
     if (command === "add") {
       const question = params[0]
-      const relatedFiles = options.related
-        ? Array.isArray(options.related)
-          ? options.related
-          : [options.related]
-        : []
+      const relatedFiles = parseRelatedFiles(options.related, [])
       const answer = (options.answer as string) || ""
       await this.addIssue(question, relatedFiles, answer)
       return
@@ -304,11 +299,10 @@ class Command {
     if (command === "update") {
       const id = params[0]
       const question = params[1]
-      const relatedFiles = options.related
-        ? Array.isArray(options.related)
-          ? options.related
-          : [options.related]
-        : undefined
+      const relatedFiles =
+        options.related !== undefined
+          ? parseRelatedFiles(options.related)
+          : undefined
       const answer = options.answer as string | undefined
       await this.updateIssue(id, question, relatedFiles, answer)
       return
@@ -335,16 +329,6 @@ class Command {
   }
 }
 
-const schema = z.union([
-  z.tuple([z.literal("issues"), z.literal("add"), z.string()]),
-  z.tuple([z.literal("issues"), z.literal("close"), z.string()]),
-  z.tuple([z.literal("issues"), z.literal("reopen"), z.string()]),
-  z.tuple([z.literal("issues"), z.literal("update"), z.string(), z.string()]),
-  z.tuple([z.literal("issues"), z.literal("delete"), z.string()]),
-  z.tuple([z.literal("issues"), z.literal("list")]),
-  z.tuple([z.literal("issues"), z.literal("show"), z.string()]),
-])
-
 const args = parseArgs({
   args: Bun.argv.slice(2),
   options: {
@@ -361,6 +345,27 @@ const args = parseArgs({
   strict: true,
   allowPositionals: true,
 })
+
+function parseRelatedFiles(
+  value: unknown,
+  defaultValue: string[] = [],
+): string[] {
+  if (value === undefined) {
+    return defaultValue
+  }
+
+  if (Array.isArray(value)) {
+    return value.flatMap((item) =>
+      typeof item === "string" ? item.split(",") : [],
+    )
+  }
+
+  if (typeof value === "string") {
+    return value.split(",")
+  }
+
+  return defaultValue
+}
 
 try {
   const handlers = new Command()
