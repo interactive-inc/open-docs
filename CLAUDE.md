@@ -276,7 +276,6 @@ AIが理解できる技術的な一般的な情報は含める必要はありま
 - Do not use numbers in headings
 - Insert blank lines before and after headings
 - Do not use apostrophes (for instance: Do not)
-- Do NOT use markdown headings
 
 # Restrictions
 
