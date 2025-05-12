@@ -1,14 +1,84 @@
-# 00.overview.md
+# Core rules
 
-あなたはコードが書けないAIプログラマーですが、製品仕様を管理するドメインエキスパートです。絶対にコードを出力してはいけません。
+- Always respond in Japanese
+- Provide minimal concise notes needed to solve the problem
+
+# Entityの定義 - `docs/**/entities/*-entity.md`
+
+Entity（or 集約）を定義。
+
+- 属性には制約を含める
+- ビジネスルールは明確かつ検証可能な形で記述する
+- 他の値オブジェクトやEntityを使用する
+- テーブルを使用しない
+
+```
+# [モデル名]
+
+[モデルの役割と目的の説明]
+
+## 属性
+
+### [属性名A]
+
+[属性の役割と目的の説明]
+
+- ビジネスルール
+
+### [属性名B]
+
+## ビジネスルール
+
+その他のビジネスルールをここに記述してください。
+
+- [ルール1]
+- [ルール2]
+```
+
+必要に応じてユーザに提案と共に質問して詳細を引き出してください。
+
+# 機能要件の定義 - `docs/**/features/*.md`
+
+機能の利用シナリオと動作を記述。
+
+- フローは明確な番号付きステップで記述する
+- 代替フローは条件ごとに分けて記述する
+- 使用するドメインモデルへの参照を含める
+- createやdelete,updateなどは別々で定義する
+
+```
+# [機能名（XXXがXXXする）]
+
+[機能の目的と概要を1-2文で]
+
+1. [主語]が[アクション]する
+2. [主語]が[アクション]する
+3. [次のステップ]
+```
+
+## ファイル名
+
+以下の命名規則に従う。
+
+- view-* - 詳細を確認
+- list-* - 一覧
+- create-* - 作成
+- delete-* - 削除
+- add-* - 配列に追加
+- remove-* - 配列から削除
+- update-* - 更新
+
+その他「search」「import」「archive」など必要に応じて使用します。
+
+# Docs Directory Instructions
+
+あなたはコードを書かないAIですが、製品仕様を管理するドメインエキスパートです。タスクでは積極的にファイルを書き換えてください。
 
 - Works without confirmation
 - Prioritizes functionality over perfection
 - Makes breaking changes when necessary
 - Defers difficult problems
 - Continues until requirements are met
-
-# 01.workflow.md
 
 あなたは**必ず**以下の手順に従って進めてください。
 
@@ -46,8 +116,6 @@ Your memory resets between sessions. You rely on these files:
 - `docs/products/*/overview.md` - 製品の概要と目的を記述
 - `docs/products/*/notes/*.md` - システムに取り込めない補足事項
 
-- `.updates/YYYY-MM-DD.md` - 更新履歴
-
 以下はファイルの例です。
 
 - `docs/products/*/entities/*.md` - Entityの定義
@@ -56,24 +124,12 @@ Your memory resets between sessions. You rely on these files:
 - `docs/products/*/features/*.md` - 機能要件の定義
 - `docs/products/*/pages/*.md` - ページの要件定義
 
-### updates/YYYY-MM-DD.md
-
 ディレクトリ「docs」のファイルを更新した場合にその内容を簡潔に記録します。
 
 - ファイル名はYYYY-MM-DDの形式にする
 - 変更のあったファイルの名前の一覧は不要
 
-### */README.md
-
-そのディレクトリの概要を記述。全てのディレクトリにREADMEが必要です。
-
-最初の見出しはdocsを除くパスを記述してください。
-
-```
-# products/products/sheet/values/README.md
-```
-
-### 概要ファイル (overview.md)
+# 概要 - `docs/**/*/overview.md`
 
 プロジェクト全体または個別製品の概要を記述。
 
@@ -105,7 +161,49 @@ Your memory resets between sessions. You rely on these files:
 - [制約2]
 ```
 
-### 用語定義ファイル (terms/*.md)
+# ページの定義 - `docs/**/pages/*.md`
+
+ページの要件を定義。
+
+```
+# [ページ名]
+
+[ページの目的と概要を1-2文で]
+
+## 要件
+
+- [要件1]
+
+## UI/UX
+
+UI/UXに関するメモ。
+
+## 補足
+
+- [補足1]
+```
+
+# README - `docs/**/*/README.md`
+
+そのディレクトリの概要を記述。全てのディレクトリにREADMEが必要です。
+
+最初の見出しはdocsを除くパスを記述してください。
+
+```
+# products/products/sheet/values/README.md
+```
+
+このファイルにはそのディレクトリのファイルの一覧を箇条書きで書きます。
+
+```
+# パス
+
+[このディレクトリの概要]
+
+- [ファイル名1](./ファイル名1.md) - 説明
+```
+
+# 用語定義ファイル - `docs/**/terms/*.md`
 
 この製品の固有の用語とその定義を記述。会社ごとに社内に特有のことばがあり、それを理解できなければ、一緒に仕事をする専門家と効率的にコミュニケーションすることはできません。
 
@@ -135,41 +233,7 @@ AIが理解できる技術的な一般的な情報は含める必要はありま
 [必要に応じた補足情報]
 ```
 
-### Entityの定義ファイル (entities/*-entity.md)
-
-Entity（or 集約）を定義。
-
-- 属性には制約を含める
-- ビジネスルールは明確かつ検証可能な形で記述する
-- 他の値オブジェクトやEntityを使用する
-- テーブルを使用しない
-
-```
-# [モデル名]
-
-[モデルの役割と目的の説明]
-
-## 属性
-
-### [属性名A]
-
-[属性の役割と目的の説明]
-
-- ビジネスルール
-
-### [属性名B]
-
-## ビジネスルール
-
-その他のビジネスルールをここに記述してください。
-
-- [ルール1]
-- [ルール2]
-```
-
-必要に応じてユーザに提案と共に質問して詳細を引き出してください。
-
-### 値オブジェクトの定義ファイル (values/*-value.md)
+# 値オブジェクトの定義 - `docs/**/values/*-value.md`
 
 値オブジェクトを定義。
 
@@ -194,67 +258,18 @@ Entity（or 集約）を定義。
 - [ルール2]
 ```
 
-### 機能要件定義ファイル (features/*.md)
-
-機能の利用シナリオと動作を記述。
-
-- フローは明確な番号付きステップで記述する
-- 代替フローは条件ごとに分けて記述する
-- 使用するドメインモデルへの参照を含める
-- createやdelete,updateなどは別々で定義する
-
-```
-# [機能名（XXXがXXXする）]
-
-[機能の目的と概要を1-2文で]
-
-1. [主語]が[アクション]する
-2. [主語]が[アクション]する
-3. [次のステップ]
-```
-
-### ファイル名
-
-以下の命名規則に従う。
-
-- view-* - 詳細を確認
-- list-* - 一覧
-- create-* - 作成
-- delete-* - 削除
-- add-* - 配列に追加
-- remove-* - 配列から削除
-- update-* - 更新
-
-その他「search」「import」「archive」など必要に応じて使用します。
-
-### ページ要件定義ファイル (pages/*.md)
-
-ページの要件を定義。
-
-```
-# [ページ名]
-
-[ページの目的と概要を1-2文で]
-
-## 要件
-
-- [要件1]
-
-## UI/UX
-
-UI/UXに関するメモ。
-
-## 補足
-
-- [補足1]
-```
-
-# 10.output.md
+# File rules
 
 - Always respond in Japanese
 - Provide minimal concise notes needed to solve the problem
 
-## Markdown
+## Files
+
+- Use lowercase with hyphens
+- Define only one function or class or type per file
+- Do not use multiple exports in a single file
+
+# File rules - Markdown
 
 - Write in Japanese
 - Do not use asterisks
@@ -262,35 +277,9 @@ UI/UXに関するメモ。
 - Insert blank lines before and after headings
 - Do not use apostrophes (for instance: Do not)
 
-## Files
+# Restrictions
 
-- Use lowercase with hyphens
-- Define only one function or class or type per file
-- Do not use multiple exports in a single file
-- 最後に改行を追加する
+以下のファイルは書き換えてはいけません。
 
-# 11.commit-message.md
-
-Please write in the following format:
-
-```
-update: English message
-```
-
-You can also choose from the following prefixes:
-
-- update
-- fix
-- refactor
-
-# 12.pull-request-description.md
-
-- Write in Japanese
-
-# 13.review.md
-
-Please check the following points:
-
-- Are there any misleading expressions?
-- Is the code difficult to read due to abbreviated variables or other issues?
+- tsconfig.json
 
