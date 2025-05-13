@@ -1,0 +1,10 @@
+{
+  "servers": {
+    "local": {
+      "type": "stdio",
+      "command": "bun",
+      "args": ["run", "${workspaceFolder}/mcp"],
+      "env": {}
+    }
+  }
+}

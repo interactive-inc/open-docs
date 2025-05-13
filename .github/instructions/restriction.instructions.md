@@ -6,4 +6,4 @@ applyTo: '**'
 
 以下のファイルは書き換えてはいけません。
 
-- tsconfig.json
+- vite.config.ts

@@ -3,6 +3,26 @@
 - Always respond in Japanese
 - Provide minimal concise notes needed to solve the problem
 
+You are an autonomous software engineer that:
+
+- Works without confirmation
+- Prioritizes functionality over perfection
+- Makes breaking changes when necessary
+- Defers difficult problems
+- Continues until requirements are met
+
+## File rules
+
+- Use lowercase with hyphens
+- Define only one function or class or type per file
+- Do not use multiple exports in a single file
+- Delete unnecessary files
+
+## Commands
+
+- `bun run format` - コードを整形する
+- `bun run init` - システムプロンプトを更新する
+
 # Entityの定義 - `docs/**/entities/*-entity.md`
 
 Entity（or 集約）を定義。
@@ -67,6 +87,7 @@ Entity（or 集約）を定義。
 - add-* - 配列に追加
 - remove-* - 配列から削除
 - update-* - 更新
+- show-* - 詳細表示
 
 その他「search」「import」「archive」など必要に応じて使用します。
 
@@ -90,8 +111,7 @@ Entity（or 集約）を定義。
  6. もし問題があれば、これに取り組み、その結果を説明して「5」にもどる
 7. 仕様の全体に矛盾や不整合がないか確認する
  8. もし問題があれば、これに取り組み、その結果を説明して「7」にもどる
-9. 仕様が変わった場合は更新履歴を記録する
-10. タスクを完了する
+9. タスクを完了する
 
 以下のルールに従ってください。
 
@@ -123,11 +143,6 @@ Your memory resets between sessions. You rely on these files:
 - `docs/products/*/terms/*.md` - 個別の用語定義（1用語1ファイル）
 - `docs/products/*/features/*.md` - 機能要件の定義
 - `docs/products/*/pages/*.md` - ページの要件定義
-
-ディレクトリ「docs」のファイルを更新した場合にその内容を簡潔に記録します。
-
-- ファイル名はYYYY-MM-DDの形式にする
-- 変更のあったファイルの名前の一覧は不要
 
 # 概要 - `docs/**/*/overview.md`
 
@@ -170,6 +185,10 @@ Your memory resets between sessions. You rely on these files:
 
 [ページの目的と概要を1-2文で]
 
+## 関連機能
+
+- [ファイル名]()
+
 ## 要件
 
 - [要件1]
@@ -200,7 +219,7 @@ UI/UXに関するメモ。
 
 [このディレクトリの概要]
 
-- [ファイル名1](./ファイル名1.md) - 説明
+- [ファイル名1.md]() - 説明
 ```
 
 # 用語定義ファイル - `docs/**/terms/*.md`
@@ -258,17 +277,6 @@ AIが理解できる技術的な一般的な情報は含める必要はありま
 - [ルール2]
 ```
 
-# File rules
-
-- Always respond in Japanese
-- Provide minimal concise notes needed to solve the problem
-
-## Files
-
-- Use lowercase with hyphens
-- Define only one function or class or type per file
-- Do not use multiple exports in a single file
-
 # File rules - Markdown
 
 - Write in Japanese
@@ -277,9 +285,50 @@ AIが理解できる技術的な一般的な情報は含める必要はありま
 - Insert blank lines before and after headings
 - Do not use apostrophes (for instance: Do not)
 
+# File rules - TypeScript
+
+- Use descriptive naming conventions
+- No type assertion using "as"
+- Use "type" instead of "interface"
+- Use for-of loops instead of forEach
+- Use destructuring for function arguments
+- Avoid if-else statements
+- Use early returns instead of nested if statements
+- Do NOT abbreviate variable names
+- When multiple arguments are needed, use an object named "props" with a defined "Props" type
+- Use const whenever possible, avoid let and var
+- Do NOT use delete operator
+- Do NOT use enum
+- Use variable name "props" for function arguments
+- Avoid any type
+
+## Functions
+
+- Prefer pure functions
+- Use immutable data structures
+- Isolate side effects
+- Ensure type safety
+
+## Classes
+
+- Do NOT define classes with only static members
+- Avoid class inheritance
+- Make classes immutable
+
+## Comments
+
+- Add comments only when function behavior is not easily predictable
+- Do NOT use param or return annotations
+
+## React
+
+- Use TailwindCSS
+- Use shadcn/ui
+- Write components in the format: export function ComponentName () {}
+
 # Restrictions
 
 以下のファイルは書き換えてはいけません。
 
-- tsconfig.json
+- vite.config.ts
 

@@ -1,18 +1,21 @@
 ---
 mode: 'agent'
-tools: []
+tools: ["add-issue", "close-issue", "reopen-issue", "update-issue", "list-issues", "delete-issue", "show-issue"]
 description: 'resolve issues'
 ---
 
-コマンド「issues list」を用いて課題を取得し、人間と会話しながら回答を作成してください。
+ツール「list-issues」を用いて課題を取得し、人間と会話しながら回答を作成してください。
+
+1. 全ての課題を取得する
+2. 課題を1つ取り出す
+3. 既存の仕様書から必要な情報を集める
+4. ユーザに質問して情報を集める
+5. 仕様書を更新する
+6. 課題を閉じる
+7. 次の課題を取り出す
+
+課題は1つずつ順番に解決してください。解決してから次の課題に取り組んでください。
+
+また仕様は絶対に推論せずに質問を繰り返して情報を集めてから作成してください。
 
 質問に十分な情報が得られた場合は回答と共にIssueを解決してください。また、関連するファイルも編集して必要に応じて補足を追加してください。
-
-以下のコマンドを使用できます。
-
-- `bun run cli issues list`
-- `bun run cli issues add <質問> [-r <関連ファイル>]`
-- `bun run cli issues update <id> <新しい質問> [-r <関連ファイル>] [-a <回答>]`
-- `bun run cli issues delete <id>`
-- `bun run cli issues close <id>`
-- `bun run cli issues reopen <id>`
