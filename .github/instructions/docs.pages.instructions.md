@@ -7,23 +7,26 @@ applyTo: '**/docs/**/pages/*.md'
 ページの要件を定義。
 
 ```
+---
+features:
+  - feature-a
+  - feature-b
+---
 # [ページ名]
 
 [ページの目的と概要を1-2文で]
 
-## 関連機能
-
 - [ファイル名]()
-
-## 要件
-
-- [要件1]
 
 ## UI/UX
 
-UI/UXに関するメモ。
+UI/UXに関する最低限のメモ。
 
 ## 補足
 
 - [補足1]
 ```
+
+## font matter
+
+- `features`: ページに関連する機能のリスト。機能は`docs/products/*/features/*.md`に定義されている必要があります。

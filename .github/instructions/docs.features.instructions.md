@@ -12,7 +12,13 @@ applyTo: '**/docs/**/features/*.md'
 - createやdelete,updateなどは別々で定義する
 
 ```
-# [機能名（XXXがXXXする）]
+---
+milestone: 2028.01.01
+is-done: false
+priority: 0
+---
+
+# [機能名（XXXをXXXする）]
 
 [機能の目的と概要を1-2文で]
 
@@ -33,5 +39,14 @@ applyTo: '**/docs/**/features/*.md'
 - remove-* - 配列から削除
 - update-* - 更新
 - show-* - 詳細表示
+- search-* - 検索
 
-その他「search」「import」「archive」など必要に応じて使用します。
+その他「import」「archive」など必要に応じて使用します。
+
+ただし「manage」など粒度が大きい動詞は使用できません。
+
+## font matter
+
+- `milestone`: カレンダーバージョニング（default: null）
+- `is-done`: 完了（default: null）
+- `priority`: 優先度（default: 0）

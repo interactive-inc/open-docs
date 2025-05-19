@@ -8,7 +8,6 @@ applyTo: '**/*.ts'
 - No type assertion using "as"
 - Use "type" instead of "interface"
 - Use for-of loops instead of forEach
-- Do NOT Use destructuring
 - Avoid if-else statements
 - Use early returns instead of nested if statements
 - Do NOT abbreviate variable names
@@ -18,6 +17,8 @@ applyTo: '**/*.ts'
 - Do NOT use enum
 - Use variable name "props" for function arguments
 - Avoid any type
+- do NOT use interface
+- do NOT use destructuring
 
 ## Functions
 
@@ -42,3 +43,5 @@ applyTo: '**/*.ts'
 - Use TailwindCSS
 - Use shadcn/ui
 - Write components in the format: export function ComponentName () {}
+- Define React custom hooks
+- do NOT use useMemo

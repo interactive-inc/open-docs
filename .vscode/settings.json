@@ -1,42 +1,39 @@
 {
+  "[javascript][typescript][typescriptreact][css][json]": {
+    "editor.codeActionsOnSave": {
+      "quickfix.biome": "explicit",
+      "source.fixAll": "explicit"
+    },
+    "editor.defaultFormatter": "biomejs.biome",
+    "editor.formatOnSave": true
+  },
   "chat.agent.enabled": true,
   "chat.agent.maxRequests": 128,
   "chat.edits2.enabled": true,
+  "chat.promptFiles": true,
   "chat.tools.autoApprove": true,
   "files.associations": {
     "*.json": "json"
   },
   "files.exclude": {
+    ".next": true,
+    ".obsidian": true,
     "*.db": true,
-    "*.db-*": true
+    "*.db-*": true,
+    "bun.lock": true,
+    "next-env.d.ts": true,
+    "node_modules": true,
+    "tsconfig.tsbuildinfo": true
   },
   "github.copilot.chat.agent.thinkingTool": true,
   "github.copilot.chat.codesearch.enabled": true,
+  "github.copilot.chat.commitMessageGeneration.instructions": [
+    {
+      "file": ".github/.copilot-commit-message-instructions.md"
+    }
+  ],
   "github.copilot.nextEditSuggestions.enabled": true,
   "search.exclude": {
     "bun.lock": true
-  },
-  "[typescript][javascript][css][json]": {
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "biomejs.biome",
-    "editor.codeActionsOnSave": {
-      "source.fixAll": "explicit",
-      "quickfix.biome": "explicit"
-    }
-  },
-  "github.copilot.chat.commitMessageGeneration.instructions": [
-    {
-      "file": ".github/copilot-instructions.commit-message-generation.md"
-    }
-  ],
-  "github.copilot.chat.pullRequestDescriptionGeneration.instructions": [
-    {
-      "file": ".github/copilot-instructions.pull-request-description-generation.md"
-    }
-  ],
-  "github.copilot.chat.reviewSelection.instructions": [
-    {
-      "file": ".github/copilot-instructions.review-selection.md"
-    }
-  ]
+  }
 }
