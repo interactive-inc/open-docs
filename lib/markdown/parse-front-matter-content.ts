@@ -3,6 +3,7 @@
  */
 
 type ParseResult = Record<string, string | string[]>
+
 type State = {
   result: ParseResult
   currentKey: string | null

@@ -1,10 +1,9 @@
-/**
- * オブジェクトをフロントマターテキストに変換
- */
-export function toFrontMatterText(obj: Record<string, unknown>): string {
+export function toFrontMatterText(
+  frontMatter: Record<string, unknown>,
+): string {
   const lines: string[] = []
 
-  for (const [key, value] of Object.entries(obj)) {
+  for (const [key, value] of Object.entries(frontMatter)) {
     if (Array.isArray(value)) {
       if (value.length === 0) {
         lines.push(`${key}:`)

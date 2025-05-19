@@ -9,6 +9,7 @@ type Props = {
 
 export async function getDocsData(props: Props) {
   const baseDirectory = path.join(process.cwd(), "docs/products")
+
   const directory = props.directory
 
   const pages = await createPageRecords({

@@ -1,10 +1,9 @@
 import fs from "node:fs/promises"
 import type { z } from "zod"
-import { readMarkdownFiles } from "../read-markdown-files"
-import { extractFrontMatterText } from "./extract-front-matter-text"
-import { parseFrontMatterContent } from "./parse-front-matter-content"
-import { toFrontMatterText } from "./to-front-matter-text"
-import { updateFrontMatter } from "./update-front-matter"
+import { parseMarkdown } from "./markdown/parse-markdown"
+import { toFrontMatterText } from "./markdown/to-front-matter-text"
+import { updateFrontMatter } from "./markdown/update-front-matter"
+import { readMarkdownFiles } from "./read-markdown-files"
 
 type Props<T, S> = {
   directory: string
@@ -17,7 +16,7 @@ type Props<T, S> = {
 /**
  * マークダウンファイルのフロントマターをスキーマに沿って更新する共通関数
  */
-export async function writeMarkdownFile<T, S>(
+export async function writeMarkdownFiles<T, S>(
   props: Props<T, S>,
 ): Promise<void> {
   const files = await readMarkdownFiles(props.directory)
@@ -37,7 +36,7 @@ export async function writeMarkdownFile<T, S>(
     const fileContent = await fs.readFile(filePath, "utf-8")
 
     // フロントマターとコンテンツを分離
-    const { frontMatterText, contentText } = extractFrontMatterText(fileContent)
+    const markdown = parseMarkdown(fileContent)
 
     // データからフロントマターを準備
     const frontMatterData = props.prepareFrontMatter(dataItem)
@@ -45,18 +44,18 @@ export async function writeMarkdownFile<T, S>(
     // スキーマでバリデーション
     props.schema.parse(frontMatterData)
 
-    if (frontMatterText === null) {
+    if (markdown.frontMatter === null) {
       // フロントマターがない場合は新規作成
       const newFrontMatter = toFrontMatterText(frontMatterData)
       await fs.writeFile(
         filePath,
-        `---\n${newFrontMatter}\n---\n\n${contentText.trim()}\n`,
+        `---\n${newFrontMatter}\n---\n\n${markdown.content.trim()}\n`,
       )
       continue
     }
 
-    // 現在のフロントマターをパース
-    const currentFrontMatter = parseFrontMatterContent(frontMatterText)
+    // 現在のフロントマターはmarkdown.frontMatterから直接取得
+    const currentFrontMatter = markdown.frontMatter
 
     // フロントマターを更新
     const updatedFrontMatter = updateFrontMatter(
@@ -73,7 +72,7 @@ export async function writeMarkdownFile<T, S>(
     // ファイルに書き込む
     await fs.writeFile(
       filePath,
-      `---\n${newFrontMatterText}\n---\n\n${contentText.trim()}\n`,
+      `---\n${newFrontMatterText}\n---\n\n${markdown.content.trim()}\n`,
     )
   }
 }

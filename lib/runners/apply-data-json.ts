@@ -1,10 +1,10 @@
 import path from "node:path"
-import { writeMarkdownFile } from "../front-matter/write-markdown-file"
 import { vData } from "../models/data"
 import { vFeatureFrontMatter } from "../models/feature-front-matter"
 import { vPageFrontMatter } from "../models/page-front-matter"
 import { toFeatureFrontMatter } from "../to-feature-front-matter"
 import { toPageFrontMatter } from "../to-page-front-matter"
+import { writeMarkdownFiles } from "../write-markdown-files"
 
 const baseDirectory = path.join(process.cwd(), "docs/products")
 
@@ -19,7 +19,7 @@ for (const directory of projects) {
 
   const pagesDirectory = path.join(baseDirectory, `${directory}/pages`)
 
-  await writeMarkdownFile({
+  await writeMarkdownFiles({
     directory: pagesDirectory,
     dataItems: dataJson.pages,
     schema: vPageFrontMatter,
@@ -29,7 +29,7 @@ for (const directory of projects) {
 
   const featuresDirectory = path.join(baseDirectory, `${directory}/features`)
 
-  await writeMarkdownFile({
+  await writeMarkdownFiles({
     directory: featuresDirectory,
     dataItems: dataJson.features,
     schema: vFeatureFrontMatter,

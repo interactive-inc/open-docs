@@ -1,5 +1,4 @@
-// Issueクラス定義
-class Issue {
+export class Issue {
   readonly id: string
   readonly question: string
   readonly relatedFiles: string[]
@@ -49,5 +48,3 @@ class Issue {
     })
   }
 }
-
-export default Issue

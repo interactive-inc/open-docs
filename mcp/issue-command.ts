@@ -1,6 +1,6 @@
-import IssueRepository from "./issue-repository.ts"
+import { IssueRepository } from "./issue-repository.ts"
 
-class Command {
+export class IssueCommand {
   constructor(private readonly repository = new IssueRepository()) {}
 
   async addIssue(question: string, relatedFiles: string[], answer: string) {
@@ -36,5 +36,3 @@ class Command {
     return this.repository.showIssue(id)
   }
 }
-
-export default Command

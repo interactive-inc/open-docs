@@ -1,13 +1,18 @@
+import { extractHeading } from "./extract-heading"
+import { parseFrontMatterContent } from "./parse-front-matter-content"
+
 type Result = {
-  frontMatterText: string | null
-  contentText: string
+  frontMatter: Record<string, string | string[]> | null
+  content: string
+  title: string
 }
 
-export function extractFrontMatterText(text: string): Result {
+export function parseMarkdown(text: string): Result {
   if (!text.startsWith("---")) {
     return {
-      frontMatterText: null,
-      contentText: text,
+      frontMatter: null,
+      content: text,
+      title: extractHeading(text),
     }
   }
 
@@ -19,29 +24,31 @@ export function extractFrontMatterText(text: string): Result {
 
   if (endIndex === -1) {
     return {
-      frontMatterText: null,
-      contentText: text,
+      frontMatter: null,
+      content: text,
+      title: extractHeading(text),
     }
   }
 
   const frontMatterText = text.slice(startIndex + 3, endIndex).trim()
 
   // フロントマター後の空行がある場合の特別な処理
-  let contentText = text.slice(endIndex + 3)
+  let content = text.slice(endIndex + 3)
 
   // フロントマターの後に空行がある場合は特別に扱う
   if (text.slice(endIndex + 3).startsWith("\n\n")) {
     // フロントマターの後に2つ以上の改行がある場合、改行を保持する
-    contentText = `\n${text.slice(endIndex + 4).trim()}`
+    content = `\n${text.slice(endIndex + 4).trim()}`
   } else {
     // それ以外の場合は通常通りtrim
-    contentText = text.slice(endIndex + 3).trim()
+    content = text.slice(endIndex + 3).trim()
   }
 
-  contentText = `${contentText.trim()}`
+  content = `${content.trim()}`
 
   return {
-    frontMatterText,
-    contentText,
+    frontMatter: parseFrontMatterContent(frontMatterText),
+    content: content,
+    title: extractHeading(content),
   }
 }

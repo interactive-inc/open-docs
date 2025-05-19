@@ -2,8 +2,7 @@ import fs from "node:fs/promises"
 import path from "node:path"
 import { createFeatureRecords } from "../create-feature-records"
 import { createPageRecords } from "../create-page-records"
-import { extractFrontMatterText } from "../front-matter/extract-front-matter-text"
-import { parseFrontMatterContent } from "../front-matter/parse-front-matter-content"
+import { parseMarkdown } from "../markdown/parse-markdown"
 import { readMarkdownFiles } from "../read-markdown-files"
 
 const baseDirectory = path.join(process.cwd(), "docs/products")
@@ -13,13 +12,13 @@ const projects = ["client"]
 // マイルストーンファイルをパースする関数
 async function parseMilestoneFile(file: string, content: string) {
   const id = file.replace(".md", "")
-  const { frontMatterText, contentText } = extractFrontMatterText(content)
+  const markdown = parseMarkdown(content)
 
-  if (!frontMatterText) {
+  if (!markdown.frontMatter) {
     throw new Error(`Frontmatter not found in file: ${file}`)
   }
 
-  const frontMatter = parseFrontMatterContent(frontMatterText)
+  const frontMatter = markdown.frontMatter
 
   return {
     id,

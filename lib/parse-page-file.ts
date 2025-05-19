@@ -1,6 +1,6 @@
 import type { z } from "zod"
-import { extractHeading } from "./front-matter/extract-heading"
-import { parseFrontMatter } from "./front-matter/parse-front-matter"
+import { extractHeading } from "./markdown/extract-heading"
+import { parseMarkdown } from "./markdown/parse-markdown"
 import { vPage } from "./models/page"
 import { vPageFrontMatter } from "./models/page-front-matter"
 import { parsePagePath } from "./parse-page-path"
@@ -8,13 +8,13 @@ import { parsePagePath } from "./parse-page-path"
 export async function parsePageFile(fileName: string, fileContent: string) {
   const content = fileContent.replace(/<!--.*?-->/gs, "").trim()
 
-  const parsedData = parseFrontMatter<
-    z.infer<typeof vPageFrontMatter>,
-    typeof vPageFrontMatter
-  >({
-    text: content,
-    schema: vPageFrontMatter,
-  })
+  const markdown = parseMarkdown(content)
+
+  if (markdown.frontMatter === null) {
+    throw new Error("Front matter not found")
+  }
+
+  const data = vPageFrontMatter.parse(markdown.frontMatter)
 
   const slug = fileName.replace(/\.md$/, "")
 
@@ -28,6 +28,6 @@ export async function parsePageFile(fileName: string, fileContent: string) {
     id: slug,
     name: name,
     path: pagePath,
-    features: parsedData.data.features || [],
+    features: data.features || [],
   } as const satisfies z.infer<typeof vPage>)
 }

@@ -1,10 +1,10 @@
-import Issue from "./issue.ts"
 import { existsSync } from "node:fs"
 import fs from "node:fs/promises"
+import { Issue } from "./issue.ts"
 
 const ISSUES_FILE_PATH = `${__dirname}/../issues.json`
 
-class IssueRepository {
+export class IssueRepository {
   private async readFile(): Promise<Issue[]> {
     if (!existsSync(ISSUES_FILE_PATH)) return []
     const content = await fs.readFile(ISSUES_FILE_PATH, "utf8")
@@ -97,5 +97,3 @@ class IssueRepository {
     return issues.find((i) => i.id === id) ?? null
   }
 }
-
-export default IssueRepository

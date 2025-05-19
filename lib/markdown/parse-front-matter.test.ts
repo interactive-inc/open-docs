@@ -1,8 +1,8 @@
 import { describe, expect, it } from "bun:test"
 import { z } from "zod"
-import { parseFrontMatter } from "./parse-front-matter"
+import { parseMarkdown } from "./parse-markdown"
 
-describe("parseFrontMatter", () => {
+describe("フロントマターのスキーマによる検証", () => {
   it("基本的なfront matterを解析できる", () => {
     const schema = z.object({
       title: z.string(),
@@ -13,18 +13,18 @@ describe("parseFrontMatter", () => {
 title: テストタイトル
 description: テスト説明
 ---
+# 見出し
 本文コンテンツ`
 
-    const result = parseFrontMatter({
-      text,
-      schema,
-    })
+    const markdown = parseMarkdown(text)
+    const data = schema.parse(markdown.frontMatter)
 
-    expect(result.data).toEqual({
+    expect(data).toEqual({
       title: "テストタイトル",
       description: "テスト説明",
     })
-    expect(result.content).toBe("本文コンテンツ")
+    expect(markdown.content).toBe("# 見出し\n本文コンテンツ")
+    expect(markdown.title).toBe("見出し")
   })
 
   it("空のfront matterも処理できる", () => {
@@ -35,15 +35,15 @@ description: テスト説明
 
     const text = `---
 ---
+# 見出し
 本文コンテンツのみ`
 
-    const result = parseFrontMatter({
-      text,
-      schema,
-    })
+    const markdown = parseMarkdown(text)
+    const data = schema.parse(markdown.frontMatter)
 
-    expect(result.data).toEqual({})
-    expect(result.content).toBe("本文コンテンツのみ")
+    expect(data).toEqual({})
+    expect(markdown.content).toBe("# 見出し\n本文コンテンツのみ")
+    expect(markdown.title).toBe("見出し")
   })
 
   it("配列値を含むfront matterを処理できる", () => {
@@ -59,18 +59,18 @@ tags:
 - タグ2
 - タグ3
 ---
+# 見出し
 本文コンテンツ`
 
-    const result = parseFrontMatter({
-      text,
-      schema,
-    })
+    const markdown = parseMarkdown(text)
+    const data = schema.parse(markdown.frontMatter)
 
-    expect(result.data).toEqual({
+    expect(data).toEqual({
       title: "配列テスト",
       tags: ["タグ1", "タグ2", "タグ3"],
     })
-    expect(result.content).toBe("本文コンテンツ")
+    expect(markdown.content).toBe("# 見出し\n本文コンテンツ")
+    expect(markdown.title).toBe("見出し")
   })
 
   it("型変換を含むスキーマでも正しく動作する", () => {
@@ -87,17 +87,17 @@ tags:
 title: テストタイトル
 count: 42
 ---
+# 見出し
 本文コンテンツ`
 
-    const result = parseFrontMatter<SchemaType, typeof schema>({
-      text,
-      schema,
-    })
+    const markdown = parseMarkdown(text)
+    const data = schema.parse(markdown.frontMatter) as SchemaType
 
-    expect(result.data).toEqual({
+    expect(data).toEqual({
       title: "テストタイトル",
       count: 42,
     })
-    expect(result.content).toBe("本文コンテンツ")
+    expect(markdown.content).toBe("# 見出し\n本文コンテンツ")
+    expect(markdown.title).toBe("見出し")
   })
 })

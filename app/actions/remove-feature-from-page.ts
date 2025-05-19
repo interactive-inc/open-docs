@@ -2,11 +2,10 @@
 
 import fs from "node:fs/promises"
 import path from "node:path"
+import { toMarkdownText } from "@/lib/markdown/to-markdown-text"
 import { revalidatePath } from "next/cache"
-import { writeMarkdownFile } from "../../lib/front-matter/write-markdown-file"
-import { vData } from "../../lib/models/data"
+import { parseMarkdown } from "../../lib/markdown/parse-markdown"
 import { vPageFrontMatter } from "../../lib/models/page-front-matter"
-import { toPageFrontMatter } from "../../lib/to-page-front-matter"
 
 type Props = {
   pageId: string
@@ -17,45 +16,40 @@ type Props = {
 export async function removeFeatureFromPage(props: Props): Promise<void> {
   const baseDirectory = path.join(process.cwd(), "docs/products")
 
-  const dataJsonPath = path.join(baseDirectory, props.project, "data.json")
-
-  const dataJsonText = await fs.readFile(dataJsonPath, "utf-8")
-
-  const dataJson = JSON.parse(dataJsonText)
-
-  const validatedData = vData.parse(dataJson)
-
-  const updatedPages = validatedData.pages.map((page) => {
-    if (page.id !== props.pageId) {
-      return page
-    }
-
-    return {
-      ...page,
-      features: page.features.filter((feature) => feature !== props.featureId),
-    }
-  })
-
-  const updatedData = {
-    ...validatedData,
-    pages: updatedPages,
-  }
-
-  await fs.writeFile(
-    dataJsonPath,
-    JSON.stringify(updatedData, null, 2),
-    "utf-8",
+  const filePath = path.join(
+    baseDirectory,
+    `${props.project}/pages/${props.pageId}.md`,
   )
 
-  const pagesDirectory = path.join(baseDirectory, `${props.project}/pages`)
+  const fileContent = await fs.readFile(filePath, "utf-8")
 
-  await writeMarkdownFile({
-    directory: pagesDirectory,
-    dataItems: updatedData.pages,
-    schema: vPageFrontMatter,
-    prepareFrontMatter: toPageFrontMatter,
-    findDataItem: (items, key) => items.find((item) => item.id === key),
+  const markdown = parseMarkdown(fileContent)
+
+  if (markdown.frontMatter === null) {
+    throw new Error()
+  }
+
+  const currentFrontMatter = markdown.frontMatter
+
+  const currentFeatures = Array.isArray(currentFrontMatter.features)
+    ? currentFrontMatter.features
+    : []
+
+  const updatedFeatures = currentFeatures.filter((feature) => {
+    return feature !== props.featureId
   })
+
+  const frontMatter = vPageFrontMatter.parse({
+    ...markdown.frontMatter,
+    features: updatedFeatures,
+  })
+
+  const markdownText = toMarkdownText({
+    content: markdown.content,
+    frontMatter: frontMatter,
+  })
+
+  await fs.writeFile(filePath, markdownText, "utf-8")
 
   revalidatePath("/")
   revalidatePath(`/projects/${props.project}`)
