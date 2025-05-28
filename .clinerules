@@ -1,3 +1,20 @@
+# App Directory Instructions
+
+これはNext.jsのAppディレクトリに関する指示です。
+
+あなたは**必ず**以下の手順に従って進めてください。
+
+1. タスクを端的に説明する
+2. 作業の計画した内容に取り組む
+3. テストを実行して結果を説明する
+  4. もし問題がある場合は、これに取り組み、その結果を説明して「5」にもどる
+5. 型の検査して結果を説明する
+  6. もし問題がある場合は、これに取り組み、その結果を説明して「5」にもどる
+7. 必要に応じて、考えうる改善点を作成し説明する
+  8. もし改善点が存在する場合、これに取り組み、その結果を説明して「9」にもどる
+9. リファクタリングを行う
+10. タスクを完了する
+
 # Core rules
 
 - Always respond in Japanese
@@ -67,7 +84,13 @@ Entity（or 集約）を定義。
 - createやdelete,updateなどは別々で定義する
 
 ```
-# [機能名（XXXがXXXする）]
+---
+milestone: 2028.01.01
+is-done: false
+priority: 0
+---
+
+# [機能名（XXXをXXXする）]
 
 [機能の目的と概要を1-2文で]
 
@@ -88,8 +111,17 @@ Entity（or 集約）を定義。
 - remove-* - 配列から削除
 - update-* - 更新
 - show-* - 詳細表示
+- search-* - 検索
 
-その他「search」「import」「archive」など必要に応じて使用します。
+その他「import」「archive」など必要に応じて使用します。
+
+ただし「manage」など粒度が大きい動詞は使用できません。
+
+## font matter
+
+- `milestone`: カレンダーバージョニング（default: null）
+- `is-done`: 完了（default: null）
+- `priority`: 優先度（default: 0）
 
 # Docs Directory Instructions
 
@@ -144,6 +176,20 @@ Your memory resets between sessions. You rely on these files:
 - `docs/products/*/features/*.md` - 機能要件の定義
 - `docs/products/*/pages/*.md` - ページの要件定義
 
+# マイルストーンの定義 - `docs/**/milestones/*-value.md`
+
+マイルストーンを管理します。
+
+例えば「2028.01.01」であれば、2025年6月1日までに実装する機能を定義します。
+
+日付は基本的に次の月の1日にします。
+
+```
+# [カレンダーバージョニング]（例: 2025.06）
+
+[開発する機能の概要]
+```
+
 # 概要 - `docs/**/*/overview.md`
 
 プロジェクト全体または個別製品の概要を記述。
@@ -181,26 +227,29 @@ Your memory resets between sessions. You rely on these files:
 ページの要件を定義。
 
 ```
+---
+features:
+  - feature-a
+  - feature-b
+---
 # [ページ名]
 
 [ページの目的と概要を1-2文で]
 
-## 関連機能
-
 - [ファイル名]()
-
-## 要件
-
-- [要件1]
 
 ## UI/UX
 
-UI/UXに関するメモ。
+UI/UXに関する最低限のメモ。
 
 ## 補足
 
 - [補足1]
 ```
+
+## font matter
+
+- `features`: ページに関連する機能のリスト。機能は`docs/products/*/features/*.md`に定義されている必要があります。
 
 # README - `docs/**/*/README.md`
 
@@ -291,7 +340,6 @@ AIが理解できる技術的な一般的な情報は含める必要はありま
 - No type assertion using "as"
 - Use "type" instead of "interface"
 - Use for-of loops instead of forEach
-- Use destructuring for function arguments
 - Avoid if-else statements
 - Use early returns instead of nested if statements
 - Do NOT abbreviate variable names
@@ -301,6 +349,9 @@ AIが理解できる技術的な一般的な情報は含める必要はありま
 - Do NOT use enum
 - Use variable name "props" for function arguments
 - Avoid any type
+- do NOT use interface
+- do NOT use destructuring
+- 分割代入は禁止!
 
 ## Functions
 
@@ -325,6 +376,8 @@ AIが理解できる技術的な一般的な情報は含める必要はありま
 - Use TailwindCSS
 - Use shadcn/ui
 - Write components in the format: export function ComponentName () {}
+- Define React custom hooks
+- do NOT use useMemo
 
 # Restrictions
 

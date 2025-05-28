@@ -1,7 +1,7 @@
 import fs from "node:fs/promises"
 import path from "node:path"
 import type { z } from "zod"
-import type { vFeature } from "./models/feature"
+import type { zFeature } from "./models/feature"
 import { parseFeatureFile } from "./parse-feature-file"
 import { readMarkdownFiles } from "./read-markdown-files"
 
@@ -14,7 +14,7 @@ export async function createFeatureRecords(props: Props) {
 
   const mdFiles = await readMarkdownFiles(featuresPath)
 
-  const promises: Promise<z.infer<typeof vFeature>>[] = []
+  const promises: Promise<z.infer<typeof zFeature>>[] = []
 
   for (const file of mdFiles) {
     const filePath = path.join(featuresPath, file)

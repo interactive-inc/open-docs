@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-export const vPage = z.object({
+export const zPage = z.object({
   id: z.string(),
   /**
    * H1

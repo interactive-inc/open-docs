@@ -1,12 +1,12 @@
 import { z } from "zod"
-import { vFeature } from "./feature"
-import { vMilestone } from "./milestone"
-import { vPage } from "./page"
+import { zFeature } from "./feature"
+import { zMilestone } from "./milestone"
+import { zPage } from "./page"
 
 export const vData = z.object({
-  pages: z.array(vPage),
-  features: z.array(vFeature),
-  milestones: z.array(vMilestone),
+  pages: z.array(zPage),
+  features: z.array(zFeature),
+  milestones: z.array(zMilestone),
 })
 
 export type Data = z.infer<typeof vData>

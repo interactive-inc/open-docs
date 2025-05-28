@@ -1,8 +1,8 @@
 import type { z } from "zod"
 import { extractHeading } from "./markdown/extract-heading"
 import { parseMarkdown } from "./markdown/parse-markdown"
-import { vFeature } from "./models/feature"
-import { vFeatureFrontMatter } from "./models/feature-front-matter"
+import { zFeature } from "./models/feature"
+import { zFeatureFrontMatter } from "./models/feature-front-matter"
 import { toPriorityText } from "./to-priority-text"
 
 export async function parseFeatureFile(fileName: string, fileContent: string) {
@@ -14,7 +14,7 @@ export async function parseFeatureFile(fileName: string, fileContent: string) {
     throw new Error("Front matter not found")
   }
 
-  const data = vFeatureFrontMatter.parse(markdown.frontMatter)
+  const data = zFeatureFrontMatter.parse(markdown.frontMatter)
 
   const slug = fileName.replace(/\.md$/, "")
 
@@ -22,11 +22,11 @@ export async function parseFeatureFile(fileName: string, fileContent: string) {
 
   const priority = toPriorityText(data.priority)
 
-  return vFeature.parse({
+  return zFeature.parse({
     id: slug,
     name: name,
     primary: priority,
     milestone: data.milestone || "",
     isDone: data["is-done"] === "true",
-  } as const satisfies z.infer<typeof vFeature>)
+  } as const satisfies z.infer<typeof zFeature>)
 }

@@ -1,7 +1,7 @@
 ---
 milestone: 2028.01.01
 is-done: false
-priority: 0
+priority: 2
 ---
 
 # 在庫一覧を表示する

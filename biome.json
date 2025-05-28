@@ -12,8 +12,7 @@
       "nursery": {
         "useSortedClasses": "error"
       }
-    },
-    "ignore": ["components/ui/**/*", "hooks/use-toast.ts"]
+    }
   },
   "javascript": {
     "formatter": {

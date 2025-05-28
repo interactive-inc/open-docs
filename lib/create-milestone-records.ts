@@ -1,7 +1,7 @@
 import fs from "node:fs/promises"
 import path from "node:path"
 import type { z } from "zod"
-import type { vMilestone } from "./models/milestone"
+import type { zMilestone } from "./models/milestone"
 import { parseMilestoneFile } from "./parse-milestone-file"
 import { readMarkdownFiles } from "./read-markdown-files"
 
@@ -14,7 +14,7 @@ export async function createMilestoneRecords(props: Props) {
 
   const mdFiles = await readMarkdownFiles(milestonesPath)
 
-  const promises: Promise<z.infer<typeof vMilestone>>[] = []
+  const promises: Promise<z.infer<typeof zMilestone>>[] = []
 
   for (const file of mdFiles) {
     const filePath = path.join(milestonesPath, file)

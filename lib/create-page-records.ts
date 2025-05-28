@@ -1,7 +1,7 @@
 import fs from "node:fs/promises"
 import path from "node:path"
 import type { z } from "zod"
-import type { vPage } from "./models/page"
+import type { zPage } from "./models/page"
 import { parsePageFile } from "./parse-page-file"
 import { readMarkdownFiles } from "./read-markdown-files"
 
@@ -14,7 +14,7 @@ export async function createPageRecords(props: Props) {
 
   const mdFiles = await readMarkdownFiles(pagesPath)
 
-  const promises: Promise<z.infer<typeof vPage>>[] = []
+  const promises: Promise<z.infer<typeof zPage>>[] = []
 
   for (const file of mdFiles) {
     const filePath = path.join(pagesPath, file)

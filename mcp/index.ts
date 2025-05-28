@@ -150,9 +150,10 @@ server.tool(
       content: [
         {
           type: "text",
-          text: data
-            ? `${project}のJSONをマークダウンに反映しました: ${data.pages.length}ページ、${data.features.length}機能`
-            : `${project}のJSONを反映できませんでした`,
+          text:
+            data && "pages" in data && "features" in data
+              ? `${project}のJSONをマークダウンに反映しました: ${data.pages.length}ページ、${data.features.length}機能`
+              : `${project}のJSONを反映できませんでした`,
         },
       ],
     }

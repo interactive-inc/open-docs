@@ -1,31 +1,43 @@
 ---
-applyTo: '**/*.ts'
+applyTo: '**/*.{ts,tsx}'
 ---
 
 # File rules - TypeScript
 
+## Code Structure and Design
+
+- Follow the Single Responsibility Principle
+- Ensure code is easily testable
+- Create highly reusable functions
+
+## Naming and Typing
+
 - Use descriptive naming conventions
-- No type assertion using "as"
-- Use "type" instead of "interface"
-- Use for-of loops instead of forEach
-- Avoid if-else statements
-- Use early returns instead of nested if statements
 - Do NOT abbreviate variable names
-- When multiple arguments are needed, use an object named "props" with a defined "Props" type
-- Use const whenever possible, avoid let and var
-- Do NOT use delete operator
-- Do NOT use enum
-- Use variable name "props" for function arguments
 - Avoid any type
-- do NOT use interface
-- do NOT use destructuring
+- Use "type" instead of "interface"
+- No type assertion using "as"
+- Do NOT use enum
 
 ## Functions
 
+- When multiple arguments are needed, use an object named "props" with a defined "Props" type
 - Prefer pure functions
 - Use immutable data structures
 - Isolate side effects
 - Ensure type safety
+
+## Control Flow
+
+- Use for-of loops instead of forEach
+- Avoid if-else statements
+- Use early returns instead of nested if statements
+- Do NOT Use destructuring
+
+## Variables and State
+
+- Use const whenever possible, avoid let and var
+- Do NOT use delete operator
 
 ## Classes
 
@@ -43,5 +55,3 @@ applyTo: '**/*.ts'
 - Use TailwindCSS
 - Use shadcn/ui
 - Write components in the format: export function ComponentName () {}
-- Define React custom hooks
-- do NOT use useMemo

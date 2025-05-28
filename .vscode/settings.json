@@ -35,5 +35,7 @@
   "github.copilot.nextEditSuggestions.enabled": true,
   "search.exclude": {
     "bun.lock": true
-  }
+  },
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

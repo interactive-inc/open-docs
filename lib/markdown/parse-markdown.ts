@@ -1,13 +1,7 @@
 import { extractHeading } from "./extract-heading"
-import { parseFrontMatterContent } from "./parse-front-matter-content"
+import { parseFrontMatterContent } from "@/lib/markdown/parse-front-matter-content"
 
-type Result = {
-  frontMatter: Record<string, string | string[]> | null
-  content: string
-  title: string
-}
-
-export function parseMarkdown(text: string): Result {
+export function parseMarkdown(text: string) {
   if (!text.startsWith("---")) {
     return {
       frontMatter: null,

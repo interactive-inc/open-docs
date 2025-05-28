@@ -1,5 +1,5 @@
 import { z } from "zod"
 
-export const vPageFrontMatter = z.object({
-  features: z.array(z.string()).optional().default([]),
+export const zPageFrontMatter = z.object({
+  features: z.array(z.string()).nullable(),
 })

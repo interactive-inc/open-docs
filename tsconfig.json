@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["ESNext", "ES2023"],
+    "lib": ["ESNext", "ES2023", "DOM", "DOM.Iterable"],
     "target": "ESNext",
     "module": "ESNext",
     "moduleDetection": "force",
@@ -23,6 +23,6 @@
     "esModuleInterop": true,
     "resolveJsonModule": true
   },
-  "include": [".next/types/**/*.ts", "app", "lib"],
+  "include": [".next/types/**/*.ts", "app", "lib", "mcp"],
   "exclude": ["node_modules"]
 }

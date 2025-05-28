@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-export const vFeature = z.object({
+export const zFeature = z.object({
   id: z.string(),
   /**
    * H1

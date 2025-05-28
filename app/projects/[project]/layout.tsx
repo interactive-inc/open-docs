@@ -1,18 +1,18 @@
 "use client"
 
-import { Button } from "@/app/components/ui/button"
+import { use } from "react"
+
+import { Button } from "@/app/_components/ui/button"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 type Props = {
   children: React.ReactNode
-  params: { project: string }
+  params: Promise<{ project: string }>
 }
 
 export default function ProjectLayout(props: Props) {
-  const params = props.params
-
-  console.log("params", params)
+  const params = use(props.params)
 
   const pathname = usePathname()
 

@@ -47,7 +47,9 @@ export class IssueRepository {
     const issues = await this.readFile()
     const idx = issues.findIndex((i) => i.id === id)
     if (idx === -1) return null
-    const updated = issues[idx].withUpdates({ isDone: true })
+    const issue = issues[idx]
+    if (!issue) return null
+    const updated = issue.withUpdates({ isDone: true })
     issues[idx] = updated
     await this.saveIssues(issues)
     return updated
@@ -57,7 +59,9 @@ export class IssueRepository {
     const issues = await this.readFile()
     const idx = issues.findIndex((i) => i.id === id)
     if (idx === -1) return null
-    const updated = issues[idx].withUpdates({ isDone: false })
+    const issue = issues[idx]
+    if (!issue) return null
+    const updated = issue.withUpdates({ isDone: false })
     issues[idx] = updated
     await this.saveIssues(issues)
     return updated
@@ -72,7 +76,9 @@ export class IssueRepository {
     const issues = await this.readFile()
     const idx = issues.findIndex((i) => i.id === props.id)
     if (idx === -1) return null
-    const updated = issues[idx].withUpdates(props)
+    const issue = issues[idx]
+    if (!issue) return null
+    const updated = issue.withUpdates(props)
     issues[idx] = updated
     await this.saveIssues(issues)
     return updated
