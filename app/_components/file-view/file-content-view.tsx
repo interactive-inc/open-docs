@@ -15,24 +15,12 @@ type Props = {
 export function FileContentView(props: Props) {
   const [currentContent, setCurrentContent] = useState(props.content)
 
-  // ファイル内容を保存する関数
   const onChange = async (newContent: string) => {
-    try {
-      // Server Actionを呼び出し
-      const result = await saveFileContent({
-        filePath: props.filePath,
-        content: newContent,
-      })
-
-      if (!result.success) {
-        console.error("Failed to save file:", result.error)
-      } else if (result.content) {
-        // Server Actionから返された内容で状態を更新
-        setCurrentContent(result.content)
-      }
-    } catch (error) {
-      console.error("Error saving file:", error)
-    }
+    const content = await saveFileContent({
+      filePath: props.filePath,
+      content: newContent,
+    })
+    setCurrentContent(content)
   }
 
   if (props.filePath.endsWith(".md")) {
@@ -59,6 +47,5 @@ export function FileContentView(props: Props) {
     return <JsonFileEditor content={currentContent} />
   }
 
-  // その他のファイルタイプ
   return <DefaultFileViewer content={currentContent} />
 }

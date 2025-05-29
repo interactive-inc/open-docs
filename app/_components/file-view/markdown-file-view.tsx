@@ -1,10 +1,11 @@
 import { FrontMatterView } from "@/app/_components/file-view/front-matter-view"
 import { PageHeader } from "@/app/_components/page-header"
+import { Card } from "@/app/_components/ui/card"
 import { parseMarkdown } from "@/lib/markdown/parse-markdown"
 import { marked } from "marked"
 import type { ReactNode } from "react"
 
-import "zenn-content-css"
+import "github-markdown-css"
 
 type Props = {
   fileName: string
@@ -23,13 +24,18 @@ export function MarkdownFileView(props: Props): ReactNode {
   const html = marked.parse(markdown.content)
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="h-full space-y-4 p-4">
       <div className="flex gap-2">
         <PageHeader filePath={props.fileName} />
       </div>
       {hasFrontMatter && <FrontMatterView frontMatter={frontMatter} />}
-      {/* biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation> */}
-      <div className="znc" dangerouslySetInnerHTML={{ __html: html }} />
+      <Card className="overflow-hidden rounded-md p-0">
+        <div
+          className="markdown-body p-4"
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+      </Card>
     </div>
   )
 }
