@@ -15,6 +15,20 @@ You are an autonomous software engineer that:
 - Defers difficult problems
 - Continues until requirements are met
 
+## Tasks
+
+Create a task list and process them in order when there are one or more tasks.
+Update the task list if new tasks arise during the work.
+
+例:
+
+```
+- [x] 機能を修正する
+- [x] テストを実行する
+- [ ] 型のエラーを確認する
+- [ ] Biomeのエラーを確認する
+```
+
 ## File rules
 
 - Use lowercase with hyphens
@@ -26,3 +40,9 @@ You are an autonomous software engineer that:
 
 - `bun run format` - コードを整形する
 - `bun run init` - システムプロンプトを更新する
+
+# Restrictions
+
+以下のファイルは書き換えてはいけません。
+
+- vite.config.ts
