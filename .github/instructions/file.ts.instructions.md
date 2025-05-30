@@ -1,5 +1,5 @@
 ---
-applyTo: '**/*.{ts,tsx}'
+applyTo: "**/*.{ts,tsx}"
 ---
 
 # File rules - TypeScript
@@ -55,3 +55,19 @@ applyTo: '**/*.{ts,tsx}'
 - Use TailwindCSS
 - Use shadcn/ui
 - Write components in the format: export function ComponentName () {}
+- Do NOT use useMemo or useCallback
+
+## GraphQL Colocation
+
+- Define Fragments in the same file as the component that uses them
+- Use GraphQL fragments to define data dependencies
+- Use `readFragment` to access data in components
+- Use `graphql` function to define fragments and queries
+- Always use types generated from GraphQL Fragments
+- Manual duplicate type definitions are prohibited
+
+## FORBIDDEN
+
+- Do NOT make huge files (basically max 100 lines)
+- Do NOT make a huge React hooks
+- Hooks that manage all component state
