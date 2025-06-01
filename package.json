@@ -38,7 +38,7 @@
     "tailwind-merge": "^3.3.0",
     "yaml": "^2.8.0",
     "zenn-content-css": "^0.1.159",
-    "zod": "^3.24.4"
+    "zod": "^3.25.45"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

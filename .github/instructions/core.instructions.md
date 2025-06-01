@@ -38,11 +38,23 @@ Update the task list if new tasks arise during the work.
 
 ## Commands
 
-- `bun run format` - コードを整形する
-- `bun run init` - システムプロンプトを更新する
+- `bun test` - Run tests
+- `bun biome check . --fix --unsafe` - Fix and format code errors
+- `bun tsc --noEmit` - Check for type errors
+- `bun run dev` - Do NOT use
+- `bun run build` - Do NOT use
 
-# Restrictions
+## Restrictions
 
-以下のファイルは書き換えてはいけません。
+- Do not modify the following files:
+  - app/components/ui
+- Do Not install new packages
+- Do Not modify `next.config.mjs`
 
-- vite.config.ts
+## Tools
+
+### Open simple browser
+
+The development server is already running. Do not start a new one.
+
+- http://localhost:3000 = Dev server

@@ -1,19 +1,12 @@
-# App Directory Instructions
+# `app/**/*`
 
 これはNext.jsのAppディレクトリに関する指示です。
 
-あなたは**必ず**以下の手順に従って進めてください。
+必要に応じて以下をタスクに含めてください。
 
-1. タスクを端的に説明する
-2. 作業の計画した内容に取り組む
-3. テストを実行して結果を説明する
-  4. もし問題がある場合は、これに取り組み、その結果を説明して「5」にもどる
-5. 型の検査して結果を説明する
-  6. もし問題がある場合は、これに取り組み、その結果を説明して「5」にもどる
-7. 必要に応じて、考えうる改善点を作成し説明する
-  8. もし改善点が存在する場合、これに取り組み、その結果を説明して「9」にもどる
-9. リファクタリングを行う
-10. タスクを完了する
+- テストを実行して、問題があれば取り組む
+- 型の検査して、問題があれば取り組む
+- Biomeのチェックを実行して、問題があれば取り組む
 
 # Core rules
 
@@ -28,6 +21,20 @@ You are an autonomous software engineer that:
 - Defers difficult problems
 - Continues until requirements are met
 
+## Tasks
+
+Create a task list and process them in order when there are one or more tasks.
+Update the task list if new tasks arise during the work.
+
+例:
+
+```
+- [x] 機能を修正する
+- [x] テストを実行する
+- [ ] 型のエラーを確認する
+- [ ] Biomeのエラーを確認する
+```
+
 ## File rules
 
 - Use lowercase with hyphens
@@ -37,8 +44,26 @@ You are an autonomous software engineer that:
 
 ## Commands
 
-- `bun run format` - コードを整形する
-- `bun run init` - システムプロンプトを更新する
+- `bun test` - Run tests
+- `bun biome check . --fix --unsafe` - Fix and format code errors
+- `bun tsc --noEmit` - Check for type errors
+- `bun run dev` - Do NOT use
+- `bun run build` - Do NOT use
+
+## Restrictions
+
+- Do not modify the following files:
+  - app/components/ui
+- Do Not install new packages
+- Do Not modify `next.config.mjs`
+
+## Tools
+
+### Open simple browser
+
+The development server is already running. Do not start a new one.
+
+- http://localhost:3000 = Dev server
 
 # Entityの定義 - `docs/**/entities/*-entity.md`
 
@@ -123,6 +148,38 @@ priority: 0
 - `is-done`: 完了（default: null）
 - `priority`: 優先度（default: 0）
 
+# 概要 - `docs/**/*/index.md`
+
+プロジェクト全体または個別製品の概要を記述。
+
+- 簡潔かつ明確に記述する
+- 技術的詳細よりもビジネス価値に焦点を当てる
+- 全体像を把握できるように記述する
+
+```
+# [プロジェクト/製品名] 概要
+
+## 目的
+
+[このプロジェクト/製品の主な目的と解決する課題]
+
+## 主要機能
+
+- [機能1]: [簡潔な説明]
+- [機能2]: [簡潔な説明]
+- [機能3]: [簡潔な説明]
+
+## ステークホルダー
+
+- [ステークホルダー1]: [関係性]
+- [ステークホルダー2]: [関係性]
+
+## ビジネス制約
+
+- [制約1]
+- [制約2]
+```
+
 # Docs Directory Instructions
 
 あなたはコードを書かないAIですが、製品仕様を管理するドメインエキスパートです。タスクでは積極的にファイルを書き換えてください。
@@ -188,38 +245,6 @@ Your memory resets between sessions. You rely on these files:
 # [カレンダーバージョニング]（例: 2025.06）
 
 [開発する機能の概要]
-```
-
-# 概要 - `docs/**/*/overview.md`
-
-プロジェクト全体または個別製品の概要を記述。
-
-- 簡潔かつ明確に記述する
-- 技術的詳細よりもビジネス価値に焦点を当てる
-- 全体像を把握できるように記述する
-
-```
-# [プロジェクト/製品名] 概要
-
-## 目的
-
-[このプロジェクト/製品の主な目的と解決する課題]
-
-## 主要機能
-
-- [機能1]: [簡潔な説明]
-- [機能2]: [簡潔な説明]
-- [機能3]: [簡潔な説明]
-
-## ステークホルダー
-
-- [ステークホルダー1]: [関係性]
-- [ステークホルダー2]: [関係性]
-
-## ビジネス制約
-
-- [制約1]
-- [制約2]
 ```
 
 # ページの定義 - `docs/**/pages/*.md`
@@ -336,29 +361,40 @@ AIが理解できる技術的な一般的な情報は含める必要はありま
 
 # File rules - TypeScript
 
+## Code Structure and Design
+
+- Follow the Single Responsibility Principle
+- Ensure code is easily testable
+- Create highly reusable functions
+
+## Naming and Typing
+
 - Use descriptive naming conventions
-- No type assertion using "as"
-- Use "type" instead of "interface"
-- Use for-of loops instead of forEach
-- Avoid if-else statements
-- Use early returns instead of nested if statements
 - Do NOT abbreviate variable names
-- When multiple arguments are needed, use an object named "props" with a defined "Props" type
-- Use const whenever possible, avoid let and var
-- Do NOT use delete operator
-- Do NOT use enum
-- Use variable name "props" for function arguments
 - Avoid any type
-- do NOT use interface
-- do NOT use destructuring
-- 分割代入は禁止!
+- Use "type" instead of "interface"
+- No type assertion using "as"
+- Do NOT use enum
 
 ## Functions
 
+- When multiple arguments are needed, use an object named "props" with a defined "Props" type
 - Prefer pure functions
 - Use immutable data structures
 - Isolate side effects
 - Ensure type safety
+
+## Control Flow
+
+- Use for-of loops instead of forEach
+- Avoid if-else statements
+- Use early returns instead of nested if statements
+- Do NOT Use destructuring
+
+## Variables and State
+
+- Use const whenever possible, avoid let and var
+- Do NOT use delete operator
 
 ## Classes
 
@@ -376,12 +412,20 @@ AIが理解できる技術的な一般的な情報は含める必要はありま
 - Use TailwindCSS
 - Use shadcn/ui
 - Write components in the format: export function ComponentName () {}
-- Define React custom hooks
-- do NOT use useMemo
+- Do NOT use useMemo or useCallback
 
-# Restrictions
+## GraphQL Colocation
 
-以下のファイルは書き換えてはいけません。
+- Define Fragments in the same file as the component that uses them
+- Use GraphQL fragments to define data dependencies
+- Use `readFragment` to access data in components
+- Use `graphql` function to define fragments and queries
+- Always use types generated from GraphQL Fragments
+- Manual duplicate type definitions are prohibited
 
-- vite.config.ts
+## FORBIDDEN
+
+- Do NOT make huge files (basically max 100 lines)
+- Do NOT make a huge React hooks
+- Hooks that manage all component state
 

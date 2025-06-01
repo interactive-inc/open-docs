@@ -32,7 +32,7 @@
         "tailwind-merge": "^3.3.0",
         "yaml": "^2.8.0",
         "zenn-content-css": "^0.1.159",
-        "zod": "^3.24.4",
+        "zod": "^3.25.45",
       },
       "devDependencies": {
         "@biomejs/biome": "^1.9.4",
@@ -644,9 +644,11 @@
 
     "zenn-content-css": ["zenn-content-css@0.1.159", "", {}, "sha512-uzcqnX1nh+A/taBS5kf9QLPLEfPOuZwrit8gpS0zX7x/EJK6rQieIMoFu7n3STH/09s2kCp25M9E1CT0YXqlOg=="],
 
-    "zod": ["zod@3.24.4", "", {}, "sha512-OdqJE9UDRPwWsrHjLN2F8bPxvwJBK22EHLWtanu0LSYr5YqzsaaW3RMgmjwr8Rypg5k+meEJdSPXJZXE/yqOMg=="],
+    "zod": ["zod@3.25.45", "", {}, "sha512-kv1swJBZqv98NQibL0oVvkQE8rXT+6qGNM1FpZkFcJG2jnz4vbtu48bgaitp85CaBPLSKXibrEsU7MzJoVoZAA=="],
 
     "zod-to-json-schema": ["zod-to-json-schema@3.24.5", "", { "peerDependencies": { "zod": "^3.24.1" } }, "sha512-/AuWwMP+YqiPbsJx5D6TfgRTc4kTLjsh5SOcd4bLsfUg2RcEXrFMJl1DGgdHy2aCfsIA/cr/1JM0xcB2GZji8g=="],
+
+    "@modelcontextprotocol/sdk/zod": ["zod@3.24.4", "", {}, "sha512-OdqJE9UDRPwWsrHjLN2F8bPxvwJBK22EHLWtanu0LSYr5YqzsaaW3RMgmjwr8Rypg5k+meEJdSPXJZXE/yqOMg=="],
 
     "@radix-ui/react-arrow/@radix-ui/react-primitive": ["@radix-ui/react-primitive@2.1.2", "", { "dependencies": { "@radix-ui/react-slot": "1.2.2" }, "peerDependencies": { "@types/react": "*", "@types/react-dom": "*", "react": "^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc", "react-dom": "^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc" }, "optionalPeers": ["@types/react", "@types/react-dom"] }, "sha512-uHa+l/lKfxuDD2zjN/0peM/RhhSmRjr5YWdk/37EnSv1nJ88uvG85DPexSm8HdFQROd2VdERJ6ynXbkCFi+APw=="],
 
