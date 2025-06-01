@@ -1,5 +1,5 @@
-import { extractHeading } from "./extract-heading"
 import { parseFrontMatterContent } from "@/lib/markdown/parse-front-matter-content"
+import { extractHeading } from "./extract-heading"
 
 export function parseMarkdown(text: string) {
   if (!text.startsWith("---")) {

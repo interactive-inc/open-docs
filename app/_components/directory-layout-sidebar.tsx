@@ -1,6 +1,5 @@
 "use client"
 import { DirectoryFileTreeNode } from "@/app/_components/directory-file-tree-node"
-import { Button } from "@/app/_components/ui/button"
 import {
   Sidebar,
   SidebarContent,
@@ -8,15 +7,13 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarInset,
   SidebarMenu,
   SidebarProvider,
 } from "@/app/_components/ui/sidebar"
 import type { FileNode } from "@/lib/get-docs-files"
-import { ArrowLeftIcon } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
-import { Fragment, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 
 type Props = {
   files: FileNode[]
@@ -25,7 +22,13 @@ type Props = {
 
 export function DirectoryLayoutSidebar(props: Props) {
   const [isClient, setIsClient] = useState(false)
+
+  const [openPaths, setOpenPaths] = useState<Set<string>>(new Set())
+
+  const [selectedDirectory, setSelectedDirectory] = useState<string>("")
+
   const router = useRouter()
+
   const path = usePathname()
 
   function getCurrentPath(path: string) {
@@ -62,162 +65,102 @@ export function DirectoryLayoutSidebar(props: Props) {
   // ファイルパスもディレクトリパスとして扱えるように処理
   const currentDirectoryPath = getCurrentPath(path)
 
-  console.log("currentDirectoryPath", currentDirectoryPath)
-
-  // 現在のパスに基づいてディレクトリの内容を取得する関数
-  const getCurrentDirectoryContents = (
-    files: FileNode[],
-    dirPath: string,
-  ): FileNode[] => {
-    // パスが空の場合は全ファイルを返す
-    if (!dirPath || dirPath === "/") {
-      return files
-    }
-
-    // パスの処理（先頭の/を削除）
-    const cleanPath = dirPath.startsWith("/") ? dirPath.substring(1) : dirPath
-    const parts = cleanPath.split("/").filter(Boolean)
-
-    // トップレベルから順に探していく
-    let currentLevel = files
-
-    for (const part of parts) {
-      // 現在の階層から該当するディレクトリを探す
-      const directory = currentLevel.find(
-        (item) => item.type === "directory" && item.name === part,
-      )
-
-      // ディレクトリが見つからないか、子要素がない場合は全ファイルを返す
-      if (!directory || !directory.children) {
-        return files
-      }
-
-      // 次の階層へ進む
-      currentLevel = directory.children
-    }
-
-    // 見つかったディレクトリの子要素を返す
-    return currentLevel
-  }
-
-  // 現在のパスに基づいて表示するファイルツリーを取得
-  const getFileTree = () => {
-    if (!isClient) return props.files
-
-    // パスの処理（先頭の/を削除）
-    const cleanPath = currentDirectoryPath.startsWith("/")
-      ? currentDirectoryPath.substring(1)
-      : currentDirectoryPath
-
-    return getCurrentDirectoryContents(props.files, cleanPath)
-  }
-
-  const fileTree = getFileTree()
-
   useEffect(() => {
     setIsClient(true)
   }, [])
 
-  const handleGoBack = () => {
-    router.back()
-  }
-
-  // パスの階層構造を取得する関数
-  const getPathHierarchy = (path: string): { name: string; path: string }[] => {
-    // /directories のパスを除去
-    const dirPath = path.startsWith("/directories")
-      ? path.replace("/directories", "")
-      : path
-
-    // パスが空または "/" の場合は空の配列を返す
-    if (!dirPath || dirPath === "/") {
-      return []
-    }
-
-    // 先頭の / を削除してセグメントに分割
-    const cleanPath = dirPath.startsWith("/") ? dirPath.substring(1) : dirPath
-    const segments = cleanPath.split("/").filter(Boolean)
-
-    // 階層ごとのパスを構築
-    const result: { name: string; path: string }[] = []
-    let currentPath = ""
-
-    // ルートディレクトリを追加
-    result.push({ name: "ルート", path: "" })
-
-    // 各階層を追加
-    for (let i = 0; i < segments.length; i++) {
-      const segment = segments[i]
-      if (!segment) continue // segmentがundefinedの場合はスキップ
-
-      currentPath = currentPath ? `${currentPath}/${segment}` : segment
-
-      // 最後のセグメントがファイルかチェック
-      if (i === segments.length - 1 && segment.includes(".")) {
-        continue // ファイル名はスキップ
+  // ファイルが変更された時に全ディレクトリを開く
+  useEffect(() => {
+    const collectAllDirectoryPaths = (
+      nodes: FileNode[],
+      basePath = "",
+    ): string[] => {
+      const paths: string[] = []
+      for (const node of nodes) {
+        if (node.type === "directory") {
+          const nodePath = node.path.replace(/^docs\//, "")
+          paths.push(nodePath)
+          if (node.children) {
+            paths.push(...collectAllDirectoryPaths(node.children, nodePath))
+          }
+        }
       }
-
-      result.push({
-        name: segment,
-        path: currentPath,
-      })
+      return paths
     }
 
-    return result
-  }
+    const allPaths = collectAllDirectoryPaths(props.files)
+    setOpenPaths(new Set(allPaths))
+  }, [props.files])
 
-  const pathHierarchy = getPathHierarchy(path)
+  // パスが変更された時に選択ディレクトリを更新
+  useEffect(() => {
+    // getCurrentPath関数をuseEffect内で定義
+    const getCurrentDirectoryFromPath = (pathname: string) => {
+      if (pathname.startsWith("/directories")) {
+        const dirPath = pathname.replace("/directories", "")
+        const pathSegments = dirPath.split("/").filter(Boolean)
+
+        if (pathSegments.length > 0) {
+          const lastSegment = pathSegments[pathSegments.length - 1]
+          if (lastSegment?.includes(".")) {
+            pathSegments.pop()
+            return `/${pathSegments.join("/")}`
+          }
+        }
+        return dirPath
+      }
+      return pathname
+    }
+
+    const currentDir = getCurrentDirectoryFromPath(path)
+    const cleanDir = currentDir.startsWith("/")
+      ? currentDir.substring(1)
+      : currentDir
+    setSelectedDirectory(cleanDir)
+  }, [path])
 
   const handleSelectDirectory = (path: string) => {
+    setSelectedDirectory(path)
     router.push(`/directories/${path}`)
+  }
+
+  const handleToggleOpen = (path: string) => {
+    const newOpenPaths = new Set(openPaths)
+    if (newOpenPaths.has(path)) {
+      newOpenPaths.delete(path)
+    } else {
+      newOpenPaths.add(path)
+    }
+    setOpenPaths(newOpenPaths)
+  }
+
+  // 再帰的に全てのディレクトリを表示する関数
+  const renderAllDirectories = (nodes: FileNode[], currentDepth = 0) => {
+    return nodes.map((node) => (
+      <DirectoryFileTreeNode
+        key={node.path || `file-${node.name}`}
+        node={node}
+        depth={currentDepth}
+        currentPath={
+          window.location.pathname.match(/\/directories\/(.*)$/)?.[1] || ""
+        }
+        onSelectDirectory={handleSelectDirectory}
+        openPaths={openPaths}
+        onToggleOpen={handleToggleOpen}
+        selectedDirectory={selectedDirectory}
+      />
+    ))
   }
 
   return (
     <SidebarProvider>
       <Sidebar collapsible={"offcanvas"} variant={"inset"}>
-        <SidebarHeader>
-          <div className="flex flex-col space-y-2">
-            {pathHierarchy.length > 0 && (
-              <div className="mt-2 flex flex-col gap-2">
-                {pathHierarchy.map((item, index) => (
-                  <Button
-                    key={item.path}
-                    size={"sm"}
-                    variant={"secondary"}
-                    className="flex justify-start"
-                    onClick={() => handleSelectDirectory(item.path)}
-                  >
-                    {index !== pathHierarchy.length - 1 && (
-                      <ArrowLeftIcon size={16} />
-                    )}
-                    <span>{item.name}</span>
-                  </Button>
-                ))}
-              </div>
-            )}
-          </div>
-        </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
             <SidebarGroupLabel>{"ファイル"}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {isClient && (
-                  <Fragment>
-                    {fileTree.map((file: FileNode) => (
-                      <DirectoryFileTreeNode
-                        key={file.path || `file-${file.name}`}
-                        node={file}
-                        currentPath={
-                          window.location.pathname.match(
-                            /\/directories\/(.*)$/,
-                          )?.[1] || ""
-                        }
-                        onSelectDirectory={handleSelectDirectory}
-                      />
-                    ))}
-                  </Fragment>
-                )}
+                {isClient && renderAllDirectories(props.files)}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

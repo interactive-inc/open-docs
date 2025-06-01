@@ -1,3 +1,26 @@
+---
+icon: 👀
+title: 製品
+description: ​ああああ
+schema:
+  name:
+    type: string
+    required: true
+    description: 製品名
+  category:
+    type: string
+    description: 製品カテゴリ
+  price:
+    type: number
+    description: 価格
+  tags:
+    type: array-string
+    description: タグ一覧
+  active:
+    type: boolean
+    description: 有効フラグ
+---
+
 # 在庫管理アプリ 概要
 
 ## 目的

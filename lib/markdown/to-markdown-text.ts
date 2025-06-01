@@ -13,5 +13,5 @@ export function toMarkdownText(props: Props): string {
 
   const frontMatterText = toFrontMatterText(props.frontMatter)
 
-  return `---\n${frontMatterText}\n---\n\n${existingContent}\n`
+  return `---\n${frontMatterText}\n---\n\n${existingContent}`.trim()
 }

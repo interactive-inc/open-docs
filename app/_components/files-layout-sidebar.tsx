@@ -1,4 +1,5 @@
 "use client"
+import { FileTreeNode } from "@/app/_components/file-tree-node"
 import {
   Sidebar,
   SidebarContent,
@@ -13,7 +14,6 @@ import {
 } from "@/app/_components/ui/sidebar"
 import type { FileNode } from "@/lib/get-docs-files"
 import { Fragment, useEffect, useState } from "react"
-import { FileTreeNode } from "@/app/_components/file-tree-node"
 
 type Props = {
   files: FileNode[]

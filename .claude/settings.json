@@ -2,9 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(bun run:*)",
-      "Bash(npx tsc:*)",
+      "Bash(bunx tsc:*)",
       "Bash(find:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(bun biome check:*)",
+      "Bash(mv:*)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": []
   }

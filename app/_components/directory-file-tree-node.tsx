@@ -5,7 +5,6 @@ import {
   SidebarMenuItem,
 } from "@/app/_components/ui/sidebar"
 import type { FileNode } from "@/lib/get-docs-files"
-import { ChevronRightIcon } from "lucide-react"
 import Link from "next/link"
 import { GetFileIcon } from "./get-file-icon"
 
@@ -14,13 +13,13 @@ type Props = {
   depth?: number
   currentPath?: string
   onSelectDirectory?: (path: string) => void
+  openPaths?: Set<string>
+  onToggleOpen?: (path: string) => void
+  selectedDirectory?: string
 }
 
 export function DirectoryFileTreeNode(props: Props) {
   const isDirectory = props.node.type === "directory"
-
-  const hasChildren =
-    isDirectory && props.node.children && props.node.children.length > 0
 
   const formatPath = (path: string) => {
     // "docs/" を取り除く
@@ -28,9 +27,10 @@ export function DirectoryFileTreeNode(props: Props) {
   }
 
   const depth = props.depth || 0
+  const isOpen = props.openPaths?.has(formatPath(props.node.path)) ?? false
 
   if (isDirectory) {
-    const isSelected = props.currentPath === formatPath(props.node.path)
+    const isSelected = props.selectedDirectory === formatPath(props.node.path)
     const handleClick = (e: React.MouseEvent) => {
       if (props.onSelectDirectory) {
         e.preventDefault()
@@ -39,21 +39,48 @@ export function DirectoryFileTreeNode(props: Props) {
     }
 
     return (
-      <SidebarMenuItem>
-        <SidebarMenuButton
-          style={{ paddingLeft: 8 + depth * 8 }}
-          className={isSelected ? "bg-sidebar-accent font-medium" : ""}
-          onClick={handleClick}
-        >
-          {hasChildren && (
-            <span>
-              <ChevronRightIcon size={16} />
-            </span>
-          )}
-          <span>{props.node.name}</span>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
+      <>
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            style={{ paddingLeft: 8 + depth * 8 }}
+            className={isSelected ? "bg-sidebar-accent font-medium" : ""}
+            onClick={handleClick}
+          >
+            {props.node.icon && (
+              <span className="text-base">{props.node.icon}</span>
+            )}
+            <span>{props.node.name}</span>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+        {isOpen &&
+          props.node.children &&
+          props.node.children
+            .filter((child) => child.type === "directory")
+            .map((child) => (
+              <DirectoryFileTreeNode
+                key={child.path}
+                node={child}
+                depth={depth + 1}
+                currentPath={props.currentPath}
+                onSelectDirectory={props.onSelectDirectory}
+                openPaths={props.openPaths}
+                onToggleOpen={props.onToggleOpen}
+                selectedDirectory={props.selectedDirectory}
+              />
+            ))}
+      </>
     )
+  }
+
+  // ファイルは選択されたディレクトリの直下にある場合のみ表示
+  const parentPath = props.node.path.substring(
+    0,
+    props.node.path.lastIndexOf("/"),
+  )
+  const formattedParentPath = parentPath.replace(/^docs\/?/, "")
+
+  if (props.selectedDirectory !== formattedParentPath) {
+    return null
   }
 
   return (

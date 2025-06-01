@@ -66,6 +66,10 @@ applyTo: "**/*.{ts,tsx}"
 - Always use types generated from GraphQL Fragments
 - Manual duplicate type definitions are prohibited
 
+## TailwindCSS
+
+- Use `space-` or `gap-` instead of `pb-`
+
 ## FORBIDDEN
 
 - Do NOT make huge files (basically max 100 lines)

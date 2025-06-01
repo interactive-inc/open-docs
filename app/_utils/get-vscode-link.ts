@@ -4,3 +4,10 @@
 export function getVSCodeLink(id: string, cwd: string): string {
   return `vscode://file/${cwd}/docs/products/client/features/${id}.md`
 }
+
+/**
+ * ファイルパスからVSCodeのリンクを生成する関数
+ */
+export function getVSCodeFileLink(filePath: string, cwd: string): string {
+  return `vscode://file/${cwd}/${filePath}`
+}
