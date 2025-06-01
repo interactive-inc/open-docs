@@ -1,16 +1,23 @@
+"use client"
+
 import { DirectoryLayoutSidebar } from "@/app/_components/directory-layout-sidebar"
-import { getDocsFiles } from "@/app/_utils/get-docs-files"
+import { useClientLoading } from "@/app/_hooks/use-client-loading"
+import { Suspense } from "react"
 
 type Props = {
   children: React.ReactNode
 }
 
-export default async function FilesLayout(props: Props) {
-  const files = await getDocsFiles()
+export default function FilesLayout(props: Props) {
+  const loading = useClientLoading()
+
+  if (loading) {
+    return null
+  }
 
   return (
-    <DirectoryLayoutSidebar files={files}>
-      {props.children}
-    </DirectoryLayoutSidebar>
+    <Suspense fallback={<div>ファイルツリーを読み込み中...</div>}>
+      <DirectoryLayoutSidebar>{props.children}</DirectoryLayoutSidebar>
+    </Suspense>
   )
 }

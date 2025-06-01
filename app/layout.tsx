@@ -1,3 +1,4 @@
+import { Providers } from "@/app/_components/providers"
 import type { Metadata } from "next"
 import { Toaster } from "sonner"
 
@@ -14,8 +15,10 @@ export default function RootLayout(props: Props) {
   return (
     <html lang={"ja"} className={"dark"}>
       <body className={"overscroll-none antialiased"}>
-        <Toaster position={"top-right"} closeButton richColors />
-        {props.children}
+        <Providers>
+          <Toaster position={"top-right"} closeButton richColors />
+          {props.children}
+        </Providers>
       </body>
     </html>
   )

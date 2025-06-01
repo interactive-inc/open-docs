@@ -1,27 +1,33 @@
-"use server"
+import * as fs from "node:fs"
+import * as path from "node:path"
+import { factory } from "@/lib/factory"
+import { zValidator } from "@hono/zod-validator"
+import { z } from "zod"
+import { validateDocsPath } from "../utils"
 
-import fs from "node:fs"
-import path from "node:path"
-import { revalidatePath } from "next/cache"
+const moveFileSchema = z.object({
+  sourcePath: z.string(),
+  destinationPath: z.string(),
+})
 
-type MoveFileProps = {
-  sourcePath: string
-  destinationPath: string
-}
+// POST /api/files/move - ファイルまたはディレクトリを移動
+export const POST = factory.createHandlers(
+  zValidator("json", moveFileSchema),
+  async (c) => {
+    const body = c.req.valid("json")
 
-export async function moveFile(
-  props: MoveFileProps,
-): Promise<{ success: boolean; message: string }> {
-  try {
-    const sourceFullPath = path.join(process.cwd(), props.sourcePath)
-    const destinationFullPath = path.join(process.cwd(), props.destinationPath)
+    const sourceFullPath = validateDocsPath(body.sourcePath)
+    const destinationFullPath = validateDocsPath(body.destinationPath)
 
     // 移動元が存在するか確認
     if (!fs.existsSync(sourceFullPath)) {
-      return {
-        success: false,
-        message: `移動元が存在しません: ${props.sourcePath}`,
-      }
+      return c.json(
+        {
+          success: false,
+          message: `移動元が存在しません: ${body.sourcePath}`,
+        },
+        404,
+      )
     }
 
     // 移動先のディレクトリが存在するか確認
@@ -32,10 +38,13 @@ export async function moveFile(
 
     // 移動先に同名のファイルが存在するか確認
     if (fs.existsSync(destinationFullPath)) {
-      return {
-        success: false,
-        message: `移動先に同名のファイルが既に存在します: ${props.destinationPath}`,
-      }
+      return c.json(
+        {
+          success: false,
+          message: `移動先に同名のファイルが既に存在します: ${body.destinationPath}`,
+        },
+        409,
+      )
     }
 
     // ファイルまたはディレクトリの移動
@@ -50,21 +59,12 @@ export async function moveFile(
       fs.renameSync(sourceFullPath, destinationFullPath)
     }
 
-    // キャッシュを更新
-    revalidatePath("/files")
-
-    return {
+    return c.json({
       success: true,
-      message: `${isDirectory ? "ディレクトリ" : "ファイル"}を移動しました: ${props.sourcePath} -> ${props.destinationPath}`,
-    }
-  } catch (error) {
-    console.error("ファイル移動エラー:", error)
-    return {
-      success: false,
-      message: `エラーが発生しました: ${error instanceof Error ? error.message : String(error)}`,
-    }
-  }
-}
+      message: `${isDirectory ? "ディレクトリ" : "ファイル"}を移動しました: ${body.sourcePath} -> ${body.destinationPath}`,
+    })
+  },
+)
 
 // ディレクトリを再帰的にコピーする関数
 function copyDirectory(source: string, destination: string): void {

@@ -1,5 +1,5 @@
 ---
-milestone: 2028.01.01
+milestone: 2028.01.02
 is-done: false
 priority: 0
 ---

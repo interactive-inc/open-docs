@@ -12,11 +12,11 @@ import {
   SidebarProvider,
 } from "@/app/_components/ui/sidebar"
 import type { FileNode } from "@/lib/get-docs-files"
+import { useSuspenseQuery } from "@tanstack/react-query"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
 type Props = {
-  files: FileNode[]
   children: React.ReactNode
 }
 
@@ -30,6 +30,18 @@ export function DirectoryLayoutSidebar(props: Props) {
   const router = useRouter()
 
   const path = usePathname()
+
+  const { data } = useSuspenseQuery({
+    queryKey: ["file-tree"],
+    queryFn: async () => {
+      const response = await fetch("/api/files/tree")
+      if (!response.ok) {
+        throw new Error("Failed to fetch file tree")
+      }
+      return response.json()
+    },
+  })
+  const files = data.files
 
   function getCurrentPath(path: string) {
     // /directories/ から始まるパスの場合（標準的なディレクトリ表示）
@@ -63,7 +75,7 @@ export function DirectoryLayoutSidebar(props: Props) {
 
   // 現在のパスをディレクトリパスに変換
   // ファイルパスもディレクトリパスとして扱えるように処理
-  const currentDirectoryPath = getCurrentPath(path)
+  getCurrentPath(path)
 
   useEffect(() => {
     setIsClient(true)
@@ -71,26 +83,23 @@ export function DirectoryLayoutSidebar(props: Props) {
 
   // ファイルが変更された時に全ディレクトリを開く
   useEffect(() => {
-    const collectAllDirectoryPaths = (
-      nodes: FileNode[],
-      basePath = "",
-    ): string[] => {
+    const collectAllDirectoryPaths = (nodes: FileNode[]): string[] => {
       const paths: string[] = []
       for (const node of nodes) {
         if (node.type === "directory") {
           const nodePath = node.path.replace(/^docs\//, "")
           paths.push(nodePath)
           if (node.children) {
-            paths.push(...collectAllDirectoryPaths(node.children, nodePath))
+            paths.push(...collectAllDirectoryPaths(node.children))
           }
         }
       }
       return paths
     }
 
-    const allPaths = collectAllDirectoryPaths(props.files)
+    const allPaths = collectAllDirectoryPaths(files)
     setOpenPaths(new Set(allPaths))
-  }, [props.files])
+  }, [files])
 
   // パスが変更された時に選択ディレクトリを更新
   useEffect(() => {
@@ -160,7 +169,7 @@ export function DirectoryLayoutSidebar(props: Props) {
             <SidebarGroupLabel>{"ファイル"}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {isClient && renderAllDirectories(props.files)}
+                {isClient && renderAllDirectories(files)}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

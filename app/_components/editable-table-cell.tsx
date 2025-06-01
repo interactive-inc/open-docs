@@ -1,6 +1,4 @@
 "use client"
-
-import { Input } from "@/app/_components/ui/input"
 import { useState } from "react"
 
 type Props = {
@@ -94,7 +92,6 @@ export function EditableTableCell(props: Props) {
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           className="absolute inset-0 w-full bg-transparent px-3 py-2 outline-none"
-          autoFocus
         />
       ) : null}
       <div

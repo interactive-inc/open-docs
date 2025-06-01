@@ -24,7 +24,7 @@ export function MarkdownFileView(props: Props): ReactNode {
   const html = marked.parse(markdown.content)
 
   return (
-    <div className="h-full space-y-4 p-4">
+    <div className="h-full space-y-2 p-4">
       <div className="flex gap-2">
         <PageHeader filePath={props.fileName} />
       </div>

@@ -20,13 +20,13 @@ export async function parseFeatureFile(fileName: string, fileContent: string) {
 
   const name = extractHeading(content)
 
-  const priority = toPriorityText(data.priority)
+  const priority = toPriorityText(String(data.priority))
 
   return zFeature.parse({
     id: slug,
     name: name,
     primary: priority,
     milestone: data.milestone || "",
-    isDone: data["is-done"] === "true",
+    isDone: Boolean(data["is-done"]),
   } as const satisfies z.infer<typeof zFeature>)
 }

@@ -22,15 +22,12 @@ export function VscodeButton(props: Props) {
   const href = props.filePath
     ? getVSCodeFileLink(props.filePath, props.cwd)
     : props.featureId
-    ? getVSCodeLink(props.featureId, props.cwd)
-    : "#"
+      ? getVSCodeLink(props.featureId, props.cwd)
+      : "#"
 
   return (
     <a href={href} className="block">
-      <Button 
-        size={props.size || "sm"} 
-        variant={props.variant || "secondary"}
-      >
+      <Button size={props.size || "sm"} variant={props.variant || "secondary"}>
         <ExternalLink />
       </Button>
     </a>

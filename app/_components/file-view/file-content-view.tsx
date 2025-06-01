@@ -1,8 +1,8 @@
 "use client"
 
-import { saveFileContent } from "@/app/_actions/save-file-content"
 import { CsvFileView } from "@/app/_components/file-view/csv-file-view"
 import { MarkdownFileView } from "@/app/_components/file-view/markdown-file-view"
+import { useSaveFileContent } from "@/lib/hooks/use-save-file-content"
 import { useState } from "react"
 import { DefaultFileViewer } from "./default-file-view"
 import { JsonFileEditor } from "./json-file-editor"
@@ -14,13 +14,16 @@ type Props = {
 
 export function FileContentView(props: Props) {
   const [currentContent, setCurrentContent] = useState(props.content)
+  const saveFileContent = useSaveFileContent()
 
   const onChange = async (newContent: string) => {
-    const content = await saveFileContent({
+    const result = await saveFileContent.mutateAsync({
       filePath: props.filePath,
       content: newContent,
     })
-    setCurrentContent(content)
+    if ("content" in result) {
+      setCurrentContent(result.content)
+    }
   }
 
   if (props.filePath.endsWith(".md")) {

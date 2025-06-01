@@ -1,11 +1,13 @@
 "use client"
 
+import { useRemoveFeatureFromPage } from "@/lib/hooks/use-remove-feature"
+import {
+  useUpdateFeaturePriority,
+  useUpdateFeatureStatus,
+} from "@/lib/hooks/use-update-feature"
 import { Check, CircleDashed, Loader2 } from "lucide-react"
 import { useState } from "react"
 import type { zFeature } from "../../lib/models/feature"
-import { removeFeatureFromPage } from "../_actions/remove-feature-from-page"
-import { updateFeaturePriority } from "../_actions/update-feature-priority"
-import { updateFeatureStatus } from "../_actions/update-feature-status"
 import { Button } from "./ui/button"
 import { Card } from "./ui/card"
 import { VscodeButton } from "./vscode-button"
@@ -18,22 +20,18 @@ type Props = {
 }
 
 export function FeatureCard(props: Props) {
-  const [isUpdating, setIsUpdating] = useState(false)
-
-  const [isPriorityUpdating, setIsPriorityUpdating] = useState(false)
-
-  const [isRemoving, setIsRemoving] = useState(false)
-
   const [featureStatus, setFeatureStatus] = useState(props.feature.isDone)
-
   const [featurePriority, setFeaturePriority] = useState(props.feature.primary)
+
+  const updateStatus = useUpdateFeatureStatus()
+  const updatePriority = useUpdateFeaturePriority()
+  const removeFeature = useRemoveFeatureFromPage()
 
   const toggleFeatureStatus = async () => {
     try {
-      setIsUpdating(true)
       const newStatus = !featureStatus
 
-      await updateFeatureStatus({
+      await updateStatus.mutateAsync({
         featureId: props.feature.id,
         isDone: newStatus,
         project: props.project,
@@ -42,33 +40,32 @@ export function FeatureCard(props: Props) {
       setFeatureStatus(newStatus)
     } catch (error) {
       console.error("ステータス更新エラー:", error)
-    } finally {
-      setIsUpdating(false)
     }
   }
 
   const toggleFeaturePriority = async () => {
     try {
-      setIsPriorityUpdating(true)
-      const newPriority = featurePriority === "high" ? "low" : "high"
+      const priorities = ["high", "medium", "low"] as const
+      const currentIndex = priorities.indexOf(featurePriority as any)
+      const nextIndex = (currentIndex + 1) % priorities.length
+      const newPriority = priorities[nextIndex]
+
       console.log("優先度を更新します:", props.feature.id, "=>", newPriority)
 
-      await updateFeaturePriority({
+      await updatePriority.mutateAsync({
         featureId: props.feature.id,
-        primary: newPriority,
+        primary: newPriority as "high" | "medium" | "low",
         project: props.project,
       })
       console.log("優先度の更新が完了しました")
 
-      setFeaturePriority(newPriority)
+      setFeaturePriority(newPriority || "low")
     } catch (error) {
       console.error("優先度更新エラー:", error)
-    } finally {
-      setIsPriorityUpdating(false)
     }
   }
 
-  const removeFeature = async () => {
+  const handleRemoveFeature = async () => {
     if (
       !confirm(
         `${props.feature.name} をこのページから削除してもよろしいですか？`,
@@ -78,19 +75,19 @@ export function FeatureCard(props: Props) {
     }
 
     try {
-      setIsRemoving(true)
-
-      await removeFeatureFromPage({
+      await removeFeature.mutateAsync({
         pageId: props.pageId,
         featureId: props.feature.id,
         project: props.project,
       })
     } catch (error) {
       console.error("機能削除エラー:", error)
-    } finally {
-      setIsRemoving(false)
     }
   }
+
+  const isUpdating = updateStatus.isPending
+  const isPriorityUpdating = updatePriority.isPending
+  const isRemoving = removeFeature.isPending
 
   return (
     <Card className="gap-y-2 overflow-hidden p-2">
@@ -104,44 +101,61 @@ export function FeatureCard(props: Props) {
         <div className="flex items-center gap-2">
           <Button
             size={"sm"}
-            onClick={toggleFeatureStatus}
             variant={featureStatus ? "default" : "secondary"}
-            disabled={isUpdating || isRemoving}
+            onClick={toggleFeatureStatus}
+            disabled={isUpdating}
             className="flex items-center gap-2"
           >
             {isUpdating ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-              </>
+              <Loader2 className="animate-spin" />
             ) : featureStatus ? (
-              <Check className="h-4 w-4" />
+              <Check />
             ) : (
-              <CircleDashed className="h-4 w-4" />
+              <CircleDashed />
             )}
           </Button>
           <Button
-            size={"sm"}
             onClick={toggleFeaturePriority}
-            variant={featurePriority === "high" ? "default" : "secondary"}
-            disabled={isPriorityUpdating || isRemoving}
+            size={"sm"}
+            variant={
+              featurePriority === "high"
+                ? "default"
+                : featurePriority === "medium"
+                  ? "secondary"
+                  : "secondary"
+            }
+            disabled={isPriorityUpdating}
+            className="gap-1.5"
           >
-            {isPriorityUpdating
-              ? "更新中..."
-              : featurePriority === "high"
-                ? "優先度:高"
-                : "優先度:低"}
+            {isPriorityUpdating ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              `優先度:${
+                featurePriority === "high"
+                  ? "高"
+                  : featurePriority === "medium"
+                    ? "中"
+                    : "低"
+              }`
+            )}
           </Button>
         </div>
         <div className="flex items-center gap-2">
+          <VscodeButton
+            featureId={props.feature.id}
+            cwd={props.cwd}
+            size="sm"
+            variant="secondary"
+          />
           <Button
+            onClick={handleRemoveFeature}
             size={"sm"}
-            onClick={removeFeature}
-            variant="destructive"
+            variant={"destructive"}
             disabled={isRemoving}
+            className="gap-1.5"
           >
-            {isRemoving ? "削除中..." : "削除"}
+            {isRemoving ? <Loader2 className="h-4 w-4 animate-spin" /> : "削除"}
           </Button>
-          <VscodeButton featureId={props.feature.id} cwd={props.cwd} />
         </div>
       </div>
     </Card>
