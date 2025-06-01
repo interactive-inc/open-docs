@@ -1,5 +1,5 @@
 ---
-applyTo: '**/docs/**/pages/*.md'
+applyTo: "**/docs/**/pages/*.md"
 ---
 
 # ページの定義 - `docs/**/pages/*.md`

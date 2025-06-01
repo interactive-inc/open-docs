@@ -1,5 +1,5 @@
 ---
-applyTo: '**'
+applyTo: "**"
 ---
 
 # Core rules
@@ -40,7 +40,7 @@ Update the task list if new tasks arise during the work.
 
 - `bun test` - Run tests
 - `bun biome check . --fix --unsafe` - Fix and format code errors
-- `bun tsc --noEmit` - Check for type errors
+- `bun tsgo --noEmit` - Check for type errors
 - `bun run dev` - Do NOT use
 - `bun run build` - Do NOT use
 

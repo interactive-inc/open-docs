@@ -1,5 +1,5 @@
 ---
-applyTo: '**/*.md'
+applyTo: "**/*.md"
 ---
 
 # File rules - Markdown
@@ -8,4 +8,3 @@ applyTo: '**/*.md'
 - Do not use asterisks
 - Do not use numbers in headings
 - Insert blank lines before and after headings
-- Do not use apostrophes (for instance: Do not)

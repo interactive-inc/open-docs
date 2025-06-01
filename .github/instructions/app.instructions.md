@@ -1,18 +1,26 @@
 ---
-applyTo: '**/app/**/*.md'
+applyTo: "**/app/**/*.md"
 ---
 
 # `app/**/*`
 
 これはNext.jsのAppディレクトリに関する指示です。
 
-必要に応じて以下をタスクに含めてください。
+Please include the following tasks as needed:
 
-- テストを実行して、問題があれば取り組む
-- 型の検査して、問題があれば取り組む
-- Biomeのチェックを実行して、問題があれば取り組む
+- Run tests and address any issues
+- Check types and address any issues
+- Run Biome checks and address any issues
 
-## Backend Processing
+## Back-End
 
 Perform as much processing as possible on the backend to reduce frontend load.
 For example, implement conditional logic (such as checking if a file exists and then updating or creating it) on the backend, so the frontend doesn't need to choose between multiple endpoints.
+
+### API
+
+When creating REST APIs with Hono:
+
+- Follow RESTful principles (GET for retrieval, POST for creation, etc.)
+- Validate all inputs with zod
+- Return JSON responses with clear structure

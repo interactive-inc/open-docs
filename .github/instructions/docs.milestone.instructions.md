@@ -1,5 +1,5 @@
 ---
-applyTo: '**/docs/**/milestones/*.md'
+applyTo: "**/docs/**/milestones/*.md"
 ---
 
 # マイルストーンの定義 - `docs/**/milestones/*-value.md`

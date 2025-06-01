@@ -2,11 +2,24 @@
 
 これはNext.jsのAppディレクトリに関する指示です。
 
-必要に応じて以下をタスクに含めてください。
+Please include the following tasks as needed:
 
-- テストを実行して、問題があれば取り組む
-- 型の検査して、問題があれば取り組む
-- Biomeのチェックを実行して、問題があれば取り組む
+- Run tests and address any issues
+- Check types and address any issues
+- Run Biome checks and address any issues
+
+## Back-End
+
+Perform as much processing as possible on the backend to reduce frontend load.
+For example, implement conditional logic (such as checking if a file exists and then updating or creating it) on the backend, so the frontend doesn't need to choose between multiple endpoints.
+
+### API
+
+When creating REST APIs with Hono:
+
+- Follow RESTful principles (GET for retrieval, POST for creation, etc.)
+- Validate all inputs with zod
+- Return JSON responses with clear structure
 
 # Core rules
 
@@ -46,7 +59,7 @@ Update the task list if new tasks arise during the work.
 
 - `bun test` - Run tests
 - `bun biome check . --fix --unsafe` - Fix and format code errors
-- `bun tsc --noEmit` - Check for type errors
+- `bun tsgo --noEmit` - Check for type errors
 - `bun run dev` - Do NOT use
 - `bun run build` - Do NOT use
 
@@ -157,27 +170,11 @@ priority: 0
 - 全体像を把握できるように記述する
 
 ```
-# [プロジェクト/製品名] 概要
+# 概要
 
-## 目的
+[ディレクトリの案内]
 
-[このプロジェクト/製品の主な目的と解決する課題]
-
-## 主要機能
-
-- [機能1]: [簡潔な説明]
-- [機能2]: [簡潔な説明]
-- [機能3]: [簡潔な説明]
-
-## ステークホルダー
-
-- [ステークホルダー1]: [関係性]
-- [ステークホルダー2]: [関係性]
-
-## ビジネス制約
-
-- [制約1]
-- [制約2]
+- [パス] - [説明]
 ```
 
 # Docs Directory Instructions
@@ -357,7 +354,6 @@ AIが理解できる技術的な一般的な情報は含める必要はありま
 - Do not use asterisks
 - Do not use numbers in headings
 - Insert blank lines before and after headings
-- Do not use apostrophes (for instance: Do not)
 
 # File rules - TypeScript
 
@@ -414,14 +410,9 @@ AIが理解できる技術的な一般的な情報は含める必要はありま
 - Write components in the format: export function ComponentName () {}
 - Do NOT use useMemo or useCallback
 
-## GraphQL Colocation
+## TailwindCSS
 
-- Define Fragments in the same file as the component that uses them
-- Use GraphQL fragments to define data dependencies
-- Use `readFragment` to access data in components
-- Use `graphql` function to define fragments and queries
-- Always use types generated from GraphQL Fragments
-- Manual duplicate type definitions are prohibited
+- Use `space-` or `gap-` instead of `pb-`
 
 ## FORBIDDEN
 

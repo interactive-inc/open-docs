@@ -1,5 +1,5 @@
 ---
-applyTo: '**/docs/**/entities/*.md'
+applyTo: "**/docs/**/entities/*.md"
 ---
 
 # Entityの定義 - `docs/**/entities/*-entity.md`

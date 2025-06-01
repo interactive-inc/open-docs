@@ -1,5 +1,5 @@
 ---
-applyTo: '**/docs/**/values/*.md'
+applyTo: "**/docs/**/values/*.md"
 ---
 
 # 値オブジェクトの定義 - `docs/**/values/*-value.md`

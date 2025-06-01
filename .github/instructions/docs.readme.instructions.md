@@ -1,5 +1,5 @@
 ---
-applyTo: '**/docs/**/README.md'
+applyTo: "**/docs/**/README.md"
 ---
 
 # README - `docs/**/*/README.md`

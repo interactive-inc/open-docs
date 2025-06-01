@@ -1,5 +1,5 @@
 ---
-applyTo: '**/docs/**/terms/*.md'
+applyTo: "**/docs/**/terms/*.md"
 ---
 
 # 用語定義ファイル - `docs/**/terms/*.md`

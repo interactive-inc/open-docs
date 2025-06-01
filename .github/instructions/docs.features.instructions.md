@@ -1,5 +1,5 @@
 ---
-applyTo: '**/docs/**/features/*.md'
+applyTo: "**/docs/**/features/*.md"
 ---
 
 # 機能要件の定義 - `docs/**/features/*.md`

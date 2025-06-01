@@ -1,12 +1,13 @@
 {
   "permissions": {
     "allow": [
+      "Bash(bun biome check:*)",
       "Bash(bun run:*)",
       "Bash(bunx tsc:*)",
       "Bash(find:*)",
-      "Bash(rm:*)",
-      "Bash(bun biome check:*)",
+      "Bash(mkdir:*)",
       "Bash(mv:*)",
+      "Bash(rm:*)",
       "mcp__ide__getDiagnostics"
     ],
     "deny": []

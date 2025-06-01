@@ -57,15 +57,6 @@ applyTo: "**/*.{ts,tsx}"
 - Write components in the format: export function ComponentName () {}
 - Do NOT use useMemo or useCallback
 
-## GraphQL Colocation
-
-- Define Fragments in the same file as the component that uses them
-- Use GraphQL fragments to define data dependencies
-- Use `readFragment` to access data in components
-- Use `graphql` function to define fragments and queries
-- Always use types generated from GraphQL Fragments
-- Manual duplicate type definitions are prohibited
-
 ## TailwindCSS
 
 - Use `space-` or `gap-` instead of `pb-`
