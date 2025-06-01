@@ -39,13 +39,13 @@ export function useUpdateProperties() {
       queryClient.invalidateQueries({
         queryKey: ["file-content", normalizedPath],
       })
-      
+
       // ディレクトリデータのキャッシュも無効化
       // ファイルパスからディレクトリパスを取得
       const pathParts = normalizedPath.split("/")
       pathParts.pop() // ファイル名を削除
       const directoryPath = pathParts.join("/")
-      
+
       queryClient.invalidateQueries({
         queryKey: ["directory-data", directoryPath],
       })

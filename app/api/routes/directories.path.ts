@@ -3,6 +3,7 @@ import path from "node:path"
 import { factory } from "@/lib/factory"
 import { isFile } from "@/lib/is-file"
 import { parseMarkdown } from "@/lib/markdown/parse-markdown"
+import { zAppDirectory, zAppError } from "@/lib/models"
 import { directoryFrontMatterSchema } from "@/lib/validations/directory-front-matter-schema"
 
 // GET /api/directories/:path - ディレクトリまたはファイルデータ取得
@@ -10,7 +11,8 @@ export const GET = factory.createHandlers(async (c) => {
   const currentPath = c.req.path.replace("/api/directories/", "")
 
   if (!currentPath) {
-    return c.json({ error: "Path is required" }, 400)
+    const errorResponse = zAppError.parse({ error: "Path is required" })
+    return c.json(errorResponse, 400)
   }
 
   const filePath = path.join(process.cwd(), "docs", currentPath)
@@ -19,12 +21,19 @@ export const GET = factory.createHandlers(async (c) => {
 
   if (fileExists) {
     // ファイルの場合
-    const content = await fs.readFile(filePath, "utf-8")
-    return c.json({
-      isFile: true,
-      content,
-      filePath,
-    })
+    try {
+      const content = await fs.readFile(filePath, "utf-8")
+      const response = zAppDirectory.parse({
+        isFile: true,
+        content,
+        filePath,
+      })
+      return c.json(response)
+    } catch (error) {
+      console.error("File schema validation error:", error)
+      const errorResponse = zAppError.parse({ error: "File validation failed" })
+      return c.json(errorResponse, 500)
+    }
   }
 
   // ディレクトリの場合
@@ -81,7 +90,7 @@ export const GET = factory.createHandlers(async (c) => {
     // ディレクトリが存在しない場合はスキップ
   }
 
-  return c.json({
+  const data = zAppDirectory.parse({
     isFile: false,
     schema,
     title,
@@ -89,4 +98,6 @@ export const GET = factory.createHandlers(async (c) => {
     indexPath: indexExists ? indexPath : undefined,
     files,
   })
+
+  return c.json(data)
 })

@@ -1,6 +1,7 @@
 import { env } from "@/lib/env"
 import { factory } from "@/lib/factory"
 import { getDocsData } from "@/lib/get-docs-data"
+import { zAppProject } from "@/lib/models"
 import { zValidator } from "@hono/zod-validator"
 import { HTTPException } from "hono/http-exception"
 import { z } from "zod"
@@ -29,10 +30,11 @@ export const GET = factory.createHandlers(
       directory: project,
     })
 
-    return c.json({
+    const response = zAppProject.parse({
       pages,
       features,
       cwd: process.cwd(),
     })
+    return c.json(response)
   },
 )

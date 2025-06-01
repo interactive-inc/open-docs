@@ -2,6 +2,7 @@ import fs from "node:fs/promises"
 import { factory } from "@/lib/factory"
 import { parseMarkdown } from "@/lib/markdown/parse-markdown"
 import { toMarkdownText } from "@/lib/markdown/to-markdown-text"
+import { zAppError, zAppFileProperties } from "@/lib/models"
 import { zValidator } from "@hono/zod-validator"
 import { z } from "zod"
 import { validateDocsPath } from "../utils"
@@ -20,13 +21,14 @@ export const PUT = factory.createHandlers(
   ),
   async (c) => {
     const body = c.req.valid("json")
-    
+
     // URLパスから /properties を除去
     const urlPath = c.req.path.replace("/api/files/", "")
     if (!urlPath.endsWith("/properties")) {
-      return c.json({ error: "Invalid path" }, 400)
+      const errorResponse = zAppError.parse({ error: "Invalid path" })
+      return c.json(errorResponse, 400)
     }
-    
+
     const filePath = urlPath.replace(/\/properties$/, "")
     const fullFilePath = `docs/${filePath}`
 
@@ -69,9 +71,10 @@ export const PUT = factory.createHandlers(
     // ファイルに書き込む
     await fs.writeFile(fullPath, updatedContent, "utf-8")
 
-    return c.json({
+    const response = zAppFileProperties.parse({
       success: true,
       frontMatter: updatedFrontMatter,
     })
+    return c.json(response)
   },
 )

@@ -1,6 +1,7 @@
 import * as fs from "node:fs"
 import * as path from "node:path"
 import { factory } from "@/lib/factory"
+import { zAppFileMove } from "@/lib/models"
 import { zValidator } from "@hono/zod-validator"
 import { z } from "zod"
 import { validateDocsPath } from "../utils"
@@ -21,13 +22,11 @@ export const POST = factory.createHandlers(
 
     // 移動元が存在するか確認
     if (!fs.existsSync(sourceFullPath)) {
-      return c.json(
-        {
-          success: false,
-          message: `移動元が存在しません: ${body.sourcePath}`,
-        },
-        404,
-      )
+      const errorResponse = zAppFileMove.parse({
+        success: false,
+        message: `移動元が存在しません: ${body.sourcePath}`,
+      })
+      return c.json(errorResponse, 404)
     }
 
     // 移動先のディレクトリが存在するか確認
@@ -38,13 +37,11 @@ export const POST = factory.createHandlers(
 
     // 移動先に同名のファイルが存在するか確認
     if (fs.existsSync(destinationFullPath)) {
-      return c.json(
-        {
-          success: false,
-          message: `移動先に同名のファイルが既に存在します: ${body.destinationPath}`,
-        },
-        409,
-      )
+      const errorResponse = zAppFileMove.parse({
+        success: false,
+        message: `移動先に同名のファイルが既に存在します: ${body.destinationPath}`,
+      })
+      return c.json(errorResponse, 409)
     }
 
     // ファイルまたはディレクトリの移動
@@ -59,10 +56,11 @@ export const POST = factory.createHandlers(
       fs.renameSync(sourceFullPath, destinationFullPath)
     }
 
-    return c.json({
+    const response = zAppFileMove.parse({
       success: true,
       message: `${isDirectory ? "ディレクトリ" : "ファイル"}を移動しました: ${body.sourcePath} -> ${body.destinationPath}`,
     })
+    return c.json(response)
   },
 )
 

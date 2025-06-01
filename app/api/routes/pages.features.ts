@@ -3,6 +3,7 @@ import * as path from "node:path"
 import { factory } from "@/lib/factory"
 import { parseMarkdown } from "@/lib/markdown/parse-markdown"
 import { toMarkdownText } from "@/lib/markdown/to-markdown-text"
+import { zAppError, zAppPageFeature } from "@/lib/models"
 import { zPage } from "@/lib/models/page"
 import { zPageFrontMatter } from "@/lib/models/page-front-matter"
 import { zValidator } from "@hono/zod-validator"
@@ -30,12 +31,10 @@ export const DELETE = factory.createHandlers(
     const markdown = parseMarkdown(fileContent)
 
     if (markdown.frontMatter === null) {
-      return c.json(
-        {
-          error: `フロントマターが見つかりません: ${filePath}`,
-        },
-        400,
-      )
+      const errorResponse = zAppError.parse({
+        error: `フロントマターが見つかりません: ${filePath}`,
+      })
+      return c.json(errorResponse, 400)
     }
 
     const currentFrontMatter = zPage.parse(markdown.frontMatter)
@@ -59,9 +58,10 @@ export const DELETE = factory.createHandlers(
 
     await fs.writeFile(filePath, markdownText, "utf-8")
 
-    return c.json({
+    const response = zAppPageFeature.parse({
       success: true,
       message: `ページから機能を削除しました: ${body.featureId}`,
     })
+    return c.json(response)
   },
 )

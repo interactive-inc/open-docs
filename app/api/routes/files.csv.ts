@@ -1,6 +1,7 @@
 import * as fs from "node:fs/promises"
 import * as path from "node:path"
 import { factory } from "@/lib/factory"
+import { zAppCsvSave } from "@/lib/models"
 import { zValidator } from "@hono/zod-validator"
 import { z } from "zod"
 import { validateDocsPath } from "../utils"
@@ -26,9 +27,10 @@ export const PUT = factory.createHandlers(
     await fs.writeFile(absolutePath, body.content, "utf-8")
 
     // 更新されたコンテンツを返す
-    return c.json({
+    const response = zAppCsvSave.parse({
       success: true,
       content: body.content,
     })
+    return c.json(response)
   },
 )

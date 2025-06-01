@@ -3,6 +3,7 @@ import * as path from "node:path"
 import { factory } from "@/lib/factory"
 import { parseMarkdown } from "@/lib/markdown/parse-markdown"
 import { toMarkdownText } from "@/lib/markdown/to-markdown-text"
+import { zAppError, zAppFeatureStatus } from "@/lib/models"
 import { zFeatureFrontMatter } from "@/lib/models/feature-front-matter"
 import { zValidator } from "@hono/zod-validator"
 import { z } from "zod"
@@ -29,12 +30,10 @@ export const PUT = factory.createHandlers(
     const markdown = parseMarkdown(fileContent)
 
     if (markdown.frontMatter === null) {
-      return c.json(
-        {
-          error: `フロントマターが見つかりません: ${filePath}`,
-        },
-        400,
-      )
+      const errorResponse = zAppError.parse({
+        error: `フロントマターが見つかりません: ${filePath}`,
+      })
+      return c.json(errorResponse, 400)
     }
 
     const frontMatter = zFeatureFrontMatter.parse({
@@ -49,9 +48,10 @@ export const PUT = factory.createHandlers(
 
     await fs.writeFile(filePath, markdownText, "utf-8")
 
-    return c.json({
+    const response = zAppFeatureStatus.parse({
       success: true,
       message: `機能のステータスを更新しました: ${body.featureId}`,
     })
+    return c.json(response)
   },
 )
