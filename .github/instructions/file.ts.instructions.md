@@ -84,7 +84,6 @@ export class ClassName {
 
 - Use TailwindCSS
 - Use shadcn/ui
-- Write components in the format: export function ComponentName () {}
 - Do NOT use useMemo or useCallback
 
 ## TailwindCSS

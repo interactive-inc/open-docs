@@ -1,5 +1,7 @@
 ---
+icon: "🐈"
 title: 機能
+description: 在庫管理システムの機能要件を定義します。
 schema:
   milestone:
     type: string
