@@ -1,5 +1,6 @@
 "use client"
 
+import { apiClient } from "@/lib/api-client"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 type SaveFileContentParams = {
@@ -12,13 +13,10 @@ export function useSaveFileContent() {
 
   return useMutation({
     mutationFn: async (params: SaveFileContentParams) => {
-      const response = await fetch("/api/files/content", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(params),
+      const response = await apiClient.api.files.content.$put({
+        json: params,
       })
+
       if (!response.ok) {
         throw new Error("Failed to save file content")
       }

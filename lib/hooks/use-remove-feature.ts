@@ -1,5 +1,6 @@
 "use client"
 
+import { apiClient } from "@/lib/api-client"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 type RemoveFeatureParams = {
@@ -13,13 +14,10 @@ export function useRemoveFeatureFromPage() {
 
   return useMutation({
     mutationFn: async (params: RemoveFeatureParams) => {
-      const response = await fetch("/api/pages/features", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(params),
+      const response = await apiClient.api.pages.features.$delete({
+        json: params,
       })
+
       if (!response.ok) {
         throw new Error("Failed to remove feature")
       }

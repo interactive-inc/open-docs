@@ -2,7 +2,7 @@
 applyTo: "**/docs/**/entities/*.md"
 ---
 
-# Entityの定義 - `docs/**/entities/*-entity.md`
+# `docs/**/entities/*-entity.md` - Entityの定義
 
 Entity（or 集約）を定義。
 

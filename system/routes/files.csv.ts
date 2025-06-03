@@ -1,5 +1,5 @@
-import * as fs from "node:fs/promises"
 import * as path from "node:path"
+import { DocsEngine } from "@/lib/docs-engine/docs-engine"
 import { factory } from "@/lib/factory"
 import { zAppCsvSave } from "@/lib/models"
 import { zValidator } from "@hono/zod-validator"
@@ -11,22 +11,28 @@ const saveCsvSchema = z.object({
   content: z.string(),
 })
 
-// PUT /api/files/csv - CSVファイルを保存
+/**
+ * CSVファイルを保存する
+ * @param filePath ファイルパス
+ * @param content CSVコンテンツ
+ * @returns 保存結果
+ */
 export const PUT = factory.createHandlers(
   zValidator("json", saveCsvSchema),
   async (c) => {
     const body = c.req.valid("json")
 
     const absolutePath = validateDocsPath(body.filePath)
+    const docsPath = path.join(process.cwd(), "docs")
+    const relativePath = path.relative(docsPath, absolutePath)
 
-    // ディレクトリが存在することを確認
-    const directory = path.dirname(absolutePath)
-    await fs.mkdir(directory, { recursive: true })
+    const docsEngine = new DocsEngine({
+      basePath: docsPath,
+    })
 
-    // ファイルに書き込み
-    await fs.writeFile(absolutePath, body.content, "utf-8")
+    const file = docsEngine.file(relativePath)
+    await file.writeContent(body.content)
 
-    // 更新されたコンテンツを返す
     const response = zAppCsvSave.parse({
       success: true,
       content: body.content,

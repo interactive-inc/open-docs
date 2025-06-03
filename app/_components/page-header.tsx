@@ -16,7 +16,7 @@ export function PageHeader(props: Props): ReactNode {
   return (
     <div className="flex flex-1 items-center gap-2">
       <SidebarButton />
-      <Input value={fileName} />
+      <Input value={fileName} readOnly />
     </div>
   )
 }

@@ -2,7 +2,7 @@
 applyTo: "**/docs/**/milestones/*.md"
 ---
 
-# マイルストーンの定義 - `docs/**/milestones/*-value.md`
+# `docs/**/milestones/*-value.md` - マイルストーンの定義
 
 マイルストーンを管理します。
 

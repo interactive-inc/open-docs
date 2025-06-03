@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/app/_components/ui/table"
+import { apiClient } from "@/lib/api-client"
 import type { SchemaDefinition } from "@/lib/types/schema-types"
 import { useSuspenseQueries } from "@tanstack/react-query"
 import Link from "next/link"
@@ -19,7 +20,7 @@ type Props = {
   onUpdate: (path: string, field: string, value: unknown) => void
   fileContents?: Array<{
     path: string
-    frontMatter: Record<string, unknown>
+    frontMatter: Record<string, unknown> | null
     content: string
   }>
 }
@@ -36,10 +37,16 @@ export function DirectoryTableView(props: Props) {
           queryKey: ["file-content", filePath.replace(/^docs\//, "")],
           queryFn: async () => {
             const normalizedPath = filePath.replace(/^docs\//, "")
-            const response = await fetch(`/api/files/${normalizedPath}`)
+            const response = await apiClient.api.files[":path{.+}"].$get({
+              param: {
+                path: normalizedPath,
+              },
+            })
+
             if (!response.ok) {
               throw new Error("Failed to fetch file")
             }
+
             return response.json()
           },
         })),
@@ -83,7 +90,7 @@ export function DirectoryTableView(props: Props) {
               <TableRow key={filePath}>
                 <TableCell className="font-medium">
                   <Link
-                    href={`/directories/${formatPath(filePath || "")}`}
+                    href={`/${formatPath(filePath || "")}`}
                     className="text-blue-600 hover:underline"
                   >
                     {fileName}

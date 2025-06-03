@@ -1,17 +1,21 @@
 import { factory } from "@/lib/factory"
+import { GET as getDirectory } from "@/system/routes/directories.path"
+import { PUT as updateFeaturePriority } from "@/system/routes/features.priority"
+import { PUT as updateFeatureStatus } from "@/system/routes/features.status"
+import { PUT as saveFileContent } from "@/system/routes/files.content"
+import { PUT as saveCsvFile } from "@/system/routes/files.csv"
+import { POST as moveFile } from "@/system/routes/files.move"
+import { GET as getFile } from "@/system/routes/files.path"
+import { PUT as updateProperties } from "@/system/routes/files.path.properties"
+import { GET as getFileTree } from "@/system/routes/files.tree"
+import { DELETE as removeFeatureFromPage } from "@/system/routes/pages.features"
+import { GET as getProject } from "@/system/routes/projects.$project"
+import {
+  GET as getFeature,
+  PUT as updateFeature,
+} from "@/system/routes/projects.$project.features.$feature"
 import { HTTPException } from "hono/http-exception"
 import { handle } from "hono/vercel"
-import { GET as getDirectory } from "../routes/directories.path"
-import { PUT as updateFeaturePriority } from "../routes/features.priority"
-import { PUT as updateFeatureStatus } from "../routes/features.status"
-import { PUT as saveFileContent } from "../routes/files.content"
-import { PUT as saveCsvFile } from "../routes/files.csv"
-import { POST as moveFile } from "../routes/files.move"
-import { GET as getFile } from "../routes/files.path"
-import { PUT as updateProperties } from "../routes/files.path.properties"
-import { GET as getFileTree } from "../routes/files.tree"
-import { DELETE as removeFeatureFromPage } from "../routes/pages.features"
-import { GET as getProject } from "../routes/projects.project"
 
 export const runtime = "nodejs"
 
@@ -19,16 +23,18 @@ export const app = factory
   .createApp()
   .basePath("/api")
   .delete("/pages/features", ...removeFeatureFromPage)
-  .get("/projects/*", ...getProject)
-  .get("/directories/*", ...getDirectory)
+  .get("/projects/:project/features/:feature", ...getFeature)
+  .put("/projects/:project/features/:feature", ...updateFeature)
+  .get("/projects/:project", ...getProject)
+  .get("/directories/:path{.+}", ...getDirectory)
   .put("/features/priority", ...updateFeaturePriority)
   .put("/features/status", ...updateFeatureStatus)
   .get("/files/tree", ...getFileTree)
   .post("/files/move", ...moveFile)
   .put("/files/content", ...saveFileContent)
   .put("/files/csv", ...saveCsvFile)
-  .get("/files/*", ...getFile)
-  .put("/files/*", ...updateProperties)
+  .put("/files/:path{.+}/properties", ...updateProperties)
+  .get("/files/:path{.+}", ...getFile)
   .get("/hello", (c) => {
     return c.json({ message: "Hello, world!" })
   })

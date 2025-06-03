@@ -1,24 +1,23 @@
 import type { z } from "zod"
-import { extractHeading } from "./markdown/extract-heading"
-import { parseMarkdown } from "./markdown/parse-markdown"
 import { zFeature } from "./models/feature"
 import { zFeatureFrontMatter } from "./models/feature-front-matter"
+import { OpenMarkdown } from "./open-markdown/open-markdown"
 import { toPriorityText } from "./to-priority-text"
 
 export async function parseFeatureFile(fileName: string, fileContent: string) {
   const content = fileContent.replace(/<!--.*?-->/gs, "").trim()
 
-  const markdown = parseMarkdown(content)
+  const openMarkdown = new OpenMarkdown(content)
 
-  if (markdown.frontMatter === null) {
+  if (openMarkdown.frontMatter.isEmpty()) {
     throw new Error("Front matter not found")
   }
 
-  const data = zFeatureFrontMatter.parse(markdown.frontMatter)
+  const data = zFeatureFrontMatter.parse(openMarkdown.frontMatter.data)
 
   const slug = fileName.replace(/\.md$/, "")
 
-  const name = extractHeading(content)
+  const name = openMarkdown.title
 
   const priority = toPriorityText(String(data.priority))
 

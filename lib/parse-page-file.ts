@@ -1,20 +1,19 @@
 import type { z } from "zod"
-import { extractHeading } from "./markdown/extract-heading"
-import { parseMarkdown } from "./markdown/parse-markdown"
 import { zPage } from "./models/page"
 import { zPageFrontMatter } from "./models/page-front-matter"
+import { OpenMarkdown } from "./open-markdown/open-markdown"
 import { parsePagePath } from "./parse-page-path"
 
 export async function parsePageFile(fileName: string, fileContent: string) {
   const content = fileContent.replace(/<!--.*?-->/gs, "").trim()
 
-  const markdown = parseMarkdown(content)
+  const openMarkdown = new OpenMarkdown(content)
 
-  if (markdown.frontMatter === null) {
+  if (openMarkdown.frontMatter.isEmpty()) {
     throw new Error("Front matter not found")
   }
 
-  const data = zPageFrontMatter.parse(markdown.frontMatter)
+  const data = zPageFrontMatter.parse(openMarkdown.frontMatter.data)
 
   const slug = fileName.replace(/\.md$/, "")
 
@@ -22,7 +21,7 @@ export async function parsePageFile(fileName: string, fileContent: string) {
 
   const pagePath = `/${pathNodes.join("/")}`
 
-  const name = extractHeading(content)
+  const name = openMarkdown.title
 
   return zPage.parse({
     id: slug,

@@ -2,7 +2,7 @@
 applyTo: "**/app/**/*.md"
 ---
 
-# `app/**/*`
+# `app/**/*` - Next.js App Directory
 
 これはNext.jsのAppディレクトリに関する指示です。
 

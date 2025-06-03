@@ -84,7 +84,7 @@ export function DirectoryFileTreeNode(props: Props) {
   }
 
   return (
-    <Link href={`/directories/${formatPath(props.node.path)}`}>
+    <Link href={`/${formatPath(props.node.path)}`}>
       <SidebarMenuItem>
         <SidebarMenuButton style={{ paddingLeft: 8 + depth * 8 }}>
           <GetFileIcon fileName={props.node.name} />

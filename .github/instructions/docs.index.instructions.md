@@ -2,7 +2,7 @@
 applyTo: "**/docs/**/*/index.md"
 ---
 
-# 概要 - `docs/**/*/index.md`
+# `docs/**/*/index.md` - 概要
 
 プロジェクト全体または個別製品の概要を記述。
 

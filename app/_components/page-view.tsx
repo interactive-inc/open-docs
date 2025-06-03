@@ -2,6 +2,7 @@
 
 import { DirectoryContentView } from "@/app/_components/directory-content-view"
 import { FileContentView } from "@/app/_components/file-view/file-content-view"
+import { apiClient } from "@/lib/api-client"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { useParams } from "next/navigation"
 
@@ -11,10 +12,12 @@ export function PageView() {
   const { data: fileTreeData } = useSuspenseQuery({
     queryKey: ["file-tree"],
     queryFn: async () => {
-      const response = await fetch("/api/files/tree")
+      const response = await apiClient.api.files.tree.$get()
+
       if (!response.ok) {
         throw new Error("Failed to fetch file tree")
       }
+
       return response.json()
     },
   })
@@ -25,10 +28,12 @@ export function PageView() {
   const { data: directoryData } = useSuspenseQuery({
     queryKey: ["directory-data", currentPath],
     queryFn: async () => {
-      const response = await fetch(`/api/directories/${currentPath}`)
-      if (!response.ok) {
-        throw new Error("Failed to fetch directory data")
-      }
+      const response = await apiClient.api.directories[":path{.+}"].$get({
+        param: {
+          path: currentPath,
+        },
+      })
+
       return response.json()
     },
   })

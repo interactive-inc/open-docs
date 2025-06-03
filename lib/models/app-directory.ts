@@ -4,7 +4,7 @@ import { z } from "zod"
 const zSchemaField = z.object({
   type: z.enum([
     "string",
-    "number", 
+    "number",
     "boolean",
     "array-string",
     "array-number",

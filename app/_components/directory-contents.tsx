@@ -85,7 +85,7 @@ export function DirectoryContents(props: Props) {
           >
             {item.type === "directory" ? (
               <Link
-                href={`/directories/${formatPath(item.path)}`}
+                href={`/${formatPath(item.path)}`}
                 className="flex w-full items-center gap-2"
               >
                 <FolderIcon className="h-5 w-5 text-blue-500" />

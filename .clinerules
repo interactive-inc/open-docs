@@ -1,4 +1,4 @@
-# `app/**/*`
+# `app/**/*` - Next.js App Directory
 
 これはNext.jsのAppディレクトリに関する指示です。
 
@@ -78,7 +78,7 @@ The development server is already running. Do not start a new one.
 
 - http://localhost:3000 = Dev server
 
-# Entityの定義 - `docs/**/entities/*-entity.md`
+# `docs/**/entities/*-entity.md` - Entityの定義
 
 Entity（or 集約）を定義。
 
@@ -112,7 +112,7 @@ Entity（or 集約）を定義。
 
 必要に応じてユーザに提案と共に質問して詳細を引き出してください。
 
-# 機能要件の定義 - `docs/**/features/*.md`
+# `docs/**/features/*.md` - 機能要件の定義
 
 機能の利用シナリオと動作を記述。
 
@@ -161,7 +161,7 @@ priority: 0
 - `is-done`: 完了（default: null）
 - `priority`: 優先度（default: 0）
 
-# 概要 - `docs/**/*/index.md`
+# `docs/**/*/index.md` - 概要
 
 プロジェクト全体または個別製品の概要を記述。
 
@@ -177,7 +177,7 @@ priority: 0
 - [パス] - [説明]
 ```
 
-# Docs Directory Instructions
+# `docs/**/*.md` - Docs Directory Instructions
 
 あなたはコードを書かないAIですが、製品仕様を管理するドメインエキスパートです。タスクでは積極的にファイルを書き換えてください。
 
@@ -230,7 +230,7 @@ Your memory resets between sessions. You rely on these files:
 - `docs/products/*/features/*.md` - 機能要件の定義
 - `docs/products/*/pages/*.md` - ページの要件定義
 
-# マイルストーンの定義 - `docs/**/milestones/*-value.md`
+# `docs/**/milestones/*-value.md` - マイルストーンの定義
 
 マイルストーンを管理します。
 
@@ -244,7 +244,7 @@ Your memory resets between sessions. You rely on these files:
 [開発する機能の概要]
 ```
 
-# ページの定義 - `docs/**/pages/*.md`
+# `docs/**/pages/*.md` - ページの定義
 
 ページの要件を定義。
 
@@ -380,6 +380,18 @@ AIが理解できる技術的な一般的な情報は含める必要はありま
 - Isolate side effects
 - Ensure type safety
 
+```ts
+type Props = {}
+
+/**
+ * Class Name
+ */
+export function FunctionName(props: Props) {
+  // props.prop1 // Use props directly
+  // const { prop1, prop2 } = props // Do NOT use destructuring
+}
+```
+
 ## Control Flow
 
 - Use for-of loops instead of forEach
@@ -397,6 +409,24 @@ AIが理解できる技術的な一般的な情報は含める必要はありま
 - Do NOT define classes with only static members
 - Avoid class inheritance
 - Make classes immutable
+
+```ts
+type Props = {}
+
+/**
+ * Class Name
+ */
+export class ClassName {
+  constructor(private readonly props: Props) {}
+
+  /**
+   * Public method description
+   */
+  public method() {
+    // method implementation
+  }
+}
+```
 
 ## Comments
 
@@ -419,4 +449,23 @@ AIが理解できる技術的な一般的な情報は含める必要はありま
 - Do NOT make huge files (basically max 100 lines)
 - Do NOT make a huge React hooks
 - Hooks that manage all component state
+
+# `system/routes/*.ts` - System Directory
+
+バックエンドに関するディレクトリです。
+
+- try-catchを使用しない
+- 例外では`HTTPException`をthrowする
+
+```ts
+export const GET = factory.createHandlers(async (c) => {
+  const path = c.req.param("path")
+
+  if (path === undefined) {
+    throw new HTTPException(400, {})
+  }
+
+  return c.json({})
+}
+```
 

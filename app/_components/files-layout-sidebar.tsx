@@ -12,6 +12,7 @@ import {
   SidebarMenu,
   SidebarProvider,
 } from "@/app/_components/ui/sidebar"
+import { apiClient } from "@/lib/api-client"
 import type { FileNode } from "@/lib/get-docs-files"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { Fragment, useEffect, useState } from "react"
@@ -26,10 +27,12 @@ export function FilesLayoutSidebar(props: Props) {
   const { data } = useSuspenseQuery({
     queryKey: ["file-tree"],
     queryFn: async () => {
-      const response = await fetch("/api/files/tree")
+      const response = await apiClient.api.files.tree.$get()
+
       if (!response.ok) {
         throw new Error("Failed to fetch file tree")
       }
+
       return response.json()
     },
   })

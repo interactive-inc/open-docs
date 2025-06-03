@@ -6,19 +6,19 @@ import { zValidator } from "@hono/zod-validator"
 import { HTTPException } from "hono/http-exception"
 import { z } from "zod"
 
-// GET /api/projects/:project - プロジェクトデータ取得
+/**
+ * プロジェクトデータを取得する
+ */
 export const GET = factory.createHandlers(
   zValidator(
     "param",
     z.object({
-      path: z
-        .string()
-        .transform((val) => val.split("/").filter(Boolean).join("/")),
+      project: z.string(),
     }),
   ),
   async (c) => {
     const params = c.req.valid("param")
-    const project = params.path
+    const project = params.project
     const projects = env().NEXT_PUBLIC_PROJECTS.split(",")
 
     // プロジェクトが有効かどうかをチェック

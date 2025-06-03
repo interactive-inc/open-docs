@@ -17,6 +17,7 @@ export async function createFeatureRecords(props: Props) {
   const promises: Promise<z.infer<typeof zFeature>>[] = []
 
   for (const file of mdFiles) {
+    if (file === "index.md") continue
     const filePath = path.join(featuresPath, file)
     const fileContent = await fs.readFile(filePath, "utf-8")
     const featurePromise = parseFeatureFile(file, fileContent)

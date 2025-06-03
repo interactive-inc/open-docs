@@ -11,6 +11,7 @@ import {
   SidebarMenu,
   SidebarProvider,
 } from "@/app/_components/ui/sidebar"
+import { apiClient } from "@/lib/api-client"
 import type { FileNode } from "@/lib/get-docs-files"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { usePathname, useRouter } from "next/navigation"
@@ -34,43 +35,39 @@ export function DirectoryLayoutSidebar(props: Props) {
   const { data } = useSuspenseQuery({
     queryKey: ["file-tree"],
     queryFn: async () => {
-      const response = await fetch("/api/files/tree")
+      const response = await apiClient.api.files.tree.$get()
+
       if (!response.ok) {
         throw new Error("Failed to fetch file tree")
       }
+
       return response.json()
     },
   })
   const files = data.files
 
   function getCurrentPath(path: string) {
-    // /directories/ から始まるパスの場合（標準的なディレクトリ表示）
-    if (path.startsWith("/directories")) {
-      const dirPath = path.replace("/directories", "")
+    const dirPath = path
 
-      // パスを分解して各セグメントを確認
-      const pathSegments = dirPath.split("/").filter(Boolean)
+    // パスを分解して各セグメントを確認
+    const pathSegments = dirPath.split("/").filter(Boolean)
 
-      // 最後のセグメントがファイル名かチェック（ドットを含むか）
-      if (pathSegments.length > 0) {
-        const lastSegment = pathSegments[pathSegments.length - 1]
-        if (lastSegment === undefined) {
-          throw new Error("Last segment is undefined")
-        }
-        const isFile = lastSegment.includes(".")
-
-        if (isFile) {
-          // ファイル名を除外してディレクトリパスを取得
-          pathSegments.pop()
-          return `/${pathSegments.join("/")}`
-        }
+    // 最後のセグメントがファイル名かチェック（ドットを含むか）
+    if (pathSegments.length > 0) {
+      const lastSegment = pathSegments[pathSegments.length - 1]
+      if (lastSegment === undefined) {
+        throw new Error("Last segment is undefined")
       }
+      const isFile = lastSegment.includes(".")
 
-      return dirPath
+      if (isFile) {
+        // ファイル名を除外してディレクトリパスを取得
+        pathSegments.pop()
+        return `/${pathSegments.join("/")}`
+      }
     }
 
-    // その他のパスの場合はそのまま返す
-    return path
+    return dirPath
   }
 
   // 現在のパスをディレクトリパスに変換
@@ -105,20 +102,17 @@ export function DirectoryLayoutSidebar(props: Props) {
   useEffect(() => {
     // getCurrentPath関数をuseEffect内で定義
     const getCurrentDirectoryFromPath = (pathname: string) => {
-      if (pathname.startsWith("/directories")) {
-        const dirPath = pathname.replace("/directories", "")
-        const pathSegments = dirPath.split("/").filter(Boolean)
+      const dirPath = pathname
+      const pathSegments = dirPath.split("/").filter(Boolean)
 
-        if (pathSegments.length > 0) {
-          const lastSegment = pathSegments[pathSegments.length - 1]
-          if (lastSegment?.includes(".")) {
-            pathSegments.pop()
-            return `/${pathSegments.join("/")}`
-          }
+      if (pathSegments.length > 0) {
+        const lastSegment = pathSegments[pathSegments.length - 1]
+        if (lastSegment?.includes(".")) {
+          pathSegments.pop()
+          return `/${pathSegments.join("/")}`
         }
-        return dirPath
       }
-      return pathname
+      return dirPath
     }
 
     const currentDir = getCurrentDirectoryFromPath(path)
@@ -130,7 +124,7 @@ export function DirectoryLayoutSidebar(props: Props) {
 
   const handleSelectDirectory = (path: string) => {
     setSelectedDirectory(path)
-    router.push(`/directories/${path}`)
+    router.push(`/${path}`)
   }
 
   const handleToggleOpen = (path: string) => {
@@ -150,9 +144,7 @@ export function DirectoryLayoutSidebar(props: Props) {
         key={node.path || `file-${node.name}`}
         node={node}
         depth={currentDepth}
-        currentPath={
-          window.location.pathname.match(/\/directories\/(.*)$/)?.[1] || ""
-        }
+        currentPath={window.location.pathname.match(/\/(.*)$/)?.[1] || ""}
         onSelectDirectory={handleSelectDirectory}
         openPaths={openPaths}
         onToggleOpen={handleToggleOpen}

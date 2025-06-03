@@ -1,11 +1,10 @@
 import * as fs from "node:fs/promises"
 import * as path from "node:path"
 import { factory } from "@/lib/factory"
-import { parseMarkdown } from "@/lib/markdown/parse-markdown"
-import { toMarkdownText } from "@/lib/markdown/to-markdown-text"
 import { zAppError, zAppPageFeature } from "@/lib/models"
 import { zPage } from "@/lib/models/page"
 import { zPageFrontMatter } from "@/lib/models/page-front-matter"
+import { OpenMarkdown } from "@/lib/open-markdown/open-markdown"
 import { zValidator } from "@hono/zod-validator"
 import { z } from "zod"
 
@@ -28,9 +27,16 @@ export const DELETE = factory.createHandlers(
     )
 
     const fileContent = await fs.readFile(filePath, "utf-8")
-    const markdown = parseMarkdown(fileContent)
+    const openMarkdown = new OpenMarkdown(fileContent)
+    const markdown = {
+      frontMatter: openMarkdown.frontMatter.data,
+      content: openMarkdown.content,
+    }
 
-    if (markdown.frontMatter === null) {
+    if (
+      markdown.frontMatter === null ||
+      Object.keys(markdown.frontMatter).length === 0
+    ) {
       const errorResponse = zAppError.parse({
         error: `フロントマターが見つかりません: ${filePath}`,
       })
@@ -51,10 +57,9 @@ export const DELETE = factory.createHandlers(
       features: updatedFeatures,
     })
 
-    const markdownText = toMarkdownText({
-      content: markdown.content,
-      frontMatter: frontMatter,
-    })
+    const markdownText = openMarkdown
+      .withFrontMatter(frontMatter)
+      .text
 
     await fs.writeFile(filePath, markdownText, "utf-8")
 

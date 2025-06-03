@@ -3,12 +3,10 @@ import path from "node:path"
 import type { z } from "zod"
 import { createFeatureRecords } from "../lib/create-feature-records.js"
 import { createPageRecords } from "../lib/create-page-records.js"
-import { parseMarkdown } from "../lib/markdown/parse-markdown.js"
-import { toFrontMatterText } from "../lib/markdown/to-front-matter-text.js"
-import { updateFrontMatter } from "../lib/markdown/update-front-matter.js"
 import { vData } from "../lib/models/data.js"
 import { zFeatureFrontMatter } from "../lib/models/feature-front-matter.js"
 import { zPageFrontMatter } from "../lib/models/page-front-matter.js"
+import { OpenMarkdown } from "../lib/open-markdown/open-markdown.js"
 import { readMarkdownFiles } from "../lib/read-markdown-files.js"
 import { toFeatureFrontMatter } from "../lib/to-feature-front-matter.js"
 import { toPageFrontMatter } from "../lib/to-page-front-matter.js"
@@ -55,7 +53,11 @@ export class JsonCommand {
       const fileContent = await fs.readFile(filePath, "utf-8")
 
       // フロントマターとコンテンツを分離
-      const markdown = parseMarkdown(fileContent)
+      const openMarkdown = new OpenMarkdown(fileContent)
+      const markdown = {
+        frontMatter: openMarkdown.frontMatter.data,
+        content: openMarkdown.content,
+      }
 
       // データからフロントマターを準備
       const frontMatterData = props.prepareFrontMatter(dataItem)
@@ -63,36 +65,28 @@ export class JsonCommand {
       // スキーマでバリデーション
       props.schema.parse(frontMatterData)
 
-      if (markdown.frontMatter === null) {
+      if (
+        markdown.frontMatter === null ||
+        Object.keys(markdown.frontMatter).length === 0
+      ) {
         // フロントマターがない場合は新規作成
-        const newFrontMatter = toFrontMatterText(frontMatterData)
-        await fs.writeFile(
-          filePath,
-          `---\n${newFrontMatter}\n---\n\n${markdown.content.trim()}\n`,
-        )
+        const newMarkdown = openMarkdown.withFrontMatter(frontMatterData)
+        await fs.writeFile(filePath, newMarkdown.text)
         continue
       }
 
       // 現在のフロントマターはmarkdown.frontMatterから直接取得
       const currentFrontMatter = markdown.frontMatter
 
-      // フロントマターを更新
-      const updatedFrontMatter = updateFrontMatter(
-        currentFrontMatter,
-        frontMatterData,
-      )
+      // フロントマターを更新してMarkdownテキストを生成
+      const updatedMarkdown =
+        openMarkdown.withUpdatedFrontMatter(frontMatterData)
 
       // 更新後のフロントマターをバリデーション
-      props.schema.parse(updatedFrontMatter)
-
-      // 更新されたフロントマターをYAML形式に変換
-      const newFrontMatterText = toFrontMatterText(updatedFrontMatter)
+      props.schema.parse(updatedMarkdown.frontMatter.data)
 
       // ファイルに書き込む
-      await fs.writeFile(
-        filePath,
-        `---\n${newFrontMatterText}\n---\n\n${markdown.content.trim()}\n`,
-      )
+      await fs.writeFile(filePath, updatedMarkdown.text)
     }
   }
 

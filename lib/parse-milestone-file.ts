@@ -1,7 +1,7 @@
 import type { z } from "zod"
-import { parseMarkdown } from "./markdown/parse-markdown"
 import { zMilestone } from "./models/milestone"
 import { zMilestoneFrontMatter } from "./models/milestone-front-matter"
+import { OpenMarkdown } from "./open-markdown/open-markdown"
 
 export async function parseMilestoneFile(
   fileName: string,
@@ -9,13 +9,13 @@ export async function parseMilestoneFile(
 ): Promise<z.infer<typeof zMilestone>> {
   const content = fileContent.replace(/<!--.*?-->/gs, "").trim()
 
-  const markdown = parseMarkdown(content)
+  const openMarkdown = new OpenMarkdown(content)
 
-  if (markdown.frontMatter === null) {
+  if (openMarkdown.frontMatter.isEmpty()) {
     throw new Error("Front matter not found")
   }
 
-  const data = zMilestoneFrontMatter.parse(markdown.frontMatter)
+  const data = zMilestoneFrontMatter.parse(openMarkdown.frontMatter.data)
 
   const id = fileName.replace(/\.md$/, "")
 

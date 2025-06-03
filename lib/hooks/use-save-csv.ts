@@ -1,5 +1,6 @@
 "use client"
 
+import { apiClient } from "@/lib/api-client"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 type SaveCsvParams = {
@@ -12,13 +13,10 @@ export function useSaveCsv() {
 
   return useMutation({
     mutationFn: async (params: SaveCsvParams) => {
-      const response = await fetch("/api/files/csv", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(params),
+      const response = await apiClient.api.files.csv.$put({
+        json: params,
       })
+
       if (!response.ok) {
         throw new Error("Failed to save CSV")
       }

@@ -2,7 +2,7 @@
 applyTo: "**/docs/**/features/*.md"
 ---
 
-# 機能要件の定義 - `docs/**/features/*.md`
+# `docs/**/features/*.md` - 機能要件の定義
 
 機能の利用シナリオと動作を記述。
 

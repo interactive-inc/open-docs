@@ -27,6 +27,18 @@ applyTo: "**/*.{ts,tsx}"
 - Isolate side effects
 - Ensure type safety
 
+```ts
+type Props = {}
+
+/**
+ * Class Name
+ */
+export function FunctionName(props: Props) {
+  // props.prop1 // Use props directly
+  // const { prop1, prop2 } = props // Do NOT use destructuring
+}
+```
+
 ## Control Flow
 
 - Use for-of loops instead of forEach
@@ -44,6 +56,24 @@ applyTo: "**/*.{ts,tsx}"
 - Do NOT define classes with only static members
 - Avoid class inheritance
 - Make classes immutable
+
+```ts
+type Props = {}
+
+/**
+ * Class Name
+ */
+export class ClassName {
+  constructor(private readonly props: Props) {}
+
+  /**
+   * Public method description
+   */
+  public method() {
+    // method implementation
+  }
+}
+```
 
 ## Comments
 

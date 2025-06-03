@@ -1,5 +1,6 @@
 "use client"
 
+import { apiClient } from "@/lib/api-client"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 type MoveFileParams = {
@@ -12,13 +13,10 @@ export function useMoveFile() {
 
   return useMutation({
     mutationFn: async (params: MoveFileParams) => {
-      const response = await fetch("/api/files/move", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(params),
+      const response = await apiClient.api.files.move.$post({
+        json: params,
       })
+
       if (!response.ok) {
         throw new Error("Failed to move file")
       }

@@ -71,10 +71,10 @@ server.tool(
   },
   async ({ id, question, relatedFiles, answer }) => {
     const issue = await issueCommand.updateIssue(
-      id,
-      question,
-      relatedFiles,
-      answer,
+      id as string,
+      question as string | undefined,
+      relatedFiles as string[] | undefined,
+      answer as string | undefined,
     )
     return {
       content: [{ type: "text", text: issue ? `更新: ${id}` : "該当なし" }],

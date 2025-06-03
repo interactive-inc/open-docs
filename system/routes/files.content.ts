@@ -1,5 +1,5 @@
-import * as fs from "node:fs/promises"
 import * as path from "node:path"
+import { DocsEngine } from "@/lib/docs-engine/docs-engine"
 import { factory } from "@/lib/factory"
 import { zAppError, zAppFileSave } from "@/lib/models"
 import { zValidator } from "@hono/zod-validator"
@@ -10,7 +10,12 @@ const saveFileContentSchema = z.object({
   content: z.string(),
 })
 
-// PUT /api/files/content - ファイルコンテンツを保存
+/**
+ * ファイルコンテンツを保存する
+ * @param filePath ファイルパス
+ * @param content ファイル内容
+ * @returns 保存結果
+ */
 export const PUT = factory.createHandlers(
   zValidator("json", saveFileContentSchema),
   async (c) => {
@@ -27,9 +32,15 @@ export const PUT = factory.createHandlers(
       return c.json(errorResponse, 403)
     }
 
-    const directory = path.dirname(absolutePath)
-    await fs.mkdir(directory, { recursive: true })
-    await fs.writeFile(absolutePath, body.content, "utf-8")
+    // 絶対パスから相対パスを計算
+    const relativePath = path.relative(docsPath, absolutePath)
+
+    const docsEngine = new DocsEngine({
+      basePath: docsPath,
+    })
+
+    const file = docsEngine.file(relativePath)
+    await file.writeContent(body.content)
 
     const response = zAppFileSave.parse({
       success: true,

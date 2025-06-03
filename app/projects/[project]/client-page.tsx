@@ -1,6 +1,7 @@
 "use client"
 
 import { PagesEditor } from "@/app/_components/pages-editor"
+import { apiClient } from "@/lib/api-client"
 import { useQuery } from "@tanstack/react-query"
 import { useParams } from "next/navigation"
 
@@ -11,10 +12,12 @@ export function ClientPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["project-data", project],
     queryFn: async () => {
-      const response = await fetch(`/api/projects/${project}`)
-      if (!response.ok) {
-        throw new Error("Failed to fetch project data")
-      }
+      const response = await apiClient.api.projects[":project"].$get({
+        param: {
+          project: project,
+        },
+      })
+
       return response.json()
     },
   })

@@ -20,7 +20,7 @@ export function CsvFileView(props: Props) {
   }
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-4">
       <div className="flex gap-2">
         <PageHeader filePath={props.fileName} />
         <Button

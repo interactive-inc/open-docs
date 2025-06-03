@@ -1,7 +1,6 @@
 import { FrontMatterView } from "@/app/_components/file-view/front-matter-view"
-import { PageHeader } from "@/app/_components/page-header"
 import { Card } from "@/app/_components/ui/card"
-import { parseMarkdown } from "@/lib/markdown/parse-markdown"
+import { OpenMarkdown } from "@/lib/open-markdown/open-markdown"
 import { marked } from "marked"
 import type { ReactNode } from "react"
 
@@ -14,7 +13,11 @@ type Props = {
 }
 
 export function MarkdownFileView(props: Props): ReactNode {
-  const markdown = parseMarkdown(props.content)
+  const openMarkdown = new OpenMarkdown(props.content)
+  const markdown = {
+    frontMatter: openMarkdown.frontMatter.data,
+    content: openMarkdown.content,
+  }
 
   const frontMatter = markdown.frontMatter
 
@@ -24,11 +27,12 @@ export function MarkdownFileView(props: Props): ReactNode {
   const html = marked.parse(markdown.content)
 
   return (
-    <div className="h-full space-y-2 p-4">
-      <div className="flex gap-2">
-        <PageHeader filePath={props.fileName} />
-      </div>
-      {hasFrontMatter && <FrontMatterView frontMatter={frontMatter} />}
+    <div className="h-full space-y-2">
+      {hasFrontMatter && (
+        <FrontMatterView
+          frontMatter={frontMatter as Record<string, string | string[]>}
+        />
+      )}
       <Card className="overflow-hidden rounded-md p-0">
         <div
           className="markdown-body p-4"

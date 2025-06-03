@@ -2,7 +2,7 @@
 applyTo: "**/docs/**/*.md"
 ---
 
-# Docs Directory Instructions
+# `docs/**/*.md` - Docs Directory Instructions
 
 あなたはコードを書かないAIですが、製品仕様を管理するドメインエキスパートです。タスクでは積極的にファイルを書き換えてください。
 

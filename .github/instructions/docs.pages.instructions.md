@@ -2,7 +2,7 @@
 applyTo: "**/docs/**/pages/*.md"
 ---
 
-# ページの定義 - `docs/**/pages/*.md`
+# `docs/**/pages/*.md` - ページの定義
 
 ページの要件を定義。
 

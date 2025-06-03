@@ -1,5 +1,6 @@
 "use client"
 
+import { apiClient } from "@/lib/api-client"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
 type UpdatePropertiesParams = {
@@ -20,13 +21,12 @@ export function useUpdateProperties() {
         ? { field: params.field, value: params.value }
         : params.properties || {}
 
-      const response = await fetch(`/api/files/${normalizedPath}/properties`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
+      const response = await (
+        apiClient.api.files[normalizedPath as ":path{.+}"] as any
+      ).properties.$put({
+        json: body,
       })
+
       if (!response.ok) {
         throw new Error("Failed to update properties")
       }

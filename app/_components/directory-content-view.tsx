@@ -18,7 +18,7 @@ type Props = {
   indexPath?: string
   fileContents?: Array<{
     path: string
-    frontMatter: Record<string, unknown>
+    frontMatter: Record<string, unknown> | null
     content: string
   }>
 }
