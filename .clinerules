@@ -78,105 +78,6 @@ The development server is already running. Do not start a new one.
 
 - http://localhost:3000 = Dev server
 
-# `docs/**/entities/*-entity.md` - Entityの定義
-
-Entity（or 集約）を定義。
-
-- 属性には制約を含める
-- ビジネスルールは明確かつ検証可能な形で記述する
-- 他の値オブジェクトやEntityを使用する
-- テーブルを使用しない
-
-```
-# [モデル名]
-
-[モデルの役割と目的の説明]
-
-## 属性
-
-### [属性名A]
-
-[属性の役割と目的の説明]
-
-- ビジネスルール
-
-### [属性名B]
-
-## ビジネスルール
-
-その他のビジネスルールをここに記述してください。
-
-- [ルール1]
-- [ルール2]
-```
-
-必要に応じてユーザに提案と共に質問して詳細を引き出してください。
-
-# `docs/**/features/*.md` - 機能要件の定義
-
-機能の利用シナリオと動作を記述。
-
-- フローは明確な番号付きステップで記述する
-- 代替フローは条件ごとに分けて記述する
-- 使用するドメインモデルへの参照を含める
-- createやdelete,updateなどは別々で定義する
-
-```
----
-milestone: 2028.01.01
-is-done: false
-priority: 0
----
-
-# [機能名（XXXをXXXする）]
-
-[機能の目的と概要を1-2文で]
-
-1. [主語]が[アクション]する
-2. [主語]が[アクション]する
-3. [次のステップ]
-```
-
-## ファイル名
-
-以下の命名規則に従う。
-
-- view-* - 詳細を確認
-- list-* - 一覧
-- create-* - 作成
-- delete-* - 削除
-- add-* - 配列に追加
-- remove-* - 配列から削除
-- update-* - 更新
-- show-* - 詳細表示
-- search-* - 検索
-
-その他「import」「archive」など必要に応じて使用します。
-
-ただし「manage」など粒度が大きい動詞は使用できません。
-
-## font matter
-
-- `milestone`: カレンダーバージョニング（default: null）
-- `is-done`: 完了（default: null）
-- `priority`: 優先度（default: 0）
-
-# `docs/**/*/index.md` - 概要
-
-プロジェクト全体または個別製品の概要を記述。
-
-- 簡潔かつ明確に記述する
-- 技術的詳細よりもビジネス価値に焦点を当てる
-- 全体像を把握できるように記述する
-
-```
-# 概要
-
-[ディレクトリの案内]
-
-- [パス] - [説明]
-```
-
 # `docs/**/*.md` - Docs Directory Instructions
 
 あなたはコードを書かないAIですが、製品仕様を管理するドメインエキスパートです。タスクでは積極的にファイルを書き換えてください。
@@ -230,7 +131,106 @@ Your memory resets between sessions. You rely on these files:
 - `docs/products/*/features/*.md` - 機能要件の定義
 - `docs/products/*/pages/*.md` - ページの要件定義
 
-# `docs/**/milestones/*-value.md` - マイルストーンの定義
+# `docs/projects/**/entities/*-entity.md` - Entityの定義
+
+Entity（or 集約）を定義。
+
+- 属性には制約を含める
+- ビジネスルールは明確かつ検証可能な形で記述する
+- 他の値オブジェクトやEntityを使用する
+- テーブルを使用しない
+
+```
+# [モデル名]
+
+[モデルの役割と目的の説明]
+
+## 属性
+
+### [属性名A]
+
+[属性の役割と目的の説明]
+
+- ビジネスルール
+
+### [属性名B]
+
+## ビジネスルール
+
+その他のビジネスルールをここに記述してください。
+
+- [ルール1]
+- [ルール2]
+```
+
+必要に応じてユーザに提案と共に質問して詳細を引き出してください。
+
+# `docs/projects/**/features/*.md` - 機能要件の定義
+
+機能の利用シナリオと動作を記述。
+
+- フローは明確な番号付きステップで記述する
+- 代替フローは条件ごとに分けて記述する
+- 使用するドメインモデルへの参照を含める
+- createやdelete,updateなどは別々で定義する
+
+```
+---
+milestone: 2028.01.01
+is-done: false
+priority: 0
+---
+
+# [機能名（XXXをXXXする）]
+
+[機能の目的と概要を1-2文で]
+
+1. [主語]が[アクション]する
+2. [主語]が[アクション]する
+3. [次のステップ]
+```
+
+## ファイル名
+
+以下の命名規則に従う。
+
+- view-* - 詳細を確認
+- list-* - 一覧
+- create-* - 作成
+- delete-* - 削除
+- add-* - 配列に追加
+- remove-* - 配列から削除
+- update-* - 更新
+- show-* - 詳細表示
+- search-* - 検索
+
+その他「import」「archive」など必要に応じて使用します。
+
+ただし「manage」など粒度が大きい動詞は使用できません。
+
+## font matter
+
+- `milestone`: カレンダーバージョニング（default: null）
+- `is-done`: 完了（default: null）
+- `priority`: 優先度（default: 0）
+
+# `docs/projects/**/*/index.md` - 概要
+
+プロジェクト全体または個別製品の概要を記述。
+
+- 簡潔かつ明確に記述する
+- 技術的詳細よりもビジネス価値に焦点を当てる
+- 全体像を把握できるように記述する
+
+```
+# 概要
+
+[ディレクトリの案内]
+
+- [パス] - [説明]
+```
+
+# `docs/projects/**/milestones/*-value.md` - マイルストーンの定義
 
 マイルストーンを管理します。
 
@@ -244,7 +244,7 @@ Your memory resets between sessions. You rely on these files:
 [開発する機能の概要]
 ```
 
-# `docs/**/pages/*.md` - ページの定義
+# `docs/projects/**/pages/*.md` - ページの定義
 
 ページの要件を定義。
 
@@ -273,27 +273,7 @@ UI/UXに関する最低限のメモ。
 
 - `features`: ページに関連する機能のリスト。機能は`docs/products/*/features/*.md`に定義されている必要があります。
 
-# README - `docs/**/*/README.md`
-
-そのディレクトリの概要を記述。全てのディレクトリにREADMEが必要です。
-
-最初の見出しはdocsを除くパスを記述してください。
-
-```
-# products/products/sheet/values/README.md
-```
-
-このファイルにはそのディレクトリのファイルの一覧を箇条書きで書きます。
-
-```
-# パス
-
-[このディレクトリの概要]
-
-- [ファイル名1.md]() - 説明
-```
-
-# 用語定義ファイル - `docs/**/terms/*.md`
+# `docs/projects/**/terms/*.md` - 用語定義
 
 この製品の固有の用語とその定義を記述。会社ごとに社内に特有のことばがあり、それを理解できなければ、一緒に仕事をする専門家と効率的にコミュニケーションすることはできません。
 
@@ -323,7 +303,7 @@ AIが理解できる技術的な一般的な情報は含める必要はありま
 [必要に応じた補足情報]
 ```
 
-# 値オブジェクトの定義 - `docs/**/values/*-value.md`
+# `docs/projects/**/values/*-value.md` - 値オブジェクト
 
 値オブジェクトを定義。
 
@@ -346,6 +326,26 @@ AIが理解できる技術的な一般的な情報は含める必要はありま
 
 - [ルール1]
 - [ルール2]
+```
+
+# README - `docs/**/*/README.md`
+
+そのディレクトリの概要を記述。全てのディレクトリにREADMEが必要です。
+
+最初の見出しはdocsを除くパスを記述してください。
+
+```
+# products/products/sheet/values/README.md
+```
+
+このファイルにはそのディレクトリのファイルの一覧を箇条書きで書きます。
+
+```
+# パス
+
+[このディレクトリの概要]
+
+- [ファイル名1.md]() - 説明
 ```
 
 # File rules - Markdown
@@ -437,7 +437,6 @@ export class ClassName {
 
 - Use TailwindCSS
 - Use shadcn/ui
-- Write components in the format: export function ComponentName () {}
 - Do NOT use useMemo or useCallback
 
 ## TailwindCSS
