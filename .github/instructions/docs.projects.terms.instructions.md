@@ -1,8 +1,8 @@
 ---
-applyTo: "**/docs/**/terms/*.md"
+applyTo: "**/docs/projects/**/terms/*.md"
 ---
 
-# 用語定義ファイル - `docs/**/terms/*.md`
+# `docs/projects/**/terms/*.md` - 用語定義
 
 この製品の固有の用語とその定義を記述。会社ごとに社内に特有のことばがあり、それを理解できなければ、一緒に仕事をする専門家と効率的にコミュニケーションすることはできません。
 

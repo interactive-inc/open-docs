@@ -1,8 +1,8 @@
 ---
-applyTo: "**/docs/**/features/*.md"
+applyTo: "**/docs/projects/**/features/*.md"
 ---
 
-# `docs/**/features/*.md` - 機能要件の定義
+# `docs/projects/**/features/*.md` - 機能要件の定義
 
 機能の利用シナリオと動作を記述。
 

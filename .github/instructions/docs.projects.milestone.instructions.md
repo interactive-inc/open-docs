@@ -1,8 +1,8 @@
 ---
-applyTo: "**/docs/**/milestones/*.md"
+applyTo: "**/docs/projects/**/milestones/*.md"
 ---
 
-# `docs/**/milestones/*-value.md` - マイルストーンの定義
+# `docs/projects/**/milestones/*-value.md` - マイルストーンの定義
 
 マイルストーンを管理します。
 

@@ -1,8 +1,8 @@
 ---
-applyTo: "**/docs/**/values/*.md"
+applyTo: "**/docs/projects/**/values/*.md"
 ---
 
-# 値オブジェクトの定義 - `docs/**/values/*-value.md`
+# `docs/projects/**/values/*-value.md` - 値オブジェクト
 
 値オブジェクトを定義。
 

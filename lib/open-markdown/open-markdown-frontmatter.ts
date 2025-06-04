@@ -69,6 +69,7 @@ export class OpenMarkdownFrontmatter {
     if (!this.data) return ""
 
     const orderedKeys = ["icon", "title", "description", "schema"]
+
     const orderedFrontMatter: Record<string, unknown> = {}
 
     for (const key of orderedKeys) {
@@ -91,6 +92,7 @@ export class OpenMarkdownFrontmatter {
    */
   public update(draft: Record<string, unknown>): OpenMarkdownFrontmatter {
     const currentData = this.data || {}
+
     const updatedData = { ...currentData }
 
     for (const [key, value] of Object.entries(draft)) {

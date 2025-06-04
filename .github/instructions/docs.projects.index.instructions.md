@@ -1,8 +1,8 @@
 ---
-applyTo: "**/docs/**/*/index.md"
+applyTo: "**/docs/projects/**/*/index.md"
 ---
 
-# `docs/**/*/index.md` - 概要
+# `docs/projects/**/*/index.md` - 概要
 
 プロジェクト全体または個別製品の概要を記述。
 
