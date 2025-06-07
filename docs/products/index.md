@@ -1,6 +1,5 @@
 ---
 icon: 👀
-title: 製品
 description: ​ああああ
 schema:
   name:

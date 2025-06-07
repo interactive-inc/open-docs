@@ -1,12 +1,12 @@
 import { factory } from "@/lib/factory"
 import { GET as getDirectory } from "@/system/routes/directories.path"
+import { PUT as updateDirectory } from "@/system/routes/directories.update"
 import { PUT as updateFeaturePriority } from "@/system/routes/features.priority"
 import { PUT as updateFeatureStatus } from "@/system/routes/features.status"
 import { PUT as saveFileContent } from "@/system/routes/files.content"
 import { PUT as saveCsvFile } from "@/system/routes/files.csv"
 import { POST as moveFile } from "@/system/routes/files.move"
-import { GET as getFile } from "@/system/routes/files.path"
-import { PUT as updateProperties } from "@/system/routes/files.path.properties"
+import { GET as getFile, PUT as updateFile } from "@/system/routes/files.path"
 import { GET as getFileTree } from "@/system/routes/files.tree"
 import { DELETE as removeFeatureFromPage } from "@/system/routes/pages.features"
 import { GET as getProject } from "@/system/routes/projects.$project"
@@ -27,24 +27,31 @@ export const app = factory
   .put("/projects/:project/features/:feature", ...updateFeature)
   .get("/projects/:project", ...getProject)
   .get("/directories/:path{.+}", ...getDirectory)
+  .put("/directories/:path{.+}", ...updateDirectory)
   .put("/features/priority", ...updateFeaturePriority)
   .put("/features/status", ...updateFeatureStatus)
   .get("/files/tree", ...getFileTree)
   .post("/files/move", ...moveFile)
-  .put("/files/content", ...saveFileContent)
-  .put("/files/csv", ...saveCsvFile)
-  .put("/files/:path{.+}/properties", ...updateProperties)
+  .put("/files/content", ...saveFileContent) // 廃止
+  .put("/files/csv", ...saveCsvFile) // 廃止
+  .put("/files/:path{.+}", ...updateFile) // ファイルの更新
   .get("/files/:path{.+}", ...getFile)
-  .get("/hello", (c) => {
-    return c.json({ message: "Hello, world!" })
-  })
 
 app.onError((err, c) => {
+  console.error("API Error:", err)
+
   if (err instanceof HTTPException) {
     return c.json({ error: err.message }, err.status)
   }
 
-  return c.json({ error: "Internal server error" }, 500)
+  return c.json(
+    {
+      error: "Internal server error",
+      message: err.message,
+      stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+    },
+    500,
+  )
 })
 
 export const DELETE = handle(app)

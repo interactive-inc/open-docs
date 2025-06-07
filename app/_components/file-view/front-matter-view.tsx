@@ -6,7 +6,7 @@ type Props = {
 }
 
 /**
- * Front-matterをより見やすく表示するコンポーネント
+ * Front-matterをより見やすく表示するコンポーネント（表示のみ）
  */
 export function FrontMatterView(props: Props) {
   const frontMatter = props.frontMatter

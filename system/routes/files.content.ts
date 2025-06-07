@@ -1,5 +1,5 @@
 import * as path from "node:path"
-import { DocsEngine } from "@/lib/docs-engine/docs-engine"
+import { DocEngine } from "@/lib/docs-engine/doc-engine"
 import { factory } from "@/lib/factory"
 import { zAppError, zAppFileSave } from "@/lib/models"
 import { zValidator } from "@hono/zod-validator"
@@ -22,25 +22,29 @@ export const PUT = factory.createHandlers(
     const body = c.req.valid("json")
 
     const docsPath = path.join(process.cwd(), "docs")
-    const absolutePath = body.filePath
-    const isInDocsDir = absolutePath.startsWith(docsPath)
 
-    if (!isInDocsDir) {
-      const errorResponse = zAppError.parse({
-        error: "Invalid file path: File must be in docs directory",
-      })
-      return c.json(errorResponse, 403)
+    // 相対パスか絶対パスかを判定
+    let relativePath: string
+    if (path.isAbsolute(body.filePath)) {
+      // 絶対パスの場合
+      const isInDocsDir = body.filePath.startsWith(docsPath)
+      if (!isInDocsDir) {
+        const errorResponse = zAppError.parse({
+          error: "Invalid file path: File must be in docs directory",
+        })
+        return c.json(errorResponse, 403)
+      }
+      relativePath = path.relative(docsPath, body.filePath)
+    } else {
+      // 相対パスの場合（docs/で始まることを想定）
+      relativePath = body.filePath.replace(/^docs\//, "")
     }
 
-    // 絶対パスから相対パスを計算
-    const relativePath = path.relative(docsPath, absolutePath)
-
-    const docsEngine = new DocsEngine({
+    const docsEngine = new DocEngine({
       basePath: docsPath,
     })
 
-    const file = docsEngine.file(relativePath)
-    await file.writeContent(body.content)
+    await docsEngine.writeFileContent(relativePath, body.content)
 
     const response = zAppFileSave.parse({
       success: true,

@@ -17,33 +17,35 @@ export function useUpdateProperties() {
     mutationFn: async (params: UpdatePropertiesParams) => {
       const normalizedPath = params.path.replace(/^docs\//, "")
 
-      const body = params.field
-        ? { field: params.field, value: params.value }
+      const properties = params.field
+        ? { [params.field]: params.value }
         : params.properties || {}
 
-      const response = await (
-        apiClient.api.files[normalizedPath as ":path{.+}"] as any
-      ).properties.$put({
-        json: body,
+      const response = await apiClient.api.files[":path{.+}"].$put({
+        param: {
+          path: normalizedPath,
+        },
+        json: {
+          properties,
+          body: null,
+          title: null,
+          description: null,
+        },
       })
-
-      if (!response.ok) {
-        throw new Error("Failed to update properties")
-      }
 
       return response.json()
     },
     onSuccess: (data, variables) => {
-      // キャッシュを無効化
       const normalizedPath = variables.path.replace(/^docs\//, "")
+
       queryClient.invalidateQueries({
         queryKey: ["file-content", normalizedPath],
       })
 
-      // ディレクトリデータのキャッシュも無効化
-      // ファイルパスからディレクトリパスを取得
       const pathParts = normalizedPath.split("/")
-      pathParts.pop() // ファイル名を削除
+
+      pathParts.pop()
+
       const directoryPath = pathParts.join("/")
 
       queryClient.invalidateQueries({

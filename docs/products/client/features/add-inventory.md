@@ -1,7 +1,7 @@
 ---
-milestone: 2028.01.01
+milestone: 2025.01.01
 is-done: false
-priority: 1
+priority: 2
 ---
 
 # 入庫処理を行う

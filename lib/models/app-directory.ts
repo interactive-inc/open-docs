@@ -32,8 +32,8 @@ export const zAppDirectoryFileResponse = z.object({
 export const zAppDirectoryResponse = z.object({
   isFile: z.literal(false),
   schema: z.record(z.string(), zSchemaField).nullable(),
-  title: z.string().nullable(),
-  description: z.string().nullable().optional(),
+  title: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
   indexPath: z.string().optional(),
   files: z.array(zAppDirectoryFile),
 })

@@ -1,5 +1,5 @@
 import path from "node:path"
-import { DocsEngine } from "@/lib/docs-engine/docs-engine"
+import { DocEngine } from "@/lib/docs-engine/doc-engine"
 import { factory } from "@/lib/factory"
 import { zAppError, zAppFileProperties } from "@/lib/models"
 import { OpenMarkdown } from "@/lib/open-markdown/open-markdown"
@@ -34,31 +34,11 @@ export const PUT = factory.createHandlers(
       throw new HTTPException(400, {})
     }
 
-    // パスを正規化（絶対パスから相対パスに変換）
-    let currentPath = rawPath
+    // Honoルート `:path{.+}/properties` では、:path{.+} の部分だけがキャプチャされる
+    // つまり rawPath は `products/client/features/add-inventory.md` のようになる
+    const filePath = rawPath
 
-    // 絶対パスの場合、相対パスに変換
-    if (currentPath.includes("/docs/")) {
-      const docsIndex = currentPath.lastIndexOf("/docs/")
-      currentPath = currentPath.substring(docsIndex + 6) // '/docs/'.length = 6
-    }
-
-    // docsプレフィックスを削除
-    currentPath = currentPath.replace(/^docs\//, "")
-
-    // 先頭のスラッシュを削除
-    currentPath = currentPath.replace(/^\/+/, "")
-
-    const urlPath = currentPath
-
-    if (!urlPath.endsWith("/properties")) {
-      const errorResponse = zAppError.parse({ error: "Invalid path" })
-      return c.json(errorResponse, 400)
-    }
-
-    const filePath = urlPath.replace(/\/properties$/, "")
-
-    const docsEngine = new DocsEngine({
+    const docsEngine = new DocEngine({
       basePath: path.join(process.cwd(), "docs"),
     })
 
@@ -70,16 +50,14 @@ export const PUT = factory.createHandlers(
       return c.json(errorResponse, 404)
     }
 
-    const file = docsEngine.file(filePath)
-    const markdownContent = await file.readContent()
+    const docFile = await docsEngine.getFile(filePath)
+    const markdownContent = await docsEngine.readFileContent(filePath)
     const openMarkdown = new OpenMarkdown(markdownContent)
-    const { frontMatter, content } = {
-      frontMatter: openMarkdown.frontMatter.data,
-      content: openMarkdown.content,
-    }
 
     // FrontMatterを更新
-    let updatedFrontMatter: Record<string, unknown> = { ...frontMatter }
+    let updatedFrontMatter: Record<string, unknown> = {
+      ...docFile.frontMatter.data,
+    }
 
     if ("field" in body && "value" in body) {
       // 単一フィールドの更新
@@ -100,12 +78,10 @@ export const PUT = factory.createHandlers(
     }
 
     // マークダウンテキストを生成
-    const updatedContent = openMarkdown
-      .withFrontMatter(updatedFrontMatter)
-      .text
+    const updatedContent = openMarkdown.withFrontMatter(updatedFrontMatter).text
 
     // ファイルに書き込む
-    await file.writeContent(updatedContent)
+    await docsEngine.writeFileContent(filePath, updatedContent)
 
     const response = zAppFileProperties.parse({
       success: true,

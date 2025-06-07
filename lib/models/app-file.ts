@@ -5,4 +5,7 @@ export const zAppFile = z.object({
   path: z.string(),
   frontMatter: z.record(z.unknown()),
   content: z.string(),
+  cwd: z.string(),
+  title: z.string().nullable(),
+  description: z.string().nullable(),
 })

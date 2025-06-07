@@ -11,7 +11,7 @@ type Props = {
   fileName: string
 }
 
-export function GetFileIcon(props: Props) {
+export function FileTreeIcon(props: Props) {
   if (props.fileName.endsWith(".md")) {
     return <FileTextIcon size={16} className="mr-2 text-green-400" />
   }

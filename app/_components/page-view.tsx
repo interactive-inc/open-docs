@@ -1,7 +1,7 @@
 "use client"
 
-import { DirectoryContentView } from "@/app/_components/directory-content-view"
-import { FileContentView } from "@/app/_components/file-view/file-content-view"
+import { DirectoryPageView } from "@/app/_components/directory-page-view"
+import { FilePageView } from "@/app/_components/file-view/file-page-view"
 import { apiClient } from "@/lib/api-client"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { useParams } from "next/navigation"
@@ -21,42 +21,35 @@ export function PageView() {
       return response.json()
     },
   })
-  const files = fileTreeData.files
 
   const currentPath = params.directories.join("/")
 
-  const { data: directoryData } = useSuspenseQuery({
-    queryKey: ["directory-data", currentPath],
-    queryFn: async () => {
-      const response = await apiClient.api.directories[":path{.+}"].$get({
-        param: {
-          path: currentPath,
-        },
-      })
-
-      return response.json()
-    },
-  })
-
-  if (directoryData.isFile) {
-    return (
-      <FileContentView
-        content={directoryData.content}
-        filePath={directoryData.filePath}
-      />
-    )
+  // ファイルツリーからパスがファイルかディレクトリかを判定
+  const findPathInTree = (
+    nodes: typeof fileTreeData.files,
+    targetPath: string,
+  ): { isFile: boolean } | null => {
+    for (const node of nodes) {
+      // docs/プレフィックスを除去して比較
+      const nodePath = node.path.replace(/^docs\//, "")
+      if (nodePath === targetPath) {
+        return { isFile: node.type === "file" }
+      }
+      if (node.children) {
+        const result = findPathInTree(node.children, targetPath)
+        if (result) return result
+      }
+    }
+    return null
   }
 
-  return (
-    <DirectoryContentView
-      key={currentPath}
-      files={files}
-      currentPath={currentPath}
-      schema={directoryData.schema}
-      title={directoryData.title}
-      description={directoryData.description}
-      indexPath={directoryData.indexPath}
-      fileContents={directoryData.files}
-    />
-  )
+  const pathInfo = findPathInTree(fileTreeData.files, currentPath)
+
+  const isFile = pathInfo?.isFile || false
+
+  if (isFile) {
+    return <FilePageView filePath={currentPath} />
+  }
+
+  return <DirectoryPageView key={currentPath} currentPath={currentPath} />
 }

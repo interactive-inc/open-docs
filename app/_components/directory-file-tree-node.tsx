@@ -4,9 +4,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/app/_components/ui/sidebar"
-import type { FileNode } from "@/lib/get-docs-files"
+import type { FileNode } from "@/system/routes/files.tree"
 import Link from "next/link"
-import { GetFileIcon } from "./get-file-icon"
+import { FileTreeIcon } from "./file-tree-icon"
 
 type Props = {
   node: FileNode
@@ -55,8 +55,8 @@ export function DirectoryFileTreeNode(props: Props) {
         {isOpen &&
           props.node.children &&
           props.node.children
-            .filter((child) => child.type === "directory")
-            .map((child) => (
+            .filter((child: FileNode) => child.type === "directory")
+            .map((child: FileNode) => (
               <DirectoryFileTreeNode
                 key={child.path}
                 node={child}
@@ -87,7 +87,7 @@ export function DirectoryFileTreeNode(props: Props) {
     <Link href={`/${formatPath(props.node.path)}`}>
       <SidebarMenuItem>
         <SidebarMenuButton style={{ paddingLeft: 8 + depth * 8 }}>
-          <GetFileIcon fileName={props.node.name} />
+          <FileTreeIcon fileName={props.node.name} />
           {props.node.name}
         </SidebarMenuButton>
       </SidebarMenuItem>

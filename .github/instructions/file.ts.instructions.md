@@ -89,9 +89,3 @@ export class ClassName {
 ## TailwindCSS
 
 - Use `space-` or `gap-` instead of `pb-`
-
-## FORBIDDEN
-
-- Do NOT make huge files (basically max 100 lines)
-- Do NOT make a huge React hooks
-- Hooks that manage all component state

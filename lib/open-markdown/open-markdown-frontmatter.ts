@@ -5,6 +5,7 @@ import { parse, stringify } from "yaml"
  */
 export class OpenMarkdownFrontmatter {
   public readonly data: Record<string, unknown> | null
+
   public readonly yamlText: string
 
   constructor(data: Record<string, unknown> | null, yamlText = "") {
@@ -66,34 +67,16 @@ export class OpenMarkdownFrontmatter {
    * フロントマターをYAMLテキストに変換
    */
   public frontMatterText(): string {
-    if (!this.data) return ""
+    if (this.data === null || Object.keys(this.data).length === 0) return ""
 
-    const orderedKeys = ["icon", "title", "description", "schema"]
-
-    const orderedFrontMatter: Record<string, unknown> = {}
-
-    for (const key of orderedKeys) {
-      if (key in this.data) {
-        orderedFrontMatter[key] = this.data[key]
-      }
-    }
-
-    for (const [key, value] of Object.entries(this.data)) {
-      if (!orderedKeys.includes(key)) {
-        orderedFrontMatter[key] = value
-      }
-    }
-
-    return stringify(orderedFrontMatter).trim()
+    return stringify(this.data).trim()
   }
 
   /**
    * フロントマターを更新した新しいインスタンスを作成
    */
   public update(draft: Record<string, unknown>): OpenMarkdownFrontmatter {
-    const currentData = this.data || {}
-
-    const updatedData = { ...currentData }
+    const updatedData = { ...(this.data || {}) }
 
     for (const [key, value] of Object.entries(draft)) {
       updatedData[key] = value
@@ -120,7 +103,7 @@ export class OpenMarkdownFrontmatter {
    * 指定したキーが存在するか
    */
   public has(key: string): boolean {
-    return this.data ? key in this.data : false
+    return this.data !== null && key in this.data
   }
 
   /**

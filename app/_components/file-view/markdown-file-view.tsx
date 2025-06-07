@@ -1,5 +1,6 @@
-import { FrontMatterView } from "@/app/_components/file-view/front-matter-view"
+import { EditableFrontMatterView } from "@/app/_components/file-view/editable-front-matter-view"
 import { Card } from "@/app/_components/ui/card"
+import type { AppFileFrontMatter } from "@/lib/docs-engine/models"
 import { OpenMarkdown } from "@/lib/open-markdown/open-markdown"
 import { marked } from "marked"
 import type { ReactNode } from "react"
@@ -10,6 +11,8 @@ type Props = {
   fileName: string
   content: string
   onChange(content: string): void
+  frontMatter: AppFileFrontMatter
+  onFrontMatterUpdate: (key: string, value: unknown) => void
 }
 
 export function MarkdownFileView(props: Props): ReactNode {
@@ -19,7 +22,8 @@ export function MarkdownFileView(props: Props): ReactNode {
     content: openMarkdown.content,
   }
 
-  const frontMatter = markdown.frontMatter
+  // APIから取得したfront matterを優先して使用
+  const frontMatter = props.frontMatter || markdown.frontMatter
 
   const hasFrontMatter =
     frontMatter !== null && Object.keys(frontMatter || {}).length > 0
@@ -29,8 +33,9 @@ export function MarkdownFileView(props: Props): ReactNode {
   return (
     <div className="h-full space-y-2">
       {hasFrontMatter && (
-        <FrontMatterView
-          frontMatter={frontMatter as Record<string, string | string[]>}
+        <EditableFrontMatterView
+          frontMatter={frontMatter as AppFileFrontMatter}
+          onUpdate={props.onFrontMatterUpdate}
         />
       )}
       <Card className="overflow-hidden rounded-md p-0">

@@ -57,9 +57,7 @@ export const DELETE = factory.createHandlers(
       features: updatedFeatures,
     })
 
-    const markdownText = openMarkdown
-      .withFrontMatter(frontMatter)
-      .text
+    const markdownText = openMarkdown.withFrontMatter(frontMatter).text
 
     await fs.writeFile(filePath, markdownText, "utf-8")
 

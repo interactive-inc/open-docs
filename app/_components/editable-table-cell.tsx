@@ -2,16 +2,16 @@
 import { useState } from "react"
 
 type Props = {
-  value: any
+  value: unknown
   type: string
-  onUpdate: (value: any) => void
+  onUpdate: (value: unknown) => void
 }
 
 export function EditableTableCell(props: Props) {
   const [isEditing, setIsEditing] = useState(false)
   const [editValue, setEditValue] = useState("")
 
-  const formatValue = (value: any, type: string): string => {
+  const formatValue = (value: unknown, type: string): string => {
     if (value === undefined || value === null) {
       return ""
     }
@@ -28,7 +28,7 @@ export function EditableTableCell(props: Props) {
     }
   }
 
-  const parseValue = (text: string, type: string): any => {
+  const parseValue = (text: string, type: string): unknown => {
     if (text === "") {
       return undefined
     }
@@ -94,14 +94,15 @@ export function EditableTableCell(props: Props) {
           className="absolute inset-0 w-full bg-transparent px-3 py-2 outline-none"
         />
       ) : null}
-      <div
+      <button
+        type="button"
         onClick={handleClick}
-        className={`cursor-pointer px-3 py-2 hover:bg-muted/50 ${
+        className={`w-full cursor-pointer px-3 py-2 text-left hover:bg-muted/50 ${
           isEditing ? "invisible" : ""
         }`}
       >
         {displayValue || <span className="text-muted-foreground">-</span>}
-      </div>
+      </button>
     </div>
   )
 }

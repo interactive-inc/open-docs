@@ -1,6 +1,5 @@
 ---
 icon: 📚
-title: 用語集
 description: これは用語集です
 schema:
   term:

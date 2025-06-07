@@ -1,12 +1,10 @@
 ---
-icon: "🐈"
-title: 機能
-description: 在庫管理システムの機能要件を定義します。
+icon: 🐈
 schema:
   milestone:
     type: string
     required: false
-    description: マイルストーン（例：2028.01.01）
+    description: マイルストーン
   is-done:
     type: boolean
     required: false
@@ -17,7 +15,7 @@ schema:
     description: 優先度（0-100）
 ---
 
-# features
+# a
 
 このディレクトリには、在庫管理システムの各機能要件を定義するファイルが含まれています。
 

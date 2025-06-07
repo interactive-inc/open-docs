@@ -1,6 +1,7 @@
 "use client"
 
 import { EditableTableCell } from "@/app/_components/editable-table-cell"
+import { Card } from "@/app/_components/ui/card"
 import {
   Table,
   TableBody,
@@ -22,6 +23,8 @@ type Props = {
     path: string
     frontMatter: Record<string, unknown> | null
     content: string
+    title: string | null
+    description: string | null
   }>
 }
 
@@ -66,11 +69,12 @@ export function DirectoryTableView(props: Props) {
     : []
 
   return (
-    <div className="overflow-x-auto rounded-lg border">
+    <Card className="overflow-x-scroll rounded-md p-0">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead className="w-[200px]">ファイル名</TableHead>
+            <TableHead className="w-[300px]">タイトル</TableHead>
             {columns.map((column) => (
               <TableHead key={column.key}>{column.label}</TableHead>
             ))}
@@ -80,7 +84,16 @@ export function DirectoryTableView(props: Props) {
           {props.files.map((filePath, index) => {
             // fileContentsから対応するデータを取得、または個別クエリの結果を使用
             const data = props.fileContents
-              ? filesData.find((f) => f.path === filePath)
+              ? filesData.find((f) => {
+                  // 複数のパターンでマッチング試行
+                  const normalizedFilePath = formatPath(filePath)
+                  const fileBasename = filePath.split("/").pop()
+                  return (
+                    f.path === filePath ||
+                    f.path === normalizedFilePath ||
+                    f.path.endsWith(fileBasename || "")
+                  )
+                })
               : queries[index]?.data
 
             const fileName =
@@ -95,6 +108,9 @@ export function DirectoryTableView(props: Props) {
                   >
                     {fileName}
                   </Link>
+                </TableCell>
+                <TableCell className="font-normal">
+                  {data && "title" in data ? data.title || "-" : "-"}
                 </TableCell>
                 {columns.map((column) => {
                   const value = data?.frontMatter?.[column.key]
@@ -116,6 +132,6 @@ export function DirectoryTableView(props: Props) {
           })}
         </TableBody>
       </Table>
-    </div>
+    </Card>
   )
 }

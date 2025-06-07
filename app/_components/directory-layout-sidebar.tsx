@@ -12,7 +12,7 @@ import {
   SidebarProvider,
 } from "@/app/_components/ui/sidebar"
 import { apiClient } from "@/lib/api-client"
-import type { FileNode } from "@/lib/get-docs-files"
+import type { FileNode } from "@/system/routes/files.tree"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -168,7 +168,7 @@ export function DirectoryLayoutSidebar(props: Props) {
         </SidebarContent>
         <SidebarFooter />
       </Sidebar>
-      <SidebarInset>{props.children}</SidebarInset>
+      <SidebarInset className="overflow-hidden">{props.children}</SidebarInset>
     </SidebarProvider>
   )
 }

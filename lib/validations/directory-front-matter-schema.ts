@@ -5,6 +5,7 @@ const schemaFieldSchema = z.object({
     "string",
     "number",
     "boolean",
+    "array",
     "array-string",
     "array-number",
     "array-boolean",
@@ -16,7 +17,6 @@ const schemaFieldSchema = z.object({
 export const directoryFrontMatterSchema = z.object({
   icon: z.string().optional(),
   title: z.string().optional(),
-  description: z.string().optional(),
   schema: z.record(z.string(), schemaFieldSchema).optional(),
 })
 

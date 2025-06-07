@@ -46,18 +46,17 @@ export function FeatureCard(props: Props) {
   const toggleFeaturePriority = async () => {
     try {
       const priorities = ["high", "medium", "low"] as const
-      const currentIndex = priorities.indexOf(featurePriority as any)
+      const currentIndex = priorities.indexOf(
+        featurePriority as "high" | "medium" | "low",
+      )
       const nextIndex = (currentIndex + 1) % priorities.length
       const newPriority = priorities[nextIndex]
-
-      console.log("優先度を更新します:", props.feature.id, "=>", newPriority)
 
       await updatePriority.mutateAsync({
         featureId: props.feature.id,
         primary: newPriority as "high" | "medium" | "low",
         project: props.project,
       })
-      console.log("優先度の更新が完了しました")
 
       setFeaturePriority(newPriority || "low")
     } catch (error) {

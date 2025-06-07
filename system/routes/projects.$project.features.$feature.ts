@@ -1,5 +1,5 @@
 import * as path from "node:path"
-import { DocsEngine } from "@/lib/docs-engine/docs-engine"
+import { DocEngine } from "@/lib/docs-engine/doc-engine"
 import { factory } from "@/lib/factory"
 import { zAppError } from "@/lib/models"
 import { zFeatureFrontMatter } from "@/lib/models/feature-front-matter"
@@ -34,7 +34,7 @@ export const PUT = factory.createHandlers(
     const params = c.req.valid("param")
     const body = c.req.valid("json")
 
-    const docsEngine = new DocsEngine({
+    const docsEngine = new DocEngine({
       basePath: path.join(process.cwd(), "docs/products"),
     })
 
@@ -48,22 +48,11 @@ export const PUT = factory.createHandlers(
       return c.json(errorResponse, 404)
     }
 
-    const file = docsEngine.file(featurePath)
-    const markdownContent = await file.readContent()
+    const docFile = await docsEngine.getFile(featurePath)
+    const markdownContent = await docsEngine.readFileContent(featurePath)
     const openMarkdown = new OpenMarkdown(markdownContent)
-    const { frontMatter, content } = {
-      frontMatter: openMarkdown.frontMatter.data,
-      content: openMarkdown.content,
-    }
 
-    if (!frontMatter) {
-      const errorResponse = zAppError.parse({
-        error: `フロントマターが見つかりません: ${featurePath}`,
-      })
-      return c.json(errorResponse, 400)
-    }
-
-    const updatedFrontMatter = { ...frontMatter }
+    const updatedFrontMatter = { ...docFile.frontMatter.data }
 
     // 優先度の更新
     if (body.priority) {
@@ -79,11 +68,9 @@ export const PUT = factory.createHandlers(
 
     const validatedFrontMatter = zFeatureFrontMatter.parse(updatedFrontMatter)
 
-    const markdownText = openMarkdown
-      .withFrontMatter(validatedFrontMatter)
-      .text
+    const markdownText = openMarkdown.withFrontMatter(validatedFrontMatter).text
 
-    await file.writeContent(markdownText)
+    await docsEngine.writeFileContent(featurePath, markdownText)
 
     return c.json({
       success: true,
@@ -115,7 +102,7 @@ export const GET = factory.createHandlers(
   async (c) => {
     const params = c.req.valid("param")
 
-    const docsEngine = new DocsEngine({
+    const docsEngine = new DocEngine({
       basePath: path.join(process.cwd(), "docs/products"),
     })
 
@@ -129,11 +116,11 @@ export const GET = factory.createHandlers(
       return c.json(errorResponse, 404)
     }
 
-    const file = docsEngine.file(featurePath)
-    const markdownContent = await file.readContent()
+    const docFile = await docsEngine.getFile(featurePath)
+    const markdownContent = await docsEngine.readFileContent(featurePath)
     const openMarkdown = new OpenMarkdown(markdownContent)
     const { frontMatter, content } = {
-      frontMatter: openMarkdown.frontMatter.data,
+      frontMatter: docFile.frontMatter.data,
       content: openMarkdown.content,
     }
 

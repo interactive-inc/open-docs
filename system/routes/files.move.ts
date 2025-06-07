@@ -1,5 +1,5 @@
 import * as path from "node:path"
-import { DocsEngine } from "@/lib/docs-engine/docs-engine"
+import { DocEngine } from "@/lib/docs-engine/doc-engine"
 import { factory } from "@/lib/factory"
 import { zAppFileMove } from "@/lib/models"
 import { zValidator } from "@hono/zod-validator"
@@ -30,7 +30,7 @@ export const POST = factory.createHandlers(
     const sourceRelativePath = path.relative(docsPath, sourceFullPath)
     const destinationRelativePath = path.relative(docsPath, destinationFullPath)
 
-    const docsEngine = new DocsEngine({
+    const docsEngine = new DocEngine({
       basePath: docsPath,
     })
 
@@ -55,13 +55,10 @@ export const POST = factory.createHandlers(
     const isDirectory = await docsEngine.isDirectory(sourceRelativePath)
 
     // 現在の実装では基本的なファイル移動のみサポート
-    const sourceFile = docsEngine.file(sourceRelativePath)
-    const destinationFile = docsEngine.file(destinationRelativePath)
-
     if (!isDirectory) {
-      const content = await sourceFile.readContent()
-      await destinationFile.writeContent(content)
-      await sourceFile.delete()
+      const content = await docsEngine.readFileContent(sourceRelativePath)
+      await docsEngine.writeFileContent(destinationRelativePath, content)
+      await docsEngine.deleteFile(sourceRelativePath)
     } else {
       throw new HTTPException(500, {
         message: "ディレクトリの移動は現在サポートされていません",

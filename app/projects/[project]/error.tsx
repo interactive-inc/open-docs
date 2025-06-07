@@ -7,7 +7,7 @@ type Props = {
   reset: () => void
 }
 
-export default function Error(props: Props) {
+export default function ProjectError(props: Props) {
   useEffect(() => {
     console.error("Project Page Error:", props.error)
   }, [props.error])
@@ -25,6 +25,7 @@ export default function Error(props: Props) {
           {props.error.stack}
         </pre>
         <button
+          type="button"
           onClick={props.reset}
           className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
         >

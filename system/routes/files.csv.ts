@@ -1,5 +1,5 @@
 import * as path from "node:path"
-import { DocsEngine } from "@/lib/docs-engine/docs-engine"
+import { DocEngine } from "@/lib/docs-engine/doc-engine"
 import { factory } from "@/lib/factory"
 import { zAppCsvSave } from "@/lib/models"
 import { zValidator } from "@hono/zod-validator"
@@ -26,12 +26,11 @@ export const PUT = factory.createHandlers(
     const docsPath = path.join(process.cwd(), "docs")
     const relativePath = path.relative(docsPath, absolutePath)
 
-    const docsEngine = new DocsEngine({
+    const docsEngine = new DocEngine({
       basePath: docsPath,
     })
 
-    const file = docsEngine.file(relativePath)
-    await file.writeContent(body.content)
+    await docsEngine.writeFileContent(relativePath, body.content)
 
     const response = zAppCsvSave.parse({
       success: true,
