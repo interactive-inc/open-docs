@@ -1,10 +1,26 @@
 import { Card } from "@/app/_components/ui/card"
-import type { AppFileFrontMatter } from "@/lib/docs-engine/models"
+import type { AppFileFrontMatter } from "@/system/models/app-file-front-matter"
 import { FrontMatterInputField } from "./front-matter-input-field"
+import { cn } from "@/lib/utils"
 
 type Props = {
   frontMatter: AppFileFrontMatter | null
   onUpdate?: (key: string, value: unknown) => void
+  schema?: Record<
+    string,
+    {
+      type: string
+      relationPath?: string
+    }
+  >
+  relations?: Array<{
+    path: string
+    files: Array<{
+      value: string
+      label: string
+      path: string
+    }>
+  }>
 }
 
 /**
@@ -51,6 +67,9 @@ export function EditableFrontMatterView(props: Props) {
       } else {
         convertedValue = items
       }
+    } else if (originalValue === null && Array.isArray(newValue)) {
+      // null値だが新しい値が配列の場合（配列リレーションなど）
+      convertedValue = newValue
     }
 
     props.onUpdate(key, convertedValue)
@@ -63,20 +82,33 @@ export function EditableFrontMatterView(props: Props) {
   return (
     <Card className="gap-4 rounded-md p-2">
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        {Object.entries(frontMatter).map(([key, value]) => (
-          <div key={key} className="flex flex-col gap-1">
-            <span className="font-medium text-sm">{key}</span>
-            <div className="flex-1">
-              <FrontMatterInputField
-                fieldKey={key}
-                value={value}
-                originalValue={frontMatter[key]}
-                onValueChange={handleValueChange}
-                onBlur={handleBlur}
-              />
+        {Object.entries(frontMatter).map(([key, value]) => {
+          const schemaField = props.schema?.[key]
+          const relationData = props.relations?.find((rel) => {
+            return rel.path === schemaField?.relationPath
+          })
+
+          // array-系のフィールドは2カラムスペースを使用
+          const isArrayField = schemaField?.type?.startsWith("array-")
+          const columnSpan = isArrayField ? "md:col-span-2" : ""
+
+          return (
+            <div key={key} className={cn("flex flex-col gap-1", columnSpan)}>
+              <span className="font-medium text-sm">{key}</span>
+              <div className="flex-1">
+                <FrontMatterInputField
+                  fieldKey={key}
+                  value={value}
+                  originalValue={frontMatter[key]}
+                  onValueChange={handleValueChange}
+                  onBlur={handleBlur}
+                  schemaField={schemaField}
+                  relationOptions={relationData?.files}
+                />
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </Card>
   )

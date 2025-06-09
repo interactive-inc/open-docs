@@ -1,9 +1,8 @@
 import path from "node:path"
 import { DocEngine } from "@/lib/docs-engine/doc-engine"
-import { zAppFileFrontMatter } from "@/lib/docs-engine/models"
 import { factory } from "@/lib/factory"
-import { OpenMarkdown } from "@/lib/open-markdown/open-markdown"
-import type { SchemaDefinition } from "@/lib/types/schema-types"
+import { zAppFileFrontMatter } from "@/system/models/app-file-front-matter"
+import { zDirectoryResponse } from "@/system/models/directory-response-schema"
 import { HTTPException } from "hono/http-exception"
 
 /**
@@ -36,86 +35,37 @@ export const GET = factory.createHandlers(async (c) => {
     })
   }
 
-  // ディレクトリデータを取得
-  const docDirectory = await mainEngine.getDirectory(currentPath)
+  // ディレクトリ情報を完全取得
+  const directoryData = await mainEngine.getDirectoryDataForApi(currentPath)
 
-  const rawData = docDirectory.toJSON()
+  const files = directoryData.files.map((file) => {
+    // zodでバリデーションして適合しない値を除外
+    const parsedFrontMatter = zAppFileFrontMatter.safeParse(file.frontMatter)
 
-  // ファイル一覧を取得（README.mdとindex.mdを除外）
-  const markdownContents = await mainEngine.readMarkdownContents(currentPath)
-
-  const files = markdownContents
-    .filter(
-      (file) =>
-        !file.filePath.endsWith("README.md") &&
-        !file.filePath.endsWith("index.md"),
-    )
-    .map((file) => {
-      // スキーマなどの特殊なプロパティを除外してfront matterをクリーンアップ
-      const cleanFrontMatter = file.frontMatter || {}
-      const { schema, ...validFrontMatter } = cleanFrontMatter as Record<
-        string,
-        unknown
-      > & { schema?: unknown }
-
-      // zodでバリデーションして適合しない値を除外
-      const parsedFrontMatter = zAppFileFrontMatter.safeParse(validFrontMatter)
-
-      return {
-        path: `${docsPath}/${file.filePath}`,
-        frontMatter: parsedFrontMatter.success ? parsedFrontMatter.data : {},
-        content: file.content,
-        title: file.title || null,
-        description: new OpenMarkdown(file.content).description,
-      }
-    })
-
-  // スキーマを適切な型に変換
-  const convertSchema = (
-    schema: typeof rawData.schema,
-  ): SchemaDefinition | null => {
-    if (!schema) return null
-
-    const converted: SchemaDefinition = {}
-    for (const [key, field] of Object.entries(schema)) {
-      let type = field.type
-      if (type === "array") {
-        type = "array-string" // デフォルト変換
-      }
-
-      converted[key] = {
-        type: type as SchemaDefinition[string]["type"],
-        required: field.required,
-        description: field.description,
-      }
+    return {
+      ...file,
+      frontMatter: parsedFrontMatter.success
+        ? parsedFrontMatter.data
+        : file.frontMatter || {},
     }
-    return converted
-  }
+  })
 
-  // ディレクトリ名を抽出
-  const directoryName = currentPath.split("/").filter(Boolean).pop() || "Root"
-
-  // ディレクトリのindex.mdからdescriptionを取得
-  let directoryDescription: string | null = null
-  const indexPath = `${currentPath}/index.md`
-  if (await mainEngine.exists(indexPath)) {
-    const indexContent = await mainEngine.readFileContent(indexPath)
-    directoryDescription = new OpenMarkdown(indexContent).description
-  }
-
-  // クライアント用の最適化されたレスポンス
-  const response = {
+  // レスポンスを検証してから返す
+  const validatedResponse = zDirectoryResponse.parse({
     isFile: false as const,
-    schema: convertSchema(rawData.schema),
-    title: rawData.title || null,
-    description: directoryDescription,
-    indexPath: rawData.indexPath,
+    schema: directoryData.schema,
+    columns: directoryData.columns,
+    title: directoryData.rawData.title || directoryData.directoryName,
+    description: directoryData.directoryDescription,
+    icon: directoryData.rawData.icon || "📁",
+    indexPath: directoryData.rawData.indexPath,
     files,
     // 追加の計算済み値
-    directoryName,
+    directoryName: directoryData.directoryName,
     markdownFilePaths: files.map((f) => f.path),
     cwd: process.cwd(),
-  }
+    relations: directoryData.relations,
+  })
 
-  return c.json(response)
+  return c.json(validatedResponse)
 })

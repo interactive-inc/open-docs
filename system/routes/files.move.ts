@@ -1,7 +1,7 @@
 import * as path from "node:path"
 import { DocEngine } from "@/lib/docs-engine/doc-engine"
 import { factory } from "@/lib/factory"
-import { zAppFileMove } from "@/lib/models"
+import { zAppFileMove } from "@/lib/models/app-file-move"
 import { zValidator } from "@hono/zod-validator"
 import { HTTPException } from "hono/http-exception"
 import { z } from "zod"
@@ -18,7 +18,7 @@ const moveFileSchema = z.object({
  * @param destinationPath 移動先パス
  * @returns 移動結果
  */
-export const POST = factory.createHandlers(
+export const PUT = factory.createHandlers(
   zValidator("json", moveFileSchema),
   async (c) => {
     const body = c.req.valid("json")

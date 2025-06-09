@@ -1,10 +1,10 @@
+import { OpenMarkdown } from "@/lib/open-markdown/open-markdown"
 import type { Schema } from "@/lib/validations/doc-schema"
-import { DocFileFrontMatter } from "./models/doc-file-front-matter"
 
 type Props<T = Record<string, unknown>> = {
   content: string
   filePath: string
-  frontMatter?: DocFileFrontMatter<T>
+  frontMatter?: { data: T }
   title?: string
 }
 
@@ -16,14 +16,14 @@ export class DocFile<T = Record<string, unknown>> {
 
   readonly filePath: string
 
-  readonly frontMatter: DocFileFrontMatter<T>
+  readonly frontMatter: { data: T }
 
   readonly title: string
 
   constructor(props: Props<T>) {
     this.content = props.content
     this.filePath = props.filePath
-    this.frontMatter = props.frontMatter || DocFileFrontMatter.empty<T>()
+    this.frontMatter = props.frontMatter || { data: {} as T }
     this.title = props.title || ""
   }
 
@@ -32,6 +32,16 @@ export class DocFile<T = Record<string, unknown>> {
    */
   get size(): number {
     return this.content.length
+  }
+
+  /**
+   * ディスクリプションを取得
+   */
+  get description(): string {
+    const openMarkdown = new OpenMarkdown(
+      `${this.title ? `# ${this.title}\n\n` : ""}${this.content}`,
+    )
+    return openMarkdown.description || ""
   }
 
   /**
@@ -58,9 +68,88 @@ export class DocFile<T = Record<string, unknown>> {
     return new DocFile<U>({
       content: this.content,
       filePath: this.filePath,
-      frontMatter: this.frontMatter.withSchema<U>(schema),
+      frontMatter: { data: this.frontMatter.data as unknown as U },
       title: this.title,
     })
+  }
+
+  /**
+   * FrontMatterを更新した新しいDocFileを作成
+   */
+  withFrontMatter(frontMatter: Record<string, unknown>): DocFile<T> {
+    return new DocFile<T>({
+      content: this.content,
+      filePath: this.filePath,
+      frontMatter: { data: { ...this.frontMatter.data, ...frontMatter } as T },
+      title: this.title,
+    })
+  }
+
+  /**
+   * タイトルを更新した新しいDocFileを作成
+   */
+  withTitle(newTitle: string): DocFile<T> {
+    const openMarkdown = new OpenMarkdown(`# ${this.title || ""}
+
+${this.content}`)
+    const updatedMarkdown = openMarkdown.withTitle(newTitle)
+
+    return new DocFile<T>({
+      content: updatedMarkdown.content,
+      filePath: this.filePath,
+      frontMatter: this.frontMatter,
+      title: newTitle,
+    })
+  }
+
+  /**
+   * ディスクリプションを更新した新しいDocFileを作成
+   */
+  withDescription(newDescription: string, defaultTitle?: string): DocFile<T> {
+    const openMarkdown = new OpenMarkdown(`# ${this.title || defaultTitle || ""}
+
+${this.content}`)
+    const updatedMarkdown = openMarkdown.withDescription(
+      newDescription,
+      defaultTitle,
+    )
+
+    return new DocFile<T>({
+      content: updatedMarkdown.content,
+      filePath: this.filePath,
+      frontMatter: this.frontMatter,
+      title: this.title,
+    })
+  }
+
+  /**
+   * コンテンツを更新した新しいDocFileを作成（FrontMatterをマージ）
+   */
+  withContent(newContent: string): DocFile<T> {
+    const newOpenMarkdown = new OpenMarkdown(newContent)
+    const existingBodyFrontMatter = newOpenMarkdown.frontMatter.data || {}
+    const mergedFrontMatter = {
+      ...this.frontMatter.data,
+      ...existingBodyFrontMatter,
+    }
+
+    return new DocFile<T>({
+      content: newOpenMarkdown.content,
+      filePath: this.filePath,
+      frontMatter: { data: mergedFrontMatter as T },
+      title: this.title,
+    })
+  }
+
+  /**
+   * Markdownテキストを生成
+   */
+  toMarkdownText(): string {
+    const openMarkdown = OpenMarkdown.fromProps({
+      frontMatter: this.frontMatter.data as Record<string, unknown>,
+      content: this.content,
+    })
+    return openMarkdown.text
   }
 
   /**
@@ -71,7 +160,6 @@ export class DocFile<T = Record<string, unknown>> {
     content: string
     filePath: string
     frontMatter: Record<string, unknown>
-    validatedFrontMatter: Record<string, unknown>
     title: string
   } {
     return {
@@ -79,10 +167,6 @@ export class DocFile<T = Record<string, unknown>> {
       content: this.content,
       filePath: this.filePath,
       frontMatter: this.frontMatter.data as Record<string, unknown>,
-      validatedFrontMatter: this.frontMatter.validated as Record<
-        string,
-        unknown
-      >,
       title: this.title,
     }
   }

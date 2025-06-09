@@ -1,4 +1,4 @@
-type FieldType =
+export type FieldType =
   | "string"
   | "number"
   | "boolean"
@@ -6,13 +6,15 @@ type FieldType =
   | "array-string"
   | "array-number"
   | "array-boolean"
+  | "relation"
+  | "array-relation"
 
-type SchemaField = {
+export type SchemaField = {
   type: FieldType
   required?: boolean
   description?: string
+  relationPath?: string
+  default?: unknown
 }
 
-type Schema = Record<string, SchemaField>
-
-export type { Schema, SchemaField, FieldType }
+export type Schema = Record<string, SchemaField>

@@ -1,7 +1,12 @@
 ---
-milestone: 2025.01.01
+milestone: 2025.01.02
 is-done: false
-priority: 2
+priority: 0
+related-entity: products/api/entities/supplier-entity.md
+related-pages:
+  - products/client/pages/inventories.md
+  - products/client/pages/products.md
+  - products/client/pages/suppliers.md
 ---
 
 # 入庫処理を行う

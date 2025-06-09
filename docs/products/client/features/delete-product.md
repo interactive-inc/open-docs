@@ -2,6 +2,11 @@
 milestone: 2028.01.01
 is-done: false
 priority: 0
+related-entity: products/api/entities/product-entity.md
+related-pages:
+  - products/client/pages/inventories.transactions.md
+  - products/client/pages/products.md
+  - products/client/pages/inventories.md
 ---
 
 # 商品を削除する

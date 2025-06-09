@@ -1,6 +1,5 @@
 ---
-features:
-  - update-product
+features: []
 ---
 
 # 商品詳細ページ

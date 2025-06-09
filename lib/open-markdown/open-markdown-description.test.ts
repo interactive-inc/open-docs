@@ -216,7 +216,9 @@ schema: {}
 - add-inventory.md - 入庫処理を行う`
 
     const openMarkdown = new OpenMarkdown(markdown)
-    expect(openMarkdown.description).toBe("このディレクトリには、在庫管理システムの各機能要件を定義するファイルが含まれています。")
+    expect(openMarkdown.description).toBe(
+      "このディレクトリには、在庫管理システムの各機能要件を定義するファイルが含まれています。",
+    )
   })
 
   test("should extract multi-line description from content without H1", () => {
@@ -227,7 +229,9 @@ schema: {}
 ## 次の見出し`
 
     const openMarkdown = new OpenMarkdown(markdown)
-    expect(openMarkdown.description).toBe("これは複数行の\n説明文です。\n改行を含んでいます。")
+    expect(openMarkdown.description).toBe(
+      "これは複数行の\n説明文です。\n改行を含んでいます。",
+    )
   })
 
   test("should update description without H1 and add default title", () => {
@@ -238,7 +242,10 @@ schema: {}
 - add-inventory.md - 入庫処理を行う`
 
     const openMarkdown = new OpenMarkdown(markdown)
-    const updated = openMarkdown.withDescription("新しい説明文です。", "features")
+    const updated = openMarkdown.withDescription(
+      "新しい説明文です。",
+      "features",
+    )
 
     expect(updated.title).toBe("features")
     expect(updated.description).toBe("新しい説明文です。")
@@ -264,11 +271,16 @@ schema:
 ## ファイル一覧`
 
     const openMarkdown = new OpenMarkdown(markdown)
-    const updated = openMarkdown.withDescription("更新された説明文です。", "features")
+    const updated = openMarkdown.withDescription(
+      "更新された説明文です。",
+      "features",
+    )
 
     expect(updated.text).toContain("# features")
     expect(updated.text).toContain("更新された説明文です。")
-    expect(updated.text).not.toContain("このディレクトリには、在庫管理システムの各機能要件を定義するファイルが含まれています。")
+    expect(updated.text).not.toContain(
+      "このディレクトリには、在庫管理システムの各機能要件を定義するファイルが含まれています。",
+    )
     expect(updated.text).toContain("## ファイル一覧")
   })
 })

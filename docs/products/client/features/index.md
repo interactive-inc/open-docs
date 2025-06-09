@@ -1,21 +1,36 @@
 ---
-icon: 🐈
+icon: 🏯
 schema:
   milestone:
     type: string
     required: false
     description: マイルストーン
+    default: null
   is-done:
     type: boolean
     required: false
     description: 完了フラグ
+    default: false
   priority:
     type: number
     required: false
     description: 優先度（0-100）
+    default: 0
+  related-entity:
+    type: relation
+    required: false
+    description: 関連エンティティ
+    relationPath: products/api/entities
+    default: null
+  related-pages:
+    type: array-relation
+    required: false
+    description: 関連ページ
+    relationPath: products/client/pages
+    default: []
 ---
 
-# a
+# 機能
 
 このディレクトリには、在庫管理システムの各機能要件を定義するファイルが含まれています。
 

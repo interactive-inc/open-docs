@@ -1,6 +1,7 @@
 "use client"
 
 import { EditableTableCell } from "@/app/_components/editable-table-cell"
+import { Button } from "@/app/_components/ui/button"
 import { Card } from "@/app/_components/ui/card"
 import {
   Table,
@@ -11,127 +12,240 @@ import {
   TableRow,
 } from "@/app/_components/ui/table"
 import { apiClient } from "@/lib/api-client"
-import type { SchemaDefinition } from "@/lib/types/schema-types"
-import { useSuspenseQueries } from "@tanstack/react-query"
+import type { DirectoryFile } from "@/system/types"
+import type { TableColumn } from "@/system/types"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { Plus, Trash2 } from "lucide-react"
 import Link from "next/link"
+import { useState } from "react"
 
 type Props = {
-  files: string[]
-  schema?: SchemaDefinition | null
-  onUpdate: (path: string, field: string, value: unknown) => void
-  fileContents?: Array<{
+  files: DirectoryFile[]
+  columns: TableColumn[]
+  directoryPath: string
+  onDataChanged?: () => void
+  relations?: Array<{
     path: string
-    frontMatter: Record<string, unknown> | null
-    content: string
-    title: string | null
-    description: string | null
+    files: Array<{
+      value: string
+      label: string
+      path: string
+    }>
   }>
 }
 
 export function DirectoryTableView(props: Props) {
-  // fileContentsが提供されている場合は、それを使用
-  const filesData = props.fileContents || []
+  const queryClient = useQueryClient()
+  const [deleteConfirmFiles, setDeleteConfirmFiles] = useState<Set<string>>(
+    new Set(),
+  )
 
-  // fileContentsが提供されていない場合のみ、個別にフェッチ
-  const queries = useSuspenseQueries({
-    queries: props.fileContents
-      ? []
-      : props.files.map((filePath) => ({
-          queryKey: ["file-content", filePath.replace(/^docs\//, "")],
-          queryFn: async () => {
-            const normalizedPath = filePath.replace(/^docs\//, "")
-            const response = await apiClient.api.files[":path{.+}"].$get({
-              param: {
-                path: normalizedPath,
-              },
-            })
+  const createFileMutation = useMutation({
+    async mutationFn() {
+      const endpoint = apiClient.api.files
+      const resp = await endpoint.$post({
+        json: {
+          directoryPath: props.directoryPath,
+        },
+      })
 
-            if (!response.ok) {
-              throw new Error("Failed to fetch file")
-            }
+      return resp.json()
+    },
+    onSuccess() {
+      // ファイルツリーキャッシュを無効化
+      queryClient.invalidateQueries({ queryKey: ["file-tree"] })
 
-            return response.json()
-          },
-        })),
+      if (!props.onDataChanged) return
+      props.onDataChanged()
+    },
+  })
+
+  const updateCellMutation = useMutation({
+    async mutationFn(params: {
+      path: string
+      field: string
+      value: unknown
+    }) {
+      const endpoint = apiClient.api.files[":path{.+}"]
+      const resp = await endpoint.$put({
+        param: { path: params.path.replace(/^docs\//, "") },
+        json: {
+          properties: { [params.field]: params.value },
+          body: null,
+          title: null,
+          description: null,
+        },
+      })
+
+      return resp.json()
+    },
+    onSuccess() {
+      if (!props.onDataChanged) return
+      props.onDataChanged()
+    },
+  })
+
+  const updateTitleMutation = useMutation({
+    async mutationFn(params: {
+      path: string
+      title: string
+    }) {
+      const endpoint = apiClient.api.files[":path{.+}"]
+      const resp = await endpoint.$put({
+        param: { path: params.path.replace(/^docs\//, "") },
+        json: {
+          title: params.title,
+          properties: null,
+          body: null,
+          description: null,
+        },
+      })
+
+      return resp.json()
+    },
+    onSuccess() {
+      if (!props.onDataChanged) return
+      props.onDataChanged()
+    },
+  })
+
+  const deleteFileMutation = useMutation({
+    async mutationFn(filePath: string) {
+      const path = filePath.replace(/^docs\//, "")
+      // パスの各セグメントを個別にエンコードしてから結合
+      const pathSegments = path
+        .split("/")
+        .map((segment) => encodeURIComponent(segment))
+      const encodedPath = pathSegments.join("/")
+      const resp = await fetch(`/api/files/${encodedPath}`, {
+        method: "DELETE",
+      })
+
+      if (!resp.ok) {
+        const errorText = await resp.text()
+        throw new Error(`Failed to delete file: ${errorText}`)
+      }
+
+      return resp.json()
+    },
+    onSuccess() {
+      // ファイルツリーキャッシュを無効化
+      queryClient.invalidateQueries({ queryKey: ["file-tree"] })
+
+      if (!props.onDataChanged) return
+      props.onDataChanged()
+    },
   })
 
   const formatPath = (path: string) => {
     return path.replace(/^docs\//, "")
   }
 
-  // スキーマからカラムを生成
-  const columns = props.schema
-    ? Object.entries(props.schema).map(([key, field]) => ({
-        key,
-        label: field.description || key,
-        type: field.type,
-      }))
-    : []
+  const handleDeleteClick = (filePath: string) => {
+    if (deleteConfirmFiles.has(filePath)) {
+      // 2回目のクリック - ファイルを削除
+      deleteFileMutation.mutate(filePath)
+      setDeleteConfirmFiles(new Set())
+    } else {
+      // 1回目のクリック - 確認状態にする
+      setDeleteConfirmFiles(new Set([filePath]))
+    }
+  }
 
   return (
-    <Card className="overflow-x-scroll rounded-md p-0">
+    <Card className="gap-0 overflow-x-scroll rounded-md p-0">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[200px]">ファイル名</TableHead>
-            <TableHead className="w-[300px]">タイトル</TableHead>
-            {columns.map((column) => (
+            <TableHead className="w-40">ファイル名</TableHead>
+            <TableHead className="w-40">タイトル</TableHead>
+            {props.columns.map((column) => (
               <TableHead key={column.key}>{column.label}</TableHead>
             ))}
+            <TableHead className="w-16" />
           </TableRow>
         </TableHeader>
         <TableBody>
-          {props.files.map((filePath, index) => {
-            // fileContentsから対応するデータを取得、または個別クエリの結果を使用
-            const data = props.fileContents
-              ? filesData.find((f) => {
-                  // 複数のパターンでマッチング試行
-                  const normalizedFilePath = formatPath(filePath)
-                  const fileBasename = filePath.split("/").pop()
-                  return (
-                    f.path === filePath ||
-                    f.path === normalizedFilePath ||
-                    f.path.endsWith(fileBasename || "")
-                  )
-                })
-              : queries[index]?.data
-
-            const fileName =
-              (filePath || "").split("/").pop()?.replace(".md", "") || ""
-
+          {props.files.map((fileData) => {
             return (
-              <TableRow key={filePath}>
+              <TableRow key={fileData.path}>
                 <TableCell className="font-medium">
                   <Link
-                    href={`/${formatPath(filePath || "")}`}
+                    href={`/${formatPath(fileData.path || "")}`}
                     className="text-blue-600 hover:underline"
                   >
-                    {fileName}
+                    {fileData.fileName}
                   </Link>
                 </TableCell>
-                <TableCell className="font-normal">
-                  {data && "title" in data ? data.title || "-" : "-"}
+                <TableCell className="p-0">
+                  <EditableTableCell
+                    value={fileData.title || ""}
+                    type="string"
+                    onUpdate={(newValue) => {
+                      return updateTitleMutation.mutate({
+                        path: fileData.path || "",
+                        title: String(newValue),
+                      })
+                    }}
+                  />
                 </TableCell>
-                {columns.map((column) => {
-                  const value = data?.frontMatter?.[column.key]
+                {props.columns.map((column) => {
+                  // リレーション情報を取得
+                  const relationData = props.relations?.find(
+                    (rel) => rel.path === column.relationPath,
+                  )
+
+                  const cellValue = fileData.frontMatter?.[column.key]
 
                   return (
                     <TableCell key={column.key} className="p-0">
                       <EditableTableCell
-                        value={value}
+                        value={cellValue}
                         type={column.type}
-                        onUpdate={async (newValue) => {
-                          props.onUpdate(filePath || "", column.key, newValue)
+                        relationPath={column.relationPath}
+                        relationOptions={relationData?.files}
+                        onUpdate={(newValue) => {
+                          return updateCellMutation.mutate({
+                            path: fileData.path || "",
+                            field: column.key,
+                            value: newValue,
+                          })
                         }}
                       />
                     </TableCell>
                   )
                 })}
+                <TableCell className="p-2">
+                  <Button
+                    size="sm"
+                    variant={
+                      deleteConfirmFiles.has(fileData.path)
+                        ? "destructive"
+                        : "ghost"
+                    }
+                    onClick={() => handleDeleteClick(fileData.path)}
+                    disabled={deleteFileMutation.isPending}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </TableCell>
               </TableRow>
             )
           })}
         </TableBody>
       </Table>
+      <div className="border-t p-2">
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => createFileMutation.mutate()}
+          disabled={createFileMutation.isPending}
+        >
+          <Plus className="h-4 w-4" />
+          {"新しいファイル"}
+        </Button>
+      </div>
     </Card>
   )
 }

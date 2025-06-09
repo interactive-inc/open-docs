@@ -35,6 +35,7 @@ Update the task list if new tasks arise during the work.
 - Define only one function or class or type per file
 - Do not use multiple exports in a single file
 - Delete unnecessary files
+- Do NOT make index.ts files
 
 ## Commands
 

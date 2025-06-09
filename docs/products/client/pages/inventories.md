@@ -1,6 +1,6 @@
 ---
 features:
-  - list-inventory
+  - products/client/features/create-product.md
 ---
 
 # 在庫一覧ページ

@@ -1,44 +1,74 @@
 "use client"
 
-import { FeatureCard } from "@/app/_components/feature-card"
 import { Card } from "@/app/_components/ui/card"
-import type { zFeature } from "@/lib/models/feature"
-import type { zMilestone } from "@/lib/models/milestone"
+import { apiClient } from "@/lib/api-client"
+import { useSuspenseQuery } from "@tanstack/react-query"
 
 type Props = {
-  milestones: Array<ReturnType<typeof zMilestone.parse>>
-  features: Array<ReturnType<typeof zFeature.parse>>
-  cwd: string
   project: string
 }
 
 export function MilestonesEditor(props: Props) {
+  const { data: milestonesData } = useSuspenseQuery({
+    queryKey: ["directories", `products/${props.project}/milestones`],
+    queryFn: async () => {
+      const response = await apiClient.api.directories[":path{.+}"].$get({
+        param: { path: `products/${props.project}/milestones` },
+      })
+      if (!response.ok) {
+        throw new Error("Failed to fetch milestones")
+      }
+      return response.json()
+    },
+  })
+
+  const { data: featuresData } = useSuspenseQuery({
+    queryKey: ["directories", `products/${props.project}/features`],
+    queryFn: async () => {
+      const response = await apiClient.api.directories[":path{.+}"].$get({
+        param: { path: `products/${props.project}/features` },
+      })
+      if (!response.ok) {
+        throw new Error("Failed to fetch features")
+      }
+      return response.json()
+    },
+  })
+
+  const milestones = milestonesData.files || []
+  const features = featuresData.files || []
+
   function getFeaturesByMilestone(milestoneId: string) {
-    return props.features.filter((feature) => feature.milestone === milestoneId)
+    return features.filter(
+      (feature: any) => feature.frontMatter?.milestone === milestoneId,
+    )
   }
 
   return (
     <div className="grid gap-2">
-      {props.milestones.map((milestone) => {
-        const milestoneFeatures = getFeaturesByMilestone(milestone.id)
+      {milestones.map((milestone: any) => {
+        const milestoneFeatures = getFeaturesByMilestone(milestone.fileName)
         return (
-          <Card key={milestone.id} className="gap-2 overflow-hidden p-2">
+          <Card key={milestone.fileName} className="gap-2 overflow-hidden p-2">
             <div className="space-y-1">
-              <h2 className="font-semibold text-xl">{milestone.title}</h2>
+              <h2 className="font-semibold text-xl">
+                {milestone.title || milestone.fileName}
+              </h2>
               <p className="text-muted-foreground text-sm">
                 {milestone.description}
               </p>
             </div>
             {milestoneFeatures.length > 0 ? (
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {milestoneFeatures.map((feature) => (
-                  <FeatureCard
-                    key={feature.id}
-                    feature={feature}
-                    pageId=""
-                    cwd={props.cwd}
-                    project={props.project}
-                  />
+                {milestoneFeatures.map((feature: any) => (
+                  <div key={feature.fileName} className="rounded border p-2">
+                    <h3 className="font-medium">
+                      {feature.title || feature.fileName}
+                    </h3>
+                    <p className="text-muted-foreground text-sm">
+                      {feature.description}
+                    </p>
+                  </div>
                 ))}
               </div>
             ) : (

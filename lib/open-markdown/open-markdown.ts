@@ -69,7 +69,7 @@ export class OpenMarkdown {
 
     // H1を見つける
     const h1Match = content.match(/^#\s+(.+)$/m)
-    
+
     let searchContent: string
     if (h1Match) {
       // H1がある場合は、H1の後の内容から検索
@@ -162,13 +162,13 @@ export class OpenMarkdown {
 
     // H1を見つける
     const h1Match = content.match(/^#\s+(.+)$/m)
-    
+
     if (!h1Match) {
       // H1がない場合、最初の段落をdescriptionとして抽出
       const paragraphMatch = content.match(
         /^(\s*)([^#\n*-][^\n]*(?:\n(?![#\s*-])[^\n]*)*)(.*)/ms,
       )
-      
+
       if (paragraphMatch) {
         const [, , descriptionPart, remaining] = paragraphMatch
         return {
@@ -177,7 +177,7 @@ export class OpenMarkdown {
           body: remaining?.trim() ?? "",
         }
       }
-      
+
       return {
         title: null,
         description: null,

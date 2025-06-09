@@ -26,6 +26,12 @@ export function createZodSchemaFromDefinition(schemaDef: SchemaDefinition) {
       case "array-boolean":
         fieldSchema = z.array(z.boolean())
         break
+      case "relation":
+        fieldSchema = z.string().nullable()
+        break
+      case "array-relation":
+        fieldSchema = z.array(z.string())
+        break
       default:
         throw new Error(`Unknown field type: ${fieldDef.type}`)
     }

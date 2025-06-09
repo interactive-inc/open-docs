@@ -1,16 +1,21 @@
-import { PageView } from "@/app/_components/page-view"
-import { Suspense } from "react"
+"use client"
+
+import { DirectoryPageView } from "@/app/_components/directory-page-view"
+import { FilePageView } from "@/app/_components/file-view/file-page-view"
+import { useParams } from "next/navigation"
 
 export default function Page() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex h-[50vh] items-center justify-center">
-          <div className="text-muted-foreground">読み込み中...</div>
-        </div>
-      }
-    >
-      <PageView />
-    </Suspense>
-  )
+  const params = useParams<{ directories: string[] }>()
+
+  const currentPath = params.directories.join("/")
+
+  const supportedExtensions = [".md", ".csv", ".json", ".mermaid"]
+
+  const isFile = supportedExtensions.some((ext) => currentPath.endsWith(ext))
+
+  if (isFile) {
+    return <FilePageView filePath={currentPath} />
+  }
+
+  return <DirectoryPageView key={currentPath} currentPath={currentPath} />
 }

@@ -2,6 +2,9 @@
 milestone: 2028.01.01
 is-done: false
 priority: 0
+related-entity: null
+related-pages:
+  - products/client/pages/inventories.md
 ---
 
 # 在庫移動を行う

@@ -1,5 +1,9 @@
 ---
 features:
+  - products/client/features/add-inventory.md
+  - products/client/features/delete-product.md
+  - products/client/features/list-inventory.md
+  - products/client/features/create-product.md
 ---
 
 # カテゴリ管理ページ

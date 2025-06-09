@@ -1,7 +1,8 @@
 import path from "node:path"
 import { DocEngine } from "@/lib/docs-engine/doc-engine"
 import { factory } from "@/lib/factory"
-import { zAppError, zAppFileProperties } from "@/lib/models"
+import { zAppError } from "@/lib/models/app-error"
+import { zAppFileProperties } from "@/lib/models/app-file-properties"
 import { OpenMarkdown } from "@/lib/open-markdown/open-markdown"
 import { zValidator } from "@hono/zod-validator"
 import { HTTPException } from "hono/http-exception"
@@ -15,8 +16,8 @@ export const PUT = factory.createHandlers(
     "json",
     z.object({
       properties: z.record(z.string(), z.unknown()).nullable(),
-      title: z.string().optional(),
-      description: z.string().optional(),
+      title: z.string().nullable().optional(),
+      description: z.string().nullable().optional(),
     }),
   ),
   async (c) => {
@@ -60,14 +61,14 @@ export const PUT = factory.createHandlers(
     let updatedFrontMatter = { ...docFile.frontMatter.data }
 
     // titleが指定されている場合はH1を更新
-    if (body.title !== undefined) {
+    if (body.title !== undefined && body.title !== null) {
       const openMd = new OpenMarkdown(updatedContent)
       const updatedMd = openMd.withTitle(body.title)
       updatedContent = updatedMd.text
     }
 
     // descriptionが指定されている場合はH1の次の段落を更新
-    if (body.description !== undefined) {
+    if (body.description !== undefined && body.description !== null) {
       const openMd = new OpenMarkdown(updatedContent)
       // H1がない場合のデフォルトタイトルを取得（ディレクトリ名から）
       const dirName = path.basename(directoryPath)

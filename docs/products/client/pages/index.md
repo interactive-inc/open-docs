@@ -1,7 +1,12 @@
 ---
-features:
-  - list-products
-  - list-inventory
+icon: 📁
+schema:
+  features:
+    type: array-relation
+    required: false
+    description: 機能
+    relationPath: products/client/features
+    default: []
 ---
 
 # ダッシュボード

@@ -1,6 +1,5 @@
 ---
 icon: 📚
-description: これは用語集です
 schema:
   term:
     type: string

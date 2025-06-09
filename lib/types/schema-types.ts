@@ -5,11 +5,15 @@ export type SchemaFieldType =
   | "array-string"
   | "array-number"
   | "array-boolean"
+  | "relation"
+  | "array-relation"
 
 export type SchemaField = {
   type: SchemaFieldType
   required?: boolean
   description?: string
+  default?: unknown
+  relationPath?: string
 }
 
 export type SchemaDefinition = {

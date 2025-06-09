@@ -1,5 +1,5 @@
 ---
-features:
+features: []
 ---
 
 # 取引先管理ページ

@@ -1,6 +1,7 @@
 "use client"
 import { DirectoryTableView } from "@/app/_components/directory-table-view"
 import { SidebarButton } from "@/app/_components/sidebar-button"
+import { EmojiPicker } from "@/app/_components/ui/emoji-picker"
 import { Input } from "@/app/_components/ui/input"
 import { Textarea } from "@/app/_components/ui/textarea"
 import { VscodeButton } from "@/app/_components/vscode-button"
@@ -27,17 +28,13 @@ export function DirectoryPageView(props: Props) {
 
   const directoryData = query.data
 
-  // H1からタイトルを取得、なければディレクトリ名を使用
-  const getInitialTitle = () => {
-    if (directoryData.title) return directoryData.title
-    return directoryData.directoryName || ""
-  }
-
-  const [title, setTitle] = useState(getInitialTitle())
+  const [title, setTitle] = useState(directoryData.title || "")
 
   const [description, setDescription] = useState(
     directoryData.description || "",
   )
+
+  const [icon, setIcon] = useState(directoryData.icon || "📁")
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value)
@@ -73,29 +70,23 @@ export function DirectoryPageView(props: Props) {
     })
   }
 
-  const handleCellUpdate = async (
-    path: string,
-    field: string,
-    value: unknown,
-  ) => {
-    const response = await apiClient.api.files[":path{.+}"].$put({
-      param: { path: path.replace(/^docs\//, "") },
+  const handleIconSelect = async (newIcon: string) => {
+    setIcon(newIcon)
+    await apiClient.api.directories[":path{.+}"].$put({
+      param: {
+        path: props.currentPath,
+      },
       json: {
-        properties: { [field]: value },
-        body: null,
+        properties: { icon: newIcon },
         title: null,
         description: null,
       },
     })
-    if (!response.ok) {
-      console.error("Failed to update cell")
-    } else {
-      // セル更新後にディレクトリデータを再取得
-      query.refetch()
-    }
+    // キャッシュを更新して最新データを取得
+    query.refetch()
   }
 
-  if (directoryData.markdownFilePaths.length === 0) {
+  if (directoryData.files.length === 0) {
     return (
       <div className="p-4">
         <h1 className="mb-4 font-bold text-xl">
@@ -121,11 +112,12 @@ export function DirectoryPageView(props: Props) {
               variant="outline"
             />
           )}
+          <EmojiPicker currentIcon={icon} onIconSelect={handleIconSelect} />
           <Input
             value={title}
             onChange={handleTitleChange}
             onBlur={handleTitleBlur}
-            placeholder={directoryData.directoryName}
+            placeholder="タイトルを入力"
             className="flex-1"
           />
         </div>
@@ -137,10 +129,11 @@ export function DirectoryPageView(props: Props) {
           rows={2}
         />
         <DirectoryTableView
-          files={directoryData.markdownFilePaths}
-          schema={directoryData.schema}
-          onUpdate={handleCellUpdate}
-          fileContents={directoryData.files}
+          files={directoryData.files}
+          columns={directoryData.columns}
+          directoryPath={props.currentPath}
+          relations={directoryData.relations}
+          onDataChanged={() => query.refetch()}
         />
       </div>
     </div>

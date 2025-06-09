@@ -3,12 +3,15 @@
 import { FileContentView } from "@/app/_components/file-view/file-content-view"
 import { ReloadButton } from "@/app/_components/reload-button"
 import { SidebarButton } from "@/app/_components/sidebar-button"
+import { Button } from "@/app/_components/ui/button"
 import { Input } from "@/app/_components/ui/input"
 import { VscodeButton } from "@/app/_components/vscode-button"
 import { apiClient } from "@/lib/api-client"
+import { useDirectorySchema } from "@/lib/hooks/use-directory-schema"
 import { useFileContent } from "@/lib/hooks/use-file-content"
-import { useSaveFileContent } from "@/lib/hooks/use-save-file-content"
 import { useUpdateProperties } from "@/lib/hooks/use-update-properties"
+import { ArrowLeft } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 
 type Props = {
@@ -16,9 +19,13 @@ type Props = {
 }
 
 export function FilePageView(props: Props) {
+  const router = useRouter()
   const fileContentQuery = useFileContent(props.filePath)
+  const directorySchemaQuery = useDirectorySchema(props.filePath)
 
   const fileData = fileContentQuery.data
+  const directorySchema = directorySchemaQuery.data?.schema || {}
+  const relations = directorySchemaQuery.data?.relations || []
 
   const [currentContent, setCurrentContent] = useState(fileData.content)
 
@@ -30,17 +37,24 @@ export function FilePageView(props: Props) {
 
   const [title, setTitle] = useState(getInitialTitle())
 
-  const saveFileContent = useSaveFileContent()
-
   const updateProperties = useUpdateProperties()
 
   const onChange = async (newContent: string) => {
-    const result = await saveFileContent.mutateAsync({
-      filePath: props.filePath,
-      content: newContent,
+    const normalizedPath = props.filePath.replace(/^docs\//, "")
+
+    const result = await apiClient.api.files[":path{.+}"].$put({
+      param: { path: normalizedPath },
+      json: {
+        title: null,
+        properties: null,
+        body: newContent,
+        description: null,
+      },
     })
-    if ("content" in result) {
-      setCurrentContent(result.content)
+
+    const data = await result.json()
+    if ("content" in data) {
+      setCurrentContent(data.content)
     }
   }
 
@@ -92,6 +106,14 @@ export function FilePageView(props: Props) {
     }
   }
 
+  const handleBackClick = () => {
+    // ファイルパスからディレクトリパスを取得
+    const pathSegments = props.filePath.split("/")
+    pathSegments.pop() // ファイル名を除去
+    const directoryPath = pathSegments.join("/")
+    router.push(`/${directoryPath}`)
+  }
+
   return (
     <div className="space-y-2 p-4">
       <div className="flex items-center gap-2">
@@ -102,6 +124,9 @@ export function FilePageView(props: Props) {
           size="icon"
           variant="outline"
         />
+        <Button onClick={handleBackClick} size="icon" variant="outline">
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
         <Input
           value={title}
           onChange={handleTitleChange}
@@ -122,6 +147,8 @@ export function FilePageView(props: Props) {
           currentContent={currentContent}
           onChange={onChange}
           onFrontMatterUpdate={handleFrontMatterUpdate}
+          schema={directorySchema}
+          relations={relations}
         />
       </div>
     </div>

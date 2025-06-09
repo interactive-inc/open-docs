@@ -7,6 +7,8 @@ import {
   SelectValue,
 } from "@/app/_components/ui/select"
 import { useEffect, useState } from "react"
+import { ArrayRelationSelect } from "./array-relation-select"
+import { SingleRelationSelect } from "./single-relation-select"
 
 type Props = {
   fieldKey: string
@@ -14,6 +16,15 @@ type Props = {
   originalValue: unknown
   onValueChange: (key: string, value: string) => void
   onBlur: (key: string, value: string) => void
+  schemaField?: {
+    type: string
+    relationPath?: string
+  }
+  relationOptions?: Array<{
+    value: string
+    label: string
+    path: string
+  }>
 }
 
 /**
@@ -40,6 +51,52 @@ export function FrontMatterInputField(props: Props) {
       return value.join(", ")
     }
     return String(value)
+  }
+
+  // リレーション型の場合
+  if (
+    props.schemaField &&
+    props.schemaField.type === "relation" &&
+    props.schemaField.relationPath
+  ) {
+    return (
+      <SingleRelationSelect
+        value={(props.value as string) || ""}
+        relationOptions={props.relationOptions}
+        onValueChange={(value) => props.onValueChange(props.fieldKey, value)}
+      />
+    )
+  }
+
+  // 配列リレーション型の場合
+  if (
+    props.schemaField &&
+    props.schemaField.type === "array-relation" &&
+    props.schemaField.relationPath
+  ) {
+    // 値を配列に正規化
+    let normalizedValue: string[] = []
+    if (Array.isArray(props.value)) {
+      normalizedValue = props.value.filter(
+        (v) => typeof v === "string" && v.trim() !== "",
+      )
+    } else if (typeof props.value === "string" && props.value.trim() !== "") {
+      normalizedValue = props.value
+        .split(",")
+        .map((v) => v.trim())
+        .filter((v) => v !== "")
+    }
+
+    return (
+      <ArrayRelationSelect
+        value={normalizedValue}
+        relationOptions={props.relationOptions}
+        onValueChange={(value) =>
+          props.onValueChange(props.fieldKey, value.join(", "))
+        }
+        wrap={true}
+      />
+    )
   }
 
   if (typeof props.originalValue === "boolean") {

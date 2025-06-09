@@ -1,8 +1,9 @@
 import { OpenMarkdown } from "@/lib/open-markdown/open-markdown"
-import { directoryFrontMatterSchema } from "@/lib/validations/directory-front-matter-schema"
+import type { SchemaField } from "@/lib/types/schema-types"
+// import { directoryFrontMatterSchema } from "@/lib/validations/directory-front-matter-schema"
 import type { Schema } from "@/lib/validations/doc-schema"
+// import { DocDirectoryFrontMatter } from "./doc-directory-front-matter"
 import type { DocFile } from "./doc-file"
-import { DocDirectoryFrontMatter } from "./models/doc-directory-front-matter"
 
 type Props = {
   schema: Schema
@@ -65,6 +66,71 @@ export class DocDirectory {
   }
 
   /**
+   * スキーマからリレーションフィールドを取得
+   */
+  getRelationFields(): Array<{
+    fieldName: string
+    relationPath: string
+    isArray: boolean
+  }> {
+    const relationFields: Array<{
+      fieldName: string
+      relationPath: string
+      isArray: boolean
+    }> = []
+
+    for (const [fieldName, field] of Object.entries(this.schema)) {
+      const fieldDef = field as SchemaField
+      if (
+        (fieldDef.type === "relation" || fieldDef.type === "array-relation") &&
+        fieldDef.relationPath
+      ) {
+        relationFields.push({
+          fieldName,
+          relationPath: fieldDef.relationPath,
+          isArray: fieldDef.type === "array-relation",
+        })
+      }
+    }
+
+    return relationFields
+  }
+
+  /**
+   * スキーマをAPI用に変換
+   */
+  convertSchemaForApi() {
+    if (!this.schema) return null
+
+    const converted: Record<
+      string,
+      {
+        type: string
+        required?: boolean
+        description?: string
+        relationPath?: string
+        default?: unknown
+      }
+    > = {}
+
+    for (const [key, field] of Object.entries(this.schema)) {
+      let type = field.type
+      if (type === "array") {
+        type = "array-string" // デフォルト変換
+      }
+
+      converted[key] = {
+        type,
+        required: field.required,
+        description: field.description,
+        relationPath: field.relationPath,
+        default: field.default,
+      }
+    }
+    return converted
+  }
+
+  /**
    * JSON形式に変換
    */
   toJSON(): {
@@ -75,6 +141,11 @@ export class DocDirectory {
     icon: string | null
     path: string
     indexPath: string
+    relationFields: Array<{
+      fieldName: string
+      relationPath: string
+      isArray: boolean
+    }>
   } {
     return {
       isFile: false,
@@ -84,6 +155,7 @@ export class DocDirectory {
       icon: this.icon,
       path: this.path,
       indexPath: this.indexPath,
+      relationFields: this.getRelationFields(),
     }
   }
 
@@ -107,29 +179,14 @@ export class DocDirectory {
     path: string,
     docFile: DocFile<Record<string, unknown>>,
   ): DocDirectory {
-    const validation = docFile.frontMatter.validateWith(
-      directoryFrontMatterSchema,
-    )
-
-    if (validation.success) {
-      return new DocDirectory({
-        schema: validation.data.schema || {},
-        title: docFile.title || docFile.frontMatter.title,
-        description: null,
-        icon: docFile.frontMatter.icon,
-        path,
-      })
-    }
-
     const rawData = docFile.frontMatter.data as Record<string, unknown>
-
     const schema = (rawData?.schema as Schema) || {}
 
     return new DocDirectory({
       schema,
-      title: docFile.title || docFile.frontMatter.title,
+      title: docFile.title || (rawData?.title as string) || null,
       description: null,
-      icon: docFile.frontMatter.icon,
+      icon: (rawData?.icon as string) || null,
       path,
     })
   }
@@ -139,32 +196,14 @@ export class DocDirectory {
    */
   static fromMarkdown(path: string, markdownContent: string): DocDirectory {
     const openMarkdown = new OpenMarkdown(markdownContent)
-
-    const frontMatter = DocDirectoryFrontMatter.from(
-      openMarkdown.frontMatter.data ?? {},
-    )
-
-    const validation = frontMatter.validateWith(directoryFrontMatterSchema)
-
-    if (validation.success) {
-      return new DocDirectory({
-        schema: validation.data.schema || {},
-        title: openMarkdown.title || frontMatter.title,
-        description: frontMatter.description,
-        icon: frontMatter.icon,
-        path,
-      })
-    }
-
     const rawData = openMarkdown.frontMatter.data || {}
-
     const schema = (rawData?.schema as Schema) || {}
 
     return new DocDirectory({
       schema,
-      title: openMarkdown.title || frontMatter.title,
-      description: frontMatter.description,
-      icon: frontMatter.icon,
+      title: openMarkdown.title || (rawData?.title as string) || null,
+      description: (rawData?.description as string) || null,
+      icon: (rawData?.icon as string) || null,
       path,
     })
   }

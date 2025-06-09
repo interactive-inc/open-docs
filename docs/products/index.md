@@ -1,6 +1,5 @@
 ---
 icon: 👀
-description: ​ああああ
 schema:
   name:
     type: string

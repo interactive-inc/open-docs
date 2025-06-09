@@ -1,8 +1,5 @@
 ---
-features:
-  - list-products
-  - create-product
-  - delete-product
+features: []
 ---
 
 # 商品一覧ページ

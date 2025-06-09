@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { zAppFileFrontMatter } from "./app-file-front-matter"
+import { zAppFileFrontMatter } from "../../../system/models/app-file-front-matter"
 
 export const zMarkdownFileData = z.object({
   filePath: z.string(),

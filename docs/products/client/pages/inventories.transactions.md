@@ -1,8 +1,6 @@
 ---
 features:
-  - add-inventory
-  - remove-inventory
-  - move-inventory
+  - products/client/features/add-inventory.md
 ---
 
 # 在庫取引ページ

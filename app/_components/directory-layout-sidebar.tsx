@@ -1,5 +1,6 @@
 "use client"
 import { DirectoryFileTreeNode } from "@/app/_components/directory-file-tree-node"
+import { Button } from "@/app/_components/ui/button"
 import {
   Sidebar,
   SidebarContent,
@@ -9,11 +10,13 @@ import {
   SidebarGroupLabel,
   SidebarInset,
   SidebarMenu,
+  SidebarMenuItem,
   SidebarProvider,
 } from "@/app/_components/ui/sidebar"
 import { apiClient } from "@/lib/api-client"
 import type { FileNode } from "@/system/routes/files.tree"
 import { useSuspenseQuery } from "@tanstack/react-query"
+import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
@@ -22,8 +25,6 @@ type Props = {
 }
 
 export function DirectoryLayoutSidebar(props: Props) {
-  const [isClient, setIsClient] = useState(false)
-
   const [openPaths, setOpenPaths] = useState<Set<string>>(new Set())
 
   const [selectedDirectory, setSelectedDirectory] = useState<string>("")
@@ -32,27 +33,21 @@ export function DirectoryLayoutSidebar(props: Props) {
 
   const path = usePathname()
 
-  const { data } = useSuspenseQuery({
+  const query = useSuspenseQuery({
     queryKey: ["file-tree"],
     queryFn: async () => {
       const response = await apiClient.api.files.tree.$get()
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch file tree")
-      }
-
       return response.json()
     },
   })
-  const files = data.files
+
+  const files = query.data.files
 
   function getCurrentPath(path: string) {
     const dirPath = path
 
-    // パスを分解して各セグメントを確認
     const pathSegments = dirPath.split("/").filter(Boolean)
 
-    // 最後のセグメントがファイル名かチェック（ドットを含むか）
     if (pathSegments.length > 0) {
       const lastSegment = pathSegments[pathSegments.length - 1]
       if (lastSegment === undefined) {
@@ -61,7 +56,6 @@ export function DirectoryLayoutSidebar(props: Props) {
       const isFile = lastSegment.includes(".")
 
       if (isFile) {
-        // ファイル名を除外してディレクトリパスを取得
         pathSegments.pop()
         return `/${pathSegments.join("/")}`
       }
@@ -70,15 +64,8 @@ export function DirectoryLayoutSidebar(props: Props) {
     return dirPath
   }
 
-  // 現在のパスをディレクトリパスに変換
-  // ファイルパスもディレクトリパスとして扱えるように処理
   getCurrentPath(path)
 
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
-
-  // ファイルが変更された時に全ディレクトリを開く
   useEffect(() => {
     const collectAllDirectoryPaths = (nodes: FileNode[]): string[] => {
       const paths: string[] = []
@@ -98,9 +85,7 @@ export function DirectoryLayoutSidebar(props: Props) {
     setOpenPaths(new Set(allPaths))
   }, [files])
 
-  // パスが変更された時に選択ディレクトリを更新
   useEffect(() => {
-    // getCurrentPath関数をuseEffect内で定義
     const getCurrentDirectoryFromPath = (pathname: string) => {
       const dirPath = pathname
       const pathSegments = dirPath.split("/").filter(Boolean)
@@ -137,7 +122,6 @@ export function DirectoryLayoutSidebar(props: Props) {
     setOpenPaths(newOpenPaths)
   }
 
-  // 再帰的に全てのディレクトリを表示する関数
   const renderAllDirectories = (nodes: FileNode[], currentDepth = 0) => {
     return nodes.map((node) => (
       <DirectoryFileTreeNode
@@ -158,11 +142,39 @@ export function DirectoryLayoutSidebar(props: Props) {
       <Sidebar collapsible={"offcanvas"} variant={"inset"}>
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupLabel>{"ファイル"}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {isClient && renderAllDirectories(files)}
+                <div className="flex gap-2">
+                  <SidebarMenuItem>
+                    <Link href={"/"}>
+                      <Button
+                        className="w-full justify-start"
+                        variant={"secondary"}
+                        size={"sm"}
+                      >
+                        {"ホーム"}
+                      </Button>
+                    </Link>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <Link href={"/app/client"}>
+                      <Button
+                        className="w-full justify-start"
+                        variant={"secondary"}
+                        size={"sm"}
+                      >
+                        {"実験"}
+                      </Button>
+                    </Link>
+                  </SidebarMenuItem>
+                </div>
               </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+          <SidebarGroup>
+            <SidebarGroupLabel>{"ファイル"}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>{renderAllDirectories(files)}</SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>

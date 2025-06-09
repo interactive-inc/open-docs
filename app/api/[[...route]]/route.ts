@@ -1,19 +1,15 @@
 import { factory } from "@/lib/factory"
 import { GET as getDirectory } from "@/system/routes/directories.path"
 import { PUT as updateDirectory } from "@/system/routes/directories.update"
-import { PUT as updateFeaturePriority } from "@/system/routes/features.priority"
-import { PUT as updateFeatureStatus } from "@/system/routes/features.status"
-import { PUT as saveFileContent } from "@/system/routes/files.content"
-import { PUT as saveCsvFile } from "@/system/routes/files.csv"
-import { POST as moveFile } from "@/system/routes/files.move"
-import { GET as getFile, PUT as updateFile } from "@/system/routes/files.path"
-import { GET as getFileTree } from "@/system/routes/files.tree"
-import { DELETE as removeFeatureFromPage } from "@/system/routes/pages.features"
-import { GET as getProject } from "@/system/routes/projects.$project"
+import { POST as createFile } from "@/system/routes/files.create"
+import { PUT as moveFile } from "@/system/routes/files.move"
 import {
-  GET as getFeature,
-  PUT as updateFeature,
-} from "@/system/routes/projects.$project.features.$feature"
+  DELETE as deleteFile,
+  GET as getFile,
+  PUT as updateFile,
+} from "@/system/routes/files.path"
+import { PUT as updateFileSchema } from "@/system/routes/files.schema"
+import { GET as getFileTree } from "@/system/routes/files.tree"
 import { HTTPException } from "hono/http-exception"
 import { handle } from "hono/vercel"
 
@@ -22,20 +18,15 @@ export const runtime = "nodejs"
 export const app = factory
   .createApp()
   .basePath("/api")
-  .delete("/pages/features", ...removeFeatureFromPage)
-  .get("/projects/:project/features/:feature", ...getFeature)
-  .put("/projects/:project/features/:feature", ...updateFeature)
-  .get("/projects/:project", ...getProject)
   .get("/directories/:path{.+}", ...getDirectory)
   .put("/directories/:path{.+}", ...updateDirectory)
-  .put("/features/priority", ...updateFeaturePriority)
-  .put("/features/status", ...updateFeatureStatus)
   .get("/files/tree", ...getFileTree)
-  .post("/files/move", ...moveFile)
-  .put("/files/content", ...saveFileContent) // 廃止
-  .put("/files/csv", ...saveCsvFile) // 廃止
+  .post("/files", ...createFile)
+  .put("/files/move", ...moveFile)
+  .put("/files/schema", ...updateFileSchema)
   .put("/files/:path{.+}", ...updateFile) // ファイルの更新
   .get("/files/:path{.+}", ...getFile)
+  .delete("/files/:path{.+}", ...deleteFile) // ファイルの削除
 
 app.onError((err, c) => {
   console.error("API Error:", err)

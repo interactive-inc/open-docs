@@ -1,14 +1,12 @@
 import path from "node:path"
 import { DocFileSystem } from "@/lib/docs-engine/doc-file-system"
-import type {
-  DocsEngineProps,
-  MarkdownFileData,
-} from "@/lib/docs-engine/models"
-import { zAppFileFrontMatter } from "@/lib/docs-engine/models"
+import type { DocsEngineProps } from "@/lib/docs-engine/models/docs-engine-props"
+import type { MarkdownFileData } from "@/lib/docs-engine/models/markdown-file-data"
 import { OpenMarkdown } from "@/lib/open-markdown/open-markdown"
+import { zAppFileFrontMatter } from "@/system/models/app-file-front-matter"
 import { DocDirectory } from "./doc-directory"
 import { DocFile } from "./doc-file"
-import { DocFileFrontMatter } from "./models/doc-file-front-matter"
+// import { DocFileFrontMatter } from "./doc-file-front-matter"
 
 /**
  * Docsディレクトリのファイルシステムエンジン
@@ -39,6 +37,13 @@ export class DocEngine {
    */
   async writeFileContent(relativePath: string, content: string): Promise<void> {
     return this.deps.fileSystem.writeFile(relativePath, content)
+  }
+
+  /**
+   * ファイルを保存する（AppEngine用）
+   */
+  async saveFile(relativePath: string, content: string): Promise<void> {
+    return this.writeFileContent(relativePath, content)
   }
 
   /**
@@ -108,7 +113,7 @@ export class DocEngine {
     return new DocFile({
       content: openMarkdown.content,
       filePath: fullPath,
-      frontMatter: DocFileFrontMatter.from(openMarkdown.frontMatter.data ?? {}),
+      frontMatter: { data: openMarkdown.frontMatter.data ?? {} },
       title: openMarkdown.title,
     })
   }
@@ -257,17 +262,24 @@ export class DocEngine {
   }
 
   /**
-   * ファイルデータを取得する
+   * ファイルデータを取得する（スキーマベースでFrontMatterを補完）
    */
   async getFile(relativePath: string): Promise<DocFile> {
     const content = await this.deps.fileSystem.readFile(relativePath)
     const openMarkdown = this.markdown(content)
     const fullPath = this.deps.fileSystem.resolve(relativePath)
 
+    // スキーマベースでFrontMatterを補完
+    const rawFrontMatter = openMarkdown.frontMatter.data ?? {}
+    const completeFrontMatter = await this.getCompleteFrontMatterForFile(
+      relativePath,
+      rawFrontMatter,
+    )
+
     return new DocFile({
       content: openMarkdown.content,
       filePath: fullPath,
-      frontMatter: DocFileFrontMatter.from(openMarkdown.frontMatter.data ?? {}),
+      frontMatter: { data: completeFrontMatter },
       title: openMarkdown.title,
     })
   }
@@ -298,5 +310,538 @@ export class DocEngine {
     }
 
     return this.getDirectory(relativePath)
+  }
+
+  /**
+   * スキーマベースでFrontMatterを補完する（内部用）
+   */
+  private async getCompleteFrontMatterForFile(
+    filePath: string,
+    rawFrontMatter: Record<string, unknown>,
+  ): Promise<Record<string, unknown>> {
+    const directoryPath = path.dirname(filePath)
+
+    const directoryExists = await this.exists(directoryPath)
+    if (!directoryExists) {
+      return rawFrontMatter
+    }
+
+    const directoryData = await this.getDirectory(directoryPath)
+    if (
+      !directoryData.schema ||
+      Object.keys(directoryData.schema).length === 0
+    ) {
+      return rawFrontMatter
+    }
+
+    const schema = directoryData.schema
+    const defaultFrontMatter: Record<string, unknown> = {}
+    for (const [key, field] of Object.entries(schema)) {
+      if (field.type === "string") {
+        defaultFrontMatter[key] = ""
+      } else if (field.type === "boolean") {
+        defaultFrontMatter[key] = false
+      } else if (field.type === "number") {
+        defaultFrontMatter[key] = 0
+      } else if (field.type === "array-string") {
+        defaultFrontMatter[key] = []
+      }
+    }
+
+    return { ...defaultFrontMatter, ...rawFrontMatter }
+  }
+
+  /**
+   * スキーマベースでFrontMatterを補完する（互換性のため保持）
+   */
+  async getCompleteFrontMatter(
+    filePath: string,
+  ): Promise<Record<string, unknown>> {
+    const content = await this.deps.fileSystem.readFile(filePath)
+    const openMarkdown = this.markdown(content)
+    const rawFrontMatter = openMarkdown.frontMatter.data ?? {}
+
+    return this.getCompleteFrontMatterForFile(filePath, rawFrontMatter)
+  }
+
+  /**
+   * 値を指定された型に変換する（デフォルト値フォールバック付き）
+   */
+  private convertValue(
+    value: unknown,
+    targetType: string,
+    defaultValue: unknown,
+  ): unknown {
+    // null や undefined の場合はデフォルト値を使用
+    if (value === null || value === undefined) {
+      return defaultValue
+    }
+
+    try {
+      switch (targetType) {
+        case "string": {
+          if (typeof value === "string") return value
+          if (typeof value === "number") return String(value)
+          if (typeof value === "boolean") return String(value)
+          return defaultValue
+        }
+
+        case "number": {
+          if (typeof value === "number") return value
+          if (typeof value === "string") {
+            const parsed = Number(value)
+            return Number.isNaN(parsed) ? defaultValue : parsed
+          }
+          if (typeof value === "boolean") return value ? 1 : 0
+          return defaultValue
+        }
+
+        case "boolean": {
+          if (typeof value === "boolean") return value
+          if (typeof value === "string") {
+            const lower = value.toLowerCase()
+            if (lower === "true" || lower === "1") return true
+            if (lower === "false" || lower === "0") return false
+            return defaultValue
+          }
+          if (typeof value === "number") return value !== 0
+          return defaultValue
+        }
+
+        case "array-string":
+        case "array": {
+          if (Array.isArray(value)) return value
+          if (typeof value === "string") {
+            // カンマ区切り文字列を配列に変換
+            return value.split(",").map((item) => item.trim())
+          }
+          return defaultValue
+        }
+
+        case "array-number": {
+          if (Array.isArray(value)) {
+            return value.map((item) => {
+              const num = Number(item)
+              return Number.isNaN(num) ? 0 : num
+            })
+          }
+          if (typeof value === "string") {
+            return value.split(",").map((item) => {
+              const num = Number(item.trim())
+              return Number.isNaN(num) ? 0 : num
+            })
+          }
+          return defaultValue
+        }
+
+        case "array-boolean": {
+          if (Array.isArray(value)) {
+            return value.map((item) => Boolean(item))
+          }
+          if (typeof value === "string") {
+            return value.split(",").map((item) => {
+              const trimmed = item.trim().toLowerCase()
+              return trimmed === "true" || trimmed === "1"
+            })
+          }
+          return defaultValue
+        }
+
+        case "relation": {
+          if (typeof value === "string") return value
+          if (value === null || value === undefined) return defaultValue
+          return defaultValue
+        }
+
+        case "array-relation": {
+          if (Array.isArray(value)) {
+            return value.filter((item) => typeof item === "string")
+          }
+          if (typeof value === "string") {
+            return value.split(",").map((item) => item.trim())
+          }
+          return defaultValue
+        }
+
+        default:
+          return defaultValue
+      }
+    } catch {
+      return defaultValue
+    }
+  }
+
+  /**
+   * 単一ファイルのFrontMatterを正規化
+   */
+  async normalizeFile(
+    relativePath: string,
+    schema: Record<string, unknown> | null,
+  ): Promise<boolean> {
+    const content = await this.readFileContent(relativePath)
+
+    const markdown = new OpenMarkdown(content)
+
+    const originalFrontMatter = markdown.frontMatter.data || {}
+
+    // スキーマにないプロパティを除外し、スキーマの順序で並び替え
+    const normalizedFrontMatter: Record<string, unknown> = {}
+
+    // まずスキーマに定義されたプロパティを追加
+    if (schema) {
+      for (const [key, field] of Object.entries(schema)) {
+        const fieldDef = field as {
+          type: string
+          default?: unknown
+        }
+
+        // デフォルト値を決定
+        let defaultValue: unknown
+        if (Object.hasOwn(fieldDef, "default")) {
+          defaultValue = fieldDef.default
+        } else {
+          // 従来のデフォルト値生成ロジック
+          if (fieldDef.type === "string") {
+            defaultValue = ""
+          } else if (fieldDef.type === "boolean") {
+            defaultValue = false
+          } else if (fieldDef.type === "number") {
+            defaultValue = 0
+          } else if (
+            fieldDef.type === "array" ||
+            fieldDef.type === "array-string" ||
+            fieldDef.type === "array-number" ||
+            fieldDef.type === "array-boolean" ||
+            fieldDef.type === "array-relation"
+          ) {
+            defaultValue = []
+          } else if (fieldDef.type === "relation") {
+            defaultValue = null
+          } else {
+            defaultValue = null
+          }
+        }
+
+        // 値の変換と設定
+        if (Object.hasOwn(originalFrontMatter, key)) {
+          normalizedFrontMatter[key] = this.convertValue(
+            originalFrontMatter[key],
+            fieldDef.type,
+            defaultValue,
+          )
+        } else {
+          normalizedFrontMatter[key] = defaultValue
+        }
+      }
+    }
+
+    // ファイル内容を整形（trim + 末尾改行）
+    const trimmedContent = markdown.content.trim()
+    const formattedContent = trimmedContent ? `${trimmedContent}\n` : ""
+
+    // 最終的なマークダウンテキストを生成
+    const updatedMarkdown = OpenMarkdown.fromProps({
+      frontMatter: normalizedFrontMatter,
+      content: formattedContent,
+    })
+    const finalText = `${updatedMarkdown.text.trim()}\n`
+
+    // 元のファイル内容を読み取って比較
+    const originalFileContent = await this.readFileContent(relativePath)
+
+    // 実際に変更があった場合のみファイルを更新
+    if (originalFileContent !== finalText) {
+      await this.writeFileContent(relativePath, finalText)
+      return true
+    }
+
+    return false
+  }
+
+  /**
+   * index.mdファイルのFrontMatterを正規化（iconとschemaのみ保持）
+   */
+  async normalizeIndexFile(indexPath: string): Promise<boolean> {
+    const indexContent = await this.readFileContent(indexPath)
+    const indexMarkdown = new OpenMarkdown(indexContent)
+    const indexFrontMatter = indexMarkdown.frontMatter.data || {}
+
+    // index.mdはiconとschemaを保持し、その他を正規化
+    const normalizedIndexFrontMatter: Record<string, unknown> = {}
+
+    // iconを追加（存在しない場合はデフォルト値）
+    if (Object.hasOwn(indexFrontMatter, "icon")) {
+      normalizedIndexFrontMatter.icon = indexFrontMatter.icon
+    } else {
+      normalizedIndexFrontMatter.icon = "📁"
+    }
+
+    // schemaを追加（存在する場合のみ）
+    if (Object.hasOwn(indexFrontMatter, "schema")) {
+      normalizedIndexFrontMatter.schema = indexFrontMatter.schema
+    }
+
+    // ファイル内容を整形（trim + 末尾改行）
+    const trimmedContent = indexMarkdown.content.trim()
+    const formattedContent = trimmedContent ? `${trimmedContent}\n` : ""
+
+    // 最終的なマークダウンテキストを生成
+    const updatedIndexMarkdown = OpenMarkdown.fromProps({
+      frontMatter: normalizedIndexFrontMatter,
+      content: formattedContent,
+    })
+    const finalText = `${updatedIndexMarkdown.text.trim()}\n`
+
+    // 元のファイル内容を読み取って比較
+    const originalFileContent = await this.readFileContent(indexPath)
+
+    // 実際に変更があった場合のみファイルを更新
+    if (originalFileContent !== finalText) {
+      await this.writeFileContent(indexPath, finalText)
+      return true
+    }
+
+    return false
+  }
+
+  /**
+   * ディレクトリ全体のFrontMatterを正規化 (Generator版)
+   */
+  async *normalizeDirectoryFiles(
+    directoryPath: string,
+    schema: Record<string, unknown> | null,
+  ): AsyncGenerator<{
+    type: "index" | "file"
+    path: string
+    isUpdated: boolean
+  }> {
+    // index.mdを正規化
+    const indexPath = path.join(directoryPath, "index.md")
+
+    if (await this.exists(indexPath)) {
+      const updated = await this.normalizeIndexFile(indexPath)
+      yield { type: "index", path: indexPath, isUpdated: updated }
+    }
+
+    // ディレクトリ内のMarkdownファイルを正規化
+    if (schema === null) return
+
+    const markdownFiles = await this.readDirectoryFiles(directoryPath)
+
+    for (const markdownFile of markdownFiles) {
+      if (
+        markdownFile.endsWith("index.md") ||
+        markdownFile.endsWith("README.md")
+      ) {
+        continue
+      }
+
+      const updated = await this.normalizeFile(markdownFile, schema)
+
+      yield { type: "file", path: markdownFile, isUpdated: updated }
+    }
+  }
+
+  /**
+   * リレーション情報を収集
+   */
+  async getRelationsFromSchema(schema: Record<string, unknown> | null): Promise<
+    Array<{
+      path: string
+      files: Array<{
+        value: string
+        label: string
+        path: string
+      }>
+    }>
+  > {
+    const relations: Array<{
+      path: string
+      files: Array<{
+        value: string
+        label: string
+        path: string
+      }>
+    }> = []
+
+    if (!schema) return relations
+
+    const uniqueRelationPaths = new Set<string>()
+
+    for (const field of Object.values(schema)) {
+      const fieldDef = field as {
+        type: string
+        relationPath?: string
+      }
+
+      if (
+        (fieldDef.type === "relation" || fieldDef.type === "array-relation") &&
+        fieldDef.relationPath &&
+        !uniqueRelationPaths.has(fieldDef.relationPath)
+      ) {
+        uniqueRelationPaths.add(fieldDef.relationPath)
+
+        // リレーションパスが存在するかチェック
+        if (await this.exists(fieldDef.relationPath)) {
+          const relationFiles = await this.readDirectoryFiles(
+            fieldDef.relationPath,
+          )
+
+          const relationOptions = []
+          for (const filePath of relationFiles) {
+            if (
+              filePath.endsWith("index.md") ||
+              filePath.endsWith("README.md")
+            ) {
+              continue
+            }
+
+            const docFile = await this.getFile(filePath)
+
+            relationOptions.push({
+              value: filePath,
+              label:
+                docFile.title ||
+                filePath.split("/").pop()?.replace(".md", "") ||
+                filePath,
+              path: filePath,
+            })
+          }
+
+          relations.push({
+            path: fieldDef.relationPath,
+            files: relationOptions,
+          })
+        }
+      }
+    }
+
+    return relations
+  }
+
+  /**
+   * ディレクトリツリー全体のFrontMatterを再帰的に正規化 (Generator版)
+   */
+  async *normalizeFileTree(basePath = ""): AsyncGenerator<{
+    type: "index" | "file"
+    path: string
+    isUpdated: boolean
+  }> {
+    const entries = await this.deps.fileSystem.readDirectory(basePath)
+
+    for (const entry of entries) {
+      const entryPath = path.join(basePath, entry)
+
+      const isDirectory = await this.isDirectory(entryPath)
+
+      if (!isDirectory) continue
+
+      // ディレクトリからスキーマを取得
+      let directorySchema: Record<string, unknown> | null = null
+
+      if (await this.hasIndexFile(entryPath)) {
+        const docDirectory = await this.getDirectory(entryPath)
+        directorySchema = docDirectory.schema
+      }
+
+      const files = this.normalizeDirectoryFiles(entryPath, directorySchema)
+
+      // 現在のディレクトリを正規化
+      for await (const result of files) {
+        yield result
+      }
+
+      const subDirectories = this.normalizeFileTree(entryPath)
+
+      // サブディレクトリを再帰的に処理
+      for await (const result of subDirectories) {
+        yield result
+      }
+    }
+  }
+
+  /**
+   * ディレクトリ情報を API レスポンス用に完全取得
+   */
+  async getDirectoryDataForApi(directoryPath: string) {
+    const docDirectory = await this.getDirectory(directoryPath)
+    const rawData = docDirectory.toJSON()
+
+    // ディレクトリのindex.mdからdescriptionを取得
+    let directoryDescription: string | null = null
+    const indexPath = `${directoryPath}/index.md`
+    if (await this.exists(indexPath)) {
+      const indexContent = await this.readFileContent(indexPath)
+      const openMarkdown = new OpenMarkdown(indexContent)
+      directoryDescription = openMarkdown.description
+    }
+
+    // ディレクトリ名を抽出
+    const directoryName =
+      directoryPath.split("/").filter(Boolean).pop() || "Root"
+
+    // ファイル一覧を取得
+    const files = await this.getDirectoryFilesForApi(directoryPath)
+
+    // スキーマを変換
+    const schema = docDirectory.convertSchemaForApi()
+
+    // カラムを生成
+    const columns = schema
+      ? Object.entries(schema).map(([key, field]) => ({
+          key,
+          label: field.description || key,
+          type: field.type,
+          relationPath: field.relationPath,
+        }))
+      : []
+
+    // リレーション情報を収集
+    const relations = await this.getRelationsFromSchema(rawData.schema)
+
+    return {
+      rawData,
+      directoryDescription,
+      directoryName,
+      files,
+      schema,
+      columns,
+      relations,
+    }
+  }
+
+  /**
+   * ディレクトリのファイル一覧を API レスポンス用に整形して取得
+   */
+  async getDirectoryFilesForApi(directoryPath: string) {
+    const markdownContents = await this.readMarkdownContents(directoryPath)
+
+    return markdownContents
+      .filter(
+        (file) =>
+          !file.filePath.endsWith("README.md") &&
+          !file.filePath.endsWith("index.md"),
+      )
+      .map((file) => {
+        // スキーマなどの特殊なプロパティを除外してfront matterをクリーンアップ
+        const cleanFrontMatter = file.frontMatter || {}
+        const { schema, ...validFrontMatter } = cleanFrontMatter as Record<
+          string,
+          unknown
+        > & { schema?: unknown }
+
+        // ファイル名を生成（拡張子なし）
+        const fileName =
+          file.filePath.split("/").pop()?.replace(/\.md$/, "") || ""
+
+        return {
+          path: `docs/${file.filePath}`,
+          fileName,
+          frontMatter: validFrontMatter,
+          content: file.content,
+          title: file.title || null,
+          description: new OpenMarkdown(file.content).description,
+        }
+      })
   }
 }

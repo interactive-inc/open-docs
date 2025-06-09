@@ -2,6 +2,9 @@
 milestone: 2028.01.02
 is-done: false
 priority: 0
+related-entity: products/api/entities/inventory-entity.md
+related-pages:
+  - products/client/pages/categories.$category.md
 ---
 
 # 商品を新規登録する

@@ -13,7 +13,7 @@ export function useMoveFile() {
 
   return useMutation({
     mutationFn: async (params: MoveFileParams) => {
-      const response = await apiClient.api.files.move.$post({
+      const response = await apiClient.api.files.move.$put({
         json: params,
       })
 
