@@ -1,6 +1,7 @@
 import { EditableFrontMatterView } from "@/app/_components/file-view/editable-front-matter-view"
 import { Card } from "@/app/_components/ui/card"
-import type { AppFileFrontMatter } from "@/system/models/app-file-front-matter"
+import type { AppFileFrontMatter } from "@/system/models"
+import type { RelationInfo, SchemaDefinition } from "@/system/types"
 import { marked } from "marked"
 import type { ReactNode } from "react"
 
@@ -12,21 +13,8 @@ type Props = {
   onChange(content: string): void
   frontMatter: AppFileFrontMatter
   onFrontMatterUpdate: (key: string, value: unknown) => void
-  schema?: Record<
-    string,
-    {
-      type: string
-      relationPath?: string
-    }
-  >
-  relations?: Array<{
-    path: string
-    files: Array<{
-      value: string
-      label: string
-      path: string
-    }>
-  }>
+  schema?: SchemaDefinition
+  relations?: RelationInfo[]
 }
 
 export function MarkdownFileView(props: Props): ReactNode {

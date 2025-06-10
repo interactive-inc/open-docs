@@ -1,8 +1,8 @@
 import { Card } from "@/app/_components/ui/card"
-import type { AppFileFrontMatter } from "@/system/models/app-file-front-matter"
-import type { SchemaDefinition, RelationInfo } from "@/system/types"
-import { FrontMatterInputField } from "./front-matter-input-field"
 import { cn } from "@/lib/utils"
+import type { AppFileFrontMatter } from "@/system/models"
+import type { RelationInfo, SchemaDefinition } from "@/system/types"
+import { FrontMatterInputField } from "./front-matter-input-field"
 
 type Props = {
   frontMatter: AppFileFrontMatter | null

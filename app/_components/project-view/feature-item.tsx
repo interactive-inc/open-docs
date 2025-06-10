@@ -2,8 +2,8 @@
 
 import { Badge } from "@/app/_components/ui/badge"
 import { Button } from "@/app/_components/ui/button"
-import { CheckCircle, Clock } from "lucide-react"
 import type { DirectoryFile } from "@/system/types"
+import { CheckCircle, Clock } from "lucide-react"
 
 type Priority = "high" | "medium" | "low"
 
@@ -39,22 +39,24 @@ export function FeatureItem(props: Props) {
 
   const getPriorityLabel = (priority: Priority): string => {
     switch (priority) {
-      case "high": return "高"
-      case "medium": return "中"
-      case "low": return "低"
-      default: return "低"
+      case "high":
+        return "高"
+      case "medium":
+        return "中"
+      case "low":
+        return "低"
+      default:
+        return "低"
     }
   }
 
   return (
-    <div
-      className={`rounded-lg border p-3 ${isDone ? "opacity-75" : ""}`}
-    >
+    <div className={`rounded-lg border p-3 ${isDone ? "opacity-75" : ""}`}>
       <div className="flex items-start gap-3">
         <div className="flex-1">
           <div className="mb-1 flex items-center gap-2">
-            <Button 
-              variant={isDone ? "default" : "secondary"} 
+            <Button
+              variant={isDone ? "default" : "secondary"}
               size="icon"
               className="h-6 w-6"
             >
@@ -68,11 +70,7 @@ export function FeatureItem(props: Props) {
             <Badge className={getPriorityColor(priority)}>
               {getPriorityLabel(priority)}
             </Badge>
-            {milestone && (
-              <Badge variant="outline">
-                {milestone}
-              </Badge>
-            )}
+            {milestone && <Badge variant="outline">{milestone}</Badge>}
           </div>
 
           {props.feature.description && (

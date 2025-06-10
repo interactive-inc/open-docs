@@ -70,6 +70,24 @@ export type RelationInfo = {
 }
 
 /**
+ * ファイルノードの型（ファイルツリー用）
+ */
+export type FileNode = {
+  name: string
+  path: string
+  type: "file" | "directory"
+  children?: FileNode[]
+  icon?: string
+}
+
+/**
+ * ファイルツリーレスポンスの型
+ */
+export type FileTreeResponse = {
+  files: FileNode[]
+}
+
+/**
  * ディレクトリレスポンスの型
  */
 export type DirectoryResponse = {
@@ -78,6 +96,7 @@ export type DirectoryResponse = {
   columns: TableColumn[]
   title: string
   description: string | null
+  icon: string
   indexPath: string | null
   files: DirectoryFile[]
   directoryName: string

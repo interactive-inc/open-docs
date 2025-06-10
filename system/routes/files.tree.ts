@@ -1,15 +1,10 @@
 import path from "node:path"
 import { DocEngine } from "@/lib/docs-engine/doc-engine"
 import { factory } from "@/lib/factory"
-import { zAppFileTree } from "@/system/models/app-file-tree"
+import { zFileTreeResponse } from "@/system/models"
+import type { FileNode } from "@/system/types"
 
-export interface FileNode {
-  name: string
-  path: string
-  type: "file" | "directory"
-  children?: FileNode[]
-  icon?: string
-}
+export type { FileNode }
 
 async function getDocsFiles(basePath = "docs"): Promise<FileNode[]> {
   const docsEngine = new DocEngine({
@@ -69,7 +64,7 @@ async function getDocsFiles(basePath = "docs"): Promise<FileNode[]> {
 export const GET = factory.createHandlers(async (c) => {
   const files = await getDocsFiles()
 
-  const response = zAppFileTree.parse({ files })
+  const response = zFileTreeResponse.parse({ files })
 
   return c.json(response)
 })

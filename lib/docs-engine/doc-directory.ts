@@ -1,7 +1,7 @@
-import { OpenMarkdown } from "@/lib/open-markdown/open-markdown"
-import type { SchemaField } from "@/lib/docs-engine/types"
 // import { directoryFrontMatterSchema } from "@/lib/validations/directory-front-matter-schema"
 import type { Schema } from "@/lib/docs-engine/models/doc-schema"
+import type { SchemaField } from "@/lib/docs-engine/types"
+import { OpenMarkdown } from "@/lib/open-markdown/open-markdown"
 // import { DocDirectoryFrontMatter } from "./doc-directory-front-matter"
 import type { DocFile } from "./doc-file"
 

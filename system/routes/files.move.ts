@@ -1,7 +1,7 @@
 import * as path from "node:path"
 import { DocEngine } from "@/lib/docs-engine/doc-engine"
 import { factory } from "@/lib/factory"
-import { zAppResult } from "@/system/models/app-result"
+import { zAppResult } from "@/system/models"
 import { zValidator } from "@hono/zod-validator"
 import { HTTPException } from "hono/http-exception"
 import { z } from "zod"

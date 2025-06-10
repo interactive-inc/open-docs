@@ -1,10 +1,10 @@
 "use client"
 
 import { apiClient } from "@/lib/api-client"
+import type { DirectoryFile, DirectoryResponse } from "@/system/types"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { ProjectPageGroup } from "./project-page-group"
 import { UnlinkedFeaturesSection } from "./unlinked-features-section"
-import type { DirectoryResponse, DirectoryFile } from "@/system/types"
 
 type Props = {
   project: string

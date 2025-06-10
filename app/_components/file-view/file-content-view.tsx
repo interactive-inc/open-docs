@@ -1,4 +1,5 @@
-import type { AppFileFrontMatter } from "@/system/models/app-file-front-matter"
+import type { AppFileFrontMatter } from "@/system/models"
+import type { RelationInfo, SchemaDefinition } from "@/system/types"
 import { CsvFileView } from "./csv-file-view"
 import { DefaultFileViewer } from "./default-file-view"
 import { JsonFileEditor } from "./json-file-editor"
@@ -12,21 +13,8 @@ type Props = {
   currentContent: string
   onChange: (content: string) => void
   onFrontMatterUpdate: (key: string, value: unknown) => void
-  schema?: Record<
-    string,
-    {
-      type: string
-      relationPath?: string
-    }
-  >
-  relations?: Array<{
-    path: string
-    files: Array<{
-      value: string
-      label: string
-      path: string
-    }>
-  }>
+  schema?: SchemaDefinition  
+  relations?: RelationInfo[]
 }
 
 /**

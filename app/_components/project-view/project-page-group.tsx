@@ -1,7 +1,7 @@
 "use client"
 import { Card } from "@/app/_components/ui/card"
-import { FeatureItem } from "./feature-item"
 import type { DirectoryFile } from "@/system/types"
+import { FeatureItem } from "./feature-item"
 
 type Priority = "high" | "medium" | "low"
 

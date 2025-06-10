@@ -6,10 +6,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/app/_components/ui/select"
+import type { RelationOption, SchemaField } from "@/system/types"
 import { useEffect, useState } from "react"
 import { ArrayRelationSelect } from "./array-relation-select"
 import { SingleRelationSelect } from "./single-relation-select"
-import type { SchemaField, RelationOption } from "@/system/types"
 
 type Props = {
   fieldKey: string

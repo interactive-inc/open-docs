@@ -53,7 +53,7 @@ export function FilePageView(props: Props) {
     })
 
     const data = await result.json()
-    if ("content" in data) {
+    if ("content" in data && typeof data.content === "string") {
       setCurrentContent(data.content)
     }
   }

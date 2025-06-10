@@ -1,8 +1,8 @@
 import path from "node:path"
 import { DocEngine } from "@/lib/docs-engine/doc-engine"
 import { factory } from "@/lib/factory"
-import { zAppFileFrontMatter } from "@/system/models/app-file-front-matter"
-import { zDirectoryResponse } from "@/system/models/directory-response-schema"
+import { zAppFileFrontMatter } from "@/system/models"
+import { zDirectoryResponse } from "@/system/models"
 import { HTTPException } from "hono/http-exception"
 
 /**
