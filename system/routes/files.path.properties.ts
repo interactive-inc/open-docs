@@ -1,8 +1,7 @@
 import path from "node:path"
 import { DocEngine } from "@/lib/docs-engine/doc-engine"
 import { factory } from "@/lib/factory"
-import { zAppError } from "@/lib/models/app-error"
-import { zAppFileProperties } from "@/lib/models/app-file-properties"
+import { zAppFileProperties } from "@/system/models/app-file-properties"
 import { OpenMarkdown } from "@/lib/open-markdown/open-markdown"
 import { zValidator } from "@hono/zod-validator"
 import { HTTPException } from "hono/http-exception"
@@ -45,10 +44,9 @@ export const PUT = factory.createHandlers(
 
     // ファイルの存在確認
     if (!(await docsEngine.exists(filePath))) {
-      const errorResponse = zAppError.parse({
-        error: `ファイルが見つかりません: ${filePath}`,
+      throw new HTTPException(404, {
+        message: `ファイルが見つかりません: ${filePath}`,
       })
-      return c.json(errorResponse, 404)
     }
 
     const docFile = await docsEngine.getFile(filePath)

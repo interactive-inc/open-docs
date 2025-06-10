@@ -1,7 +1,7 @@
 import path from "node:path"
 import { DocEngine } from "@/lib/docs-engine/doc-engine"
 import { factory } from "@/lib/factory"
-import { zAppFileTree } from "@/lib/models/app-file-tree"
+import { zAppFileTree } from "@/system/models/app-file-tree"
 
 export interface FileNode {
   name: string

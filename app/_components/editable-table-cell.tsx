@@ -2,17 +2,14 @@
 import { ArrayRelationSelect } from "@/app/_components/file-view/array-relation-select"
 import { SingleRelationSelect } from "@/app/_components/file-view/single-relation-select"
 import { useState } from "react"
+import type { RelationOption } from "@/system/types"
 
 type Props = {
   value: unknown
   type: string
   onUpdate: (value: unknown) => void
   relationPath?: string
-  relationOptions?: Array<{
-    value: string
-    label: string
-    path: string
-  }>
+  relationOptions?: RelationOption[]
 }
 
 export function EditableTableCell(props: Props) {

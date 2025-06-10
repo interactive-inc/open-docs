@@ -30,7 +30,6 @@ type Props = {
 }
 
 export function MarkdownFileView(props: Props): ReactNode {
-  // APIから取得したfront matterを使用
   const frontMatter = props.frontMatter
 
   const hasFrontMatter =

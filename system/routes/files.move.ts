@@ -1,7 +1,7 @@
 import * as path from "node:path"
 import { DocEngine } from "@/lib/docs-engine/doc-engine"
 import { factory } from "@/lib/factory"
-import { zAppFileMove } from "@/lib/models/app-file-move"
+import { zAppResult } from "@/system/models/app-result"
 import { zValidator } from "@hono/zod-validator"
 import { HTTPException } from "hono/http-exception"
 import { z } from "zod"
@@ -36,20 +36,16 @@ export const PUT = factory.createHandlers(
 
     // 移動元が存在するか確認
     if (!(await docsEngine.exists(sourceRelativePath))) {
-      const errorResponse = zAppFileMove.parse({
-        success: false,
+      throw new HTTPException(404, {
         message: `移動元が存在しません: ${body.sourcePath}`,
       })
-      return c.json(errorResponse, 404)
     }
 
     // 移動先に同名のファイルが存在するか確認
     if (await docsEngine.exists(destinationRelativePath)) {
-      const errorResponse = zAppFileMove.parse({
-        success: false,
+      throw new HTTPException(409, {
         message: `移動先に同名のファイルが既に存在します: ${body.destinationPath}`,
       })
-      return c.json(errorResponse, 409)
     }
 
     const isDirectory = await docsEngine.isDirectory(sourceRelativePath)
@@ -65,10 +61,11 @@ export const PUT = factory.createHandlers(
       })
     }
 
-    const response = zAppFileMove.parse({
+    const response = zAppResult.parse({
       success: true,
       message: `${isDirectory ? "ディレクトリ" : "ファイル"}を移動しました: ${body.sourcePath} -> ${body.destinationPath}`,
     })
+
     return c.json(response)
   },
 )

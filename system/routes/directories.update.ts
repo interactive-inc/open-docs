@@ -1,8 +1,7 @@
 import path from "node:path"
 import { DocEngine } from "@/lib/docs-engine/doc-engine"
 import { factory } from "@/lib/factory"
-import { zAppError } from "@/lib/models/app-error"
-import { zAppFileProperties } from "@/lib/models/app-file-properties"
+import { zAppFileProperties } from "@/system/models/app-file-properties"
 import { OpenMarkdown } from "@/lib/open-markdown/open-markdown"
 import { zValidator } from "@hono/zod-validator"
 import { HTTPException } from "hono/http-exception"
@@ -36,10 +35,9 @@ export const PUT = factory.createHandlers(
 
     // ディレクトリの存在確認
     if (!(await docsEngine.exists(directoryPath))) {
-      const errorResponse = zAppError.parse({
-        error: `ディレクトリが見つかりません: ${directoryPath}`,
+      throw new HTTPException(404, {
+        message: `ディレクトリが見つかりません: ${directoryPath}`,
       })
-      return c.json(errorResponse, 404)
     }
 
     // index.mdの処理
@@ -47,10 +45,9 @@ export const PUT = factory.createHandlers(
     const indexExists = await docsEngine.fileExists(indexPath)
 
     if (!indexExists) {
-      const errorResponse = zAppError.parse({
-        error: `index.mdが見つかりません: ${indexPath}`,
+      throw new HTTPException(404, {
+        message: `index.mdが見つかりません: ${indexPath}`,
       })
-      return c.json(errorResponse, 404)
     }
 
     const markdownContent = await docsEngine.readFileContent(indexPath)
@@ -101,6 +98,7 @@ export const PUT = factory.createHandlers(
       success: true,
       frontMatter: updatedFrontMatter,
     })
+
     return c.json(response)
   },
 )

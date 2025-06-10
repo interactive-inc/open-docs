@@ -7,12 +7,7 @@ import {
   SelectValue,
 } from "@/app/_components/ui/select"
 import { X } from "lucide-react"
-
-type RelationOption = {
-  value: string
-  label: string
-  path: string
-}
+import type { RelationOption } from "@/system/types"
 
 type Props = {
   value: string[]

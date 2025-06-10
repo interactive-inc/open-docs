@@ -9,6 +9,7 @@ import {
 import { useEffect, useState } from "react"
 import { ArrayRelationSelect } from "./array-relation-select"
 import { SingleRelationSelect } from "./single-relation-select"
+import type { SchemaField, RelationOption } from "@/system/types"
 
 type Props = {
   fieldKey: string
@@ -16,15 +17,8 @@ type Props = {
   originalValue: unknown
   onValueChange: (key: string, value: string) => void
   onBlur: (key: string, value: string) => void
-  schemaField?: {
-    type: string
-    relationPath?: string
-  }
-  relationOptions?: Array<{
-    value: string
-    label: string
-    path: string
-  }>
+  schemaField?: SchemaField
+  relationOptions?: RelationOption[]
 }
 
 /**

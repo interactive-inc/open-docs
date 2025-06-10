@@ -1,5 +1,5 @@
 import { OpenMarkdown } from "@/lib/open-markdown/open-markdown"
-import type { Schema } from "@/lib/validations/doc-schema"
+import type { Schema } from "@/lib/docs-engine/models/doc-schema"
 
 type Props<T = Record<string, unknown>> = {
   content: string

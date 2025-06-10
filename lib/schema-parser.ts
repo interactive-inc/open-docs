@@ -1,5 +1,5 @@
 import { z } from "zod"
-import type { SchemaDefinition } from "./types/schema-types"
+import type { SchemaDefinition } from "./docs-engine/types"
 
 export function createZodSchemaFromDefinition(schemaDef: SchemaDefinition) {
   const zodSchema: Record<string, z.ZodTypeAny> = {}

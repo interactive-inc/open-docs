@@ -1,26 +1,14 @@
 import { Card } from "@/app/_components/ui/card"
 import type { AppFileFrontMatter } from "@/system/models/app-file-front-matter"
+import type { SchemaDefinition, RelationInfo } from "@/system/types"
 import { FrontMatterInputField } from "./front-matter-input-field"
 import { cn } from "@/lib/utils"
 
 type Props = {
   frontMatter: AppFileFrontMatter | null
   onUpdate?: (key: string, value: unknown) => void
-  schema?: Record<
-    string,
-    {
-      type: string
-      relationPath?: string
-    }
-  >
-  relations?: Array<{
-    path: string
-    files: Array<{
-      value: string
-      label: string
-      path: string
-    }>
-  }>
+  schema?: SchemaDefinition
+  relations?: RelationInfo[]
 }
 
 /**

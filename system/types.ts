@@ -53,15 +53,20 @@ export type TableColumn = {
 }
 
 /**
+ * リレーションオプションの型
+ */
+export type RelationOption = {
+  value: string
+  label: string
+  path: string
+}
+
+/**
  * リレーション情報の型
  */
 export type RelationInfo = {
   path: string
-  files: Array<{
-    value: string
-    label: string
-    path: string
-  }>
+  files: RelationOption[]
 }
 
 /**
