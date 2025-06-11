@@ -1,9 +1,10 @@
 import { EditableFrontMatterView } from "@/app/_components/file-view/editable-front-matter-view"
 import { Card } from "@/app/_components/ui/card"
-import type { AppFileFrontMatter } from "@/system/models"
-import type { RelationInfo, SchemaDefinition } from "@/system/types"
+import type { appFileFrontMatterSchema } from "@/lib/models"
+import type { RelationInfo, SchemaDefinition } from "@/lib/types"
 import { marked } from "marked"
 import type { ReactNode } from "react"
+import type { z } from "zod"
 
 import "github-markdown-css"
 
@@ -11,7 +12,7 @@ type Props = {
   fileName: string
   content: string
   onChange(content: string): void
-  frontMatter: AppFileFrontMatter
+  frontMatter: z.infer<typeof appFileFrontMatterSchema>
   onFrontMatterUpdate: (key: string, value: unknown) => void
   schema?: SchemaDefinition
   relations?: RelationInfo[]
@@ -29,7 +30,7 @@ export function MarkdownFileView(props: Props): ReactNode {
     <div className="h-full space-y-2">
       {hasFrontMatter && (
         <EditableFrontMatterView
-          frontMatter={frontMatter as AppFileFrontMatter}
+          frontMatter={frontMatter as z.infer<typeof appFileFrontMatterSchema>}
           onUpdate={props.onFrontMatterUpdate}
           schema={props.schema}
           relations={props.relations}

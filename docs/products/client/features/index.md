@@ -1,5 +1,5 @@
 ---
-icon: 🏯
+icon: 🏢
 schema:
   milestone:
     type: string

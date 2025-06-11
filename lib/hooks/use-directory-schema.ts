@@ -28,7 +28,7 @@ export function useDirectorySchema(filePath: string) {
 
       const data = await response.json()
       return {
-        schema: data.schema || {},
+        schema: data.indexFile.frontMatter.schema || {},
         relations: data.relations || [],
       }
     },

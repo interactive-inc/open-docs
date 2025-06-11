@@ -2,7 +2,7 @@
 
 import { Badge } from "@/app/_components/ui/badge"
 import { Card } from "@/app/_components/ui/card"
-import type { DirectoryFile } from "@/system/types"
+import type { DirectoryFile } from "@/lib/types"
 import { FeatureItem } from "./feature-item"
 
 type Priority = "high" | "medium" | "low"
@@ -22,8 +22,12 @@ export function UnlinkedFeaturesSection(props: Props) {
       medium: 1,
       low: 2,
     }
-    const aPriority = (a.frontMatter?.priority as Priority) || "low"
-    const bPriority = (b.frontMatter?.priority as Priority) || "low"
+    const aPriority =
+      ((a.frontMatter as Record<string, unknown>)?.priority as Priority) ||
+      "low"
+    const bPriority =
+      ((b.frontMatter as Record<string, unknown>)?.priority as Priority) ||
+      "low"
     return (priorityOrder[aPriority] || 2) - (priorityOrder[bPriority] || 2)
   })
 

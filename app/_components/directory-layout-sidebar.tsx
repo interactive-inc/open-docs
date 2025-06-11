@@ -14,7 +14,7 @@ import {
   SidebarProvider,
 } from "@/app/_components/ui/sidebar"
 import { apiClient } from "@/lib/api-client"
-import type { FileNode } from "@/system/routes/files.tree"
+import type { FileNode } from "@/lib/types"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -41,7 +41,7 @@ export function DirectoryLayoutSidebar(props: Props) {
     },
   })
 
-  const files = query.data.files
+  const files = query.data
 
   function getCurrentPath(path: string) {
     const dirPath = path

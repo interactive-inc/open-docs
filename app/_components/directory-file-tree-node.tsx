@@ -4,7 +4,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/app/_components/ui/sidebar"
-import type { FileNode } from "@/system/routes/files.tree"
+import type { FileNode } from "@/lib/types"
 import Link from "next/link"
 import { FileTreeIcon } from "./file-tree-icon"
 

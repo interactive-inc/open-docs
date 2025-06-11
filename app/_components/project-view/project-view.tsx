@@ -1,7 +1,7 @@
 "use client"
 
 import { apiClient } from "@/lib/api-client"
-import type { DirectoryFile, DirectoryResponse } from "@/system/types"
+import type { DirectoryFile, DirectoryResponse } from "@/lib/types"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { ProjectPageGroup } from "./project-page-group"
 import { UnlinkedFeaturesSection } from "./unlinked-features-section"
@@ -41,9 +41,11 @@ export function ProjectView(props: Props) {
   const features = featuresQuery.data.files || []
 
   // ページと関連機能をグループ化
-  const pageGroups: PageGroup[] = pages.map((page) => {
-    const pageFeatures = (page.frontMatter?.features as string[]) || []
-    const relatedFeatures = features.filter((feature) => {
+  const pageGroups: PageGroup[] = pages.map((page: DirectoryFile) => {
+    const pageFeatures =
+      ((page.frontMatter as Record<string, unknown>)?.features as string[]) ||
+      []
+    const relatedFeatures = features.filter((feature: DirectoryFile) => {
       const featureFileName = feature.fileName
       const featureFileNameWithExt = `${featureFileName}.md`
 
@@ -68,7 +70,7 @@ export function ProjectView(props: Props) {
   )
 
   const unlinkedFeatures = features.filter(
-    (feature) => !allLinkedFeatures.includes(feature.fileName),
+    (feature: DirectoryFile) => !allLinkedFeatures.includes(feature.fileName),
   )
 
   return (

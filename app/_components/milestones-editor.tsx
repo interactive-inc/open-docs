@@ -2,6 +2,7 @@
 
 import { Card } from "@/app/_components/ui/card"
 import { apiClient } from "@/lib/api-client"
+import type { DirectoryFile } from "@/lib/types"
 import { useSuspenseQuery } from "@tanstack/react-query"
 
 type Props = {
@@ -35,18 +36,20 @@ export function MilestonesEditor(props: Props) {
     },
   })
 
-  const milestones = milestonesData.files || []
-  const features = featuresData.files || []
+  const milestones: DirectoryFile[] = milestonesData.files || []
+  const features: DirectoryFile[] = featuresData.files || []
 
   function getFeaturesByMilestone(milestoneId: string) {
     return features.filter(
-      (feature: any) => feature.frontMatter?.milestone === milestoneId,
+      (feature) =>
+        (feature.frontMatter as Record<string, unknown>)?.milestone ===
+        milestoneId,
     )
   }
 
   return (
     <div className="grid gap-2">
-      {milestones.map((milestone: any) => {
+      {milestones.map((milestone) => {
         const milestoneFeatures = getFeaturesByMilestone(milestone.fileName)
         return (
           <Card key={milestone.fileName} className="gap-2 overflow-hidden p-2">
@@ -60,7 +63,7 @@ export function MilestonesEditor(props: Props) {
             </div>
             {milestoneFeatures.length > 0 ? (
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {milestoneFeatures.map((feature: any) => (
+                {milestoneFeatures.map((feature) => (
                   <div key={feature.fileName} className="rounded border p-2">
                     <h3 className="font-medium">
                       {feature.title || feature.fileName}

@@ -1,8 +1,7 @@
 import path from "node:path"
-import { DocEngine } from "@/lib/docs-engine/doc-engine"
+import { DocEngine } from "@/lib/engine/doc-engine"
 import { factory } from "@/lib/factory"
 import { OpenMarkdown } from "@/lib/open-markdown/open-markdown"
-import { zAppFileProperties } from "@/system/models"
 import { zValidator } from "@hono/zod-validator"
 import { HTTPException } from "hono/http-exception"
 import { z } from "zod"
@@ -40,6 +39,8 @@ export const PUT = factory.createHandlers(
 
     const docsEngine = new DocEngine({
       basePath: path.join(process.cwd(), "docs"),
+      indexFileName: null,
+      readmeFileName: null,
     })
 
     // ファイルの存在確認
@@ -82,10 +83,8 @@ export const PUT = factory.createHandlers(
     // ファイルに書き込む
     await docsEngine.writeFileContent(filePath, updatedContent)
 
-    const response = zAppFileProperties.parse({
-      success: true,
-      frontMatter: updatedFrontMatter,
-    })
+    // 更新後のファイル情報を統一フォーマットで返す
+    const response = await docsEngine.readFile(filePath)
     return c.json(response)
   },
 )

@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/app/_components/ui/select"
-import type { RelationOption } from "@/system/types"
+import type { RelationOption } from "@/lib/types"
 import { X } from "lucide-react"
 
 type Props = {

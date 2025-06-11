@@ -1,11 +1,13 @@
 import path from "node:path"
 import { parseArgs } from "node:util"
-import { DocEngine } from "@/lib/docs-engine/doc-engine"
+import { DocEngine } from "@/lib/engine/doc-engine"
 
 class Command {
   async formatDocs(): Promise<void> {
     const docsEngine = new DocEngine({
       basePath: path.join(process.cwd(), "docs"),
+      indexFileName: null,
+      readmeFileName: null,
     })
 
     let filesUpdated = 0

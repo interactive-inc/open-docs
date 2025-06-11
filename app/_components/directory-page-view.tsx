@@ -28,13 +28,15 @@ export function DirectoryPageView(props: Props) {
 
   const directoryData = query.data
 
-  const [title, setTitle] = useState(directoryData.title || "")
+  const [title, setTitle] = useState(directoryData.indexFile.title || "")
 
   const [description, setDescription] = useState(
-    directoryData.description || "",
+    directoryData.indexFile.description || "",
   )
 
-  const [icon, setIcon] = useState(directoryData.icon || "📁")
+  const [icon, setIcon] = useState(
+    (directoryData.indexFile.frontMatter.icon as string) || "📁",
+  )
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value)
@@ -48,6 +50,7 @@ export function DirectoryPageView(props: Props) {
       json: {
         properties: null,
         title: title,
+        description: null,
       },
     })
   }
@@ -65,6 +68,7 @@ export function DirectoryPageView(props: Props) {
       },
       json: {
         properties: null,
+        title: null,
         description: description,
       },
     })
@@ -90,7 +94,7 @@ export function DirectoryPageView(props: Props) {
     return (
       <div className="p-4">
         <h1 className="mb-4 font-bold text-xl">
-          {directoryData.directoryName}
+          {directoryData.indexFile.directoryName}
         </h1>
         <div className="text-center text-gray-500">
           このディレクトリにはMarkdownファイルがありません
@@ -104,10 +108,10 @@ export function DirectoryPageView(props: Props) {
       <div className="space-y-2 p-4">
         <div className="flex items-center gap-2">
           <SidebarButton />
-          {directoryData.indexPath && (
+          {directoryData.indexFile && (
             <VscodeButton
               cwd={directoryData.cwd}
-              filePath={directoryData.indexPath}
+              filePath={directoryData.indexFile.path}
               size="icon"
               variant="outline"
             />
@@ -130,7 +134,7 @@ export function DirectoryPageView(props: Props) {
         />
         <DirectoryTableView
           files={directoryData.files}
-          columns={directoryData.columns}
+          columns={directoryData.indexFile.columns || []}
           directoryPath={props.currentPath}
           relations={directoryData.relations}
           onDataChanged={() => query.refetch()}

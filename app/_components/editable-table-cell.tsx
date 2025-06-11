@@ -1,14 +1,14 @@
 "use client"
 import { ArrayRelationSelect } from "@/app/_components/file-view/array-relation-select"
 import { SingleRelationSelect } from "@/app/_components/file-view/single-relation-select"
-import type { RelationOption } from "@/system/types"
+import type { RelationOption } from "@/lib/types"
 import { useState } from "react"
 
 type Props = {
   value: unknown
   type: string
   onUpdate: (value: unknown) => void
-  relationPath?: string
+  relationPath?: string | null
   relationOptions?: RelationOption[]
 }
 

@@ -1,7 +1,6 @@
 import * as path from "node:path"
-import { DocEngine } from "@/lib/docs-engine/doc-engine"
+import { DocEngine } from "@/lib/engine/doc-engine"
 import { factory } from "@/lib/factory"
-import { zAppResult } from "@/system/models"
 import { zValidator } from "@hono/zod-validator"
 import { HTTPException } from "hono/http-exception"
 import { z } from "zod"
@@ -32,6 +31,8 @@ export const PUT = factory.createHandlers(
 
     const docsEngine = new DocEngine({
       basePath: docsPath,
+      indexFileName: null,
+      readmeFileName: null,
     })
 
     // 移動元が存在するか確認
@@ -61,10 +62,8 @@ export const PUT = factory.createHandlers(
       })
     }
 
-    const response = zAppResult.parse({
-      success: true,
-      message: `${isDirectory ? "ディレクトリ" : "ファイル"}を移動しました: ${body.sourcePath} -> ${body.destinationPath}`,
-    })
+    // 移動後のファイル情報を統一フォーマットで返す
+    const response = await docsEngine.readFile(destinationRelativePath)
 
     return c.json(response)
   },

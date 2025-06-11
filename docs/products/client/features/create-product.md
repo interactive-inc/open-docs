@@ -4,7 +4,8 @@ is-done: false
 priority: 0
 related-entity: products/api/entities/inventory-entity.md
 related-pages:
-  - products/client/pages/categories.$category.md
+  - products/client/pages/products.$product.md
+  - products/client/pages/inventories.md
 ---
 
 # 商品を新規登録する

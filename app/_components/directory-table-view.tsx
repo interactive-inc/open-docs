@@ -12,8 +12,8 @@ import {
   TableRow,
 } from "@/app/_components/ui/table"
 import { apiClient } from "@/lib/api-client"
-import type { DirectoryFile } from "@/system/types"
-import type { TableColumn } from "@/system/types"
+import type { DirectoryFile } from "@/lib/types"
+import type { TableColumn } from "@/lib/types"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Plus, Trash2 } from "lucide-react"
 import Link from "next/link"
@@ -195,7 +195,9 @@ export function DirectoryTableView(props: Props) {
                     (rel) => rel.path === column.relationPath,
                   )
 
-                  const cellValue = fileData.frontMatter?.[column.key]
+                  const cellValue = (
+                    fileData.frontMatter as Record<string, unknown>
+                  )?.[column.key]
 
                   return (
                     <TableCell key={column.key} className="p-0">

@@ -1,11 +1,12 @@
 import { Card } from "@/app/_components/ui/card"
+import type { appFileFrontMatterSchema } from "@/lib/models"
+import type { RelationInfo, SchemaDefinition } from "@/lib/types"
 import { cn } from "@/lib/utils"
-import type { AppFileFrontMatter } from "@/system/models"
-import type { RelationInfo, SchemaDefinition } from "@/system/types"
+import type { z } from "zod"
 import { FrontMatterInputField } from "./front-matter-input-field"
 
 type Props = {
-  frontMatter: AppFileFrontMatter | null
+  frontMatter: z.infer<typeof appFileFrontMatterSchema> | null
   onUpdate?: (key: string, value: unknown) => void
   schema?: SchemaDefinition
   relations?: RelationInfo[]
@@ -73,7 +74,12 @@ export function EditableFrontMatterView(props: Props) {
         {Object.entries(frontMatter).map(([key, value]) => {
           const schemaField = props.schema?.[key]
           const relationData = props.relations?.find((rel) => {
-            return rel.path === schemaField?.relationPath
+            return (
+              rel.path ===
+              (schemaField && "relationPath" in schemaField
+                ? schemaField.relationPath
+                : null)
+            )
           })
 
           // array-系のフィールドは2カラムスペースを使用

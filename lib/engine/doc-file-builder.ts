@@ -1,29 +1,29 @@
-import type { Schema } from "@/lib/docs-engine/models/doc-schema"
 import { OpenMarkdown } from "@/lib/open-markdown/open-markdown"
+import { DocFrontMatterBuilder } from "./doc-front-matter-builder"
 
-type Props<T = Record<string, unknown>> = {
+type Props = {
   content: string
   filePath: string
-  frontMatter?: { data: T }
+  frontMatter?: DocFrontMatterBuilder
   title?: string
 }
 
 /**
  * ドキュメントのファイル
  */
-export class DocFile<T = Record<string, unknown>> {
+export class DocFileBuilder {
   readonly content: string
 
   readonly filePath: string
 
-  readonly frontMatter: { data: T }
+  readonly frontMatter: DocFrontMatterBuilder
 
   readonly title: string
 
-  constructor(props: Props<T>) {
+  constructor(props: Props) {
     this.content = props.content
     this.filePath = props.filePath
-    this.frontMatter = props.frontMatter || { data: {} as T }
+    this.frontMatter = props.frontMatter || DocFrontMatterBuilder.empty()
     this.title = props.title || ""
   }
 
@@ -62,25 +62,29 @@ export class DocFile<T = Record<string, unknown>> {
   }
 
   /**
-   * スキーマを設定した新しいDocFileを作成
+   * Markdownテキストから生成
    */
-  withSchema<U = Record<string, unknown>>(schema: Schema): DocFile<U> {
-    return new DocFile<U>({
-      content: this.content,
-      filePath: this.filePath,
-      frontMatter: { data: this.frontMatter.data as unknown as U },
-      title: this.title,
+  static from(filePath: string, markdownText: string): DocFileBuilder {
+    const openMarkdown = new OpenMarkdown(markdownText)
+    const frontMatter = DocFrontMatterBuilder.from(markdownText)
+
+    return new DocFileBuilder({
+      content: openMarkdown.content,
+      filePath,
+      frontMatter,
+      title: openMarkdown.title,
     })
   }
 
   /**
    * FrontMatterを更新した新しいDocFileを作成
    */
-  withFrontMatter(frontMatter: Record<string, unknown>): DocFile<T> {
-    return new DocFile<T>({
+  withFrontMatter(frontMatter: Record<string, unknown>): DocFileBuilder {
+    const newFrontMatterData = { ...this.frontMatter.data, ...frontMatter }
+    return new DocFileBuilder({
       content: this.content,
       filePath: this.filePath,
-      frontMatter: { data: { ...this.frontMatter.data, ...frontMatter } as T },
+      frontMatter: DocFrontMatterBuilder.fromData(newFrontMatterData),
       title: this.title,
     })
   }
@@ -88,13 +92,13 @@ export class DocFile<T = Record<string, unknown>> {
   /**
    * タイトルを更新した新しいDocFileを作成
    */
-  withTitle(newTitle: string): DocFile<T> {
+  withTitle(newTitle: string): DocFileBuilder {
     const openMarkdown = new OpenMarkdown(`# ${this.title || ""}
 
 ${this.content}`)
     const updatedMarkdown = openMarkdown.withTitle(newTitle)
 
-    return new DocFile<T>({
+    return new DocFileBuilder({
       content: updatedMarkdown.content,
       filePath: this.filePath,
       frontMatter: this.frontMatter,
@@ -102,19 +106,20 @@ ${this.content}`)
     })
   }
 
-  /**
-   * ディスクリプションを更新した新しいDocFileを作成
-   */
-  withDescription(newDescription: string, defaultTitle?: string): DocFile<T> {
-    const openMarkdown = new OpenMarkdown(`# ${this.title || defaultTitle || ""}
+  withDescription(
+    newDescription: string,
+    defaultTitle?: string,
+  ): DocFileBuilder {
+    const openMarkdown = new OpenMarkdown(
+      [this.title || defaultTitle || "", "", this.content].join("\n"),
+    )
 
-${this.content}`)
     const updatedMarkdown = openMarkdown.withDescription(
       newDescription,
       defaultTitle,
     )
 
-    return new DocFile<T>({
+    return new DocFileBuilder({
       content: updatedMarkdown.content,
       filePath: this.filePath,
       frontMatter: this.frontMatter,
@@ -122,21 +127,20 @@ ${this.content}`)
     })
   }
 
-  /**
-   * コンテンツを更新した新しいDocFileを作成（FrontMatterをマージ）
-   */
-  withContent(newContent: string): DocFile<T> {
+  withContent(newContent: string): DocFileBuilder {
     const newOpenMarkdown = new OpenMarkdown(newContent)
+
     const existingBodyFrontMatter = newOpenMarkdown.frontMatter.data || {}
+
     const mergedFrontMatter = {
       ...this.frontMatter.data,
       ...existingBodyFrontMatter,
     }
 
-    return new DocFile<T>({
+    return new DocFileBuilder({
       content: newOpenMarkdown.content,
       filePath: this.filePath,
-      frontMatter: { data: mergedFrontMatter as T },
+      frontMatter: DocFrontMatterBuilder.fromData(mergedFrontMatter),
       title: this.title,
     })
   }
@@ -153,21 +157,16 @@ ${this.content}`)
   }
 
   /**
-   * JSON形式に変換
+   * directoryFileSchemaの形式に変換
    */
-  toJSON(): {
-    isFile: true
-    content: string
-    filePath: string
-    frontMatter: Record<string, unknown>
-    title: string
-  } {
+  toDirectoryFile() {
     return {
-      isFile: true,
+      path: this.filePath,
+      fileName: this.fileName,
       content: this.content,
-      filePath: this.filePath,
-      frontMatter: this.frontMatter.data as Record<string, unknown>,
-      title: this.title,
+      title: this.title || null,
+      description: this.description || null,
+      frontMatter: this.frontMatter.data || null,
     }
   }
 }

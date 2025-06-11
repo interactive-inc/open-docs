@@ -1,32 +1,10 @@
 import path from "node:path"
-import { DocEngine } from "@/lib/docs-engine/doc-engine"
+import { DocEngine } from "@/lib/engine/doc-engine"
 import { factory } from "@/lib/factory"
-import { zAppFile } from "@/system/models"
-import { zAppFileProperties } from "@/system/models"
+import { normalizePath } from "@/system/utils/normalize-path"
 import { zValidator } from "@hono/zod-validator"
 import { HTTPException } from "hono/http-exception"
 import { z } from "zod"
-
-/**
- * パスを正規化（絶対パスから相対パスに変換）
- */
-function normalizePath(rawPath: string): string {
-  let currentPath = rawPath
-
-  // 絶対パスの場合、相対パスに変換
-  if (currentPath.includes("/docs/")) {
-    const docsIndex = currentPath.lastIndexOf("/docs/")
-    currentPath = currentPath.substring(docsIndex + 6) // '/docs/'.length = 6
-  }
-
-  // docsプレフィックスを削除
-  currentPath = currentPath.replace(/^docs\//, "")
-
-  // 先頭のスラッシュを削除
-  currentPath = currentPath.replace(/^\/+/, "")
-
-  return currentPath
-}
 
 /**
  * ファイルコンテンツを取得する
@@ -44,6 +22,8 @@ export const GET = factory.createHandlers(async (c) => {
 
   const docsEngine = new DocEngine({
     basePath: path.join(process.cwd(), "docs"),
+    indexFileName: null,
+    readmeFileName: null,
   })
 
   const exists = await docsEngine.exists(currentPath)
@@ -52,16 +32,7 @@ export const GET = factory.createHandlers(async (c) => {
     throw new HTTPException(400, {})
   }
 
-  const docFile = await docsEngine.getFile(currentPath)
-
-  const response = zAppFile.parse({
-    path: `docs/${currentPath}`,
-    frontMatter: docFile.frontMatter.data,
-    content: docFile.content,
-    cwd: process.cwd(),
-    title: docFile.title || null,
-    description: docFile.description,
-  })
+  const response = await docsEngine.readFile(currentPath)
 
   return c.json(response)
 })
@@ -92,11 +63,12 @@ export const PUT = factory.createHandlers(
 
     const docsEngine = new DocEngine({
       basePath: path.join(process.cwd(), "docs"),
+      indexFileName: null,
+      readmeFileName: null,
     })
 
     const exists = await docsEngine.exists(filePath)
 
-    // ファイルの存在確認
     if (!exists) {
       throw new HTTPException(404, {
         message: `ファイルが見つかりません: ${filePath}`,
@@ -126,10 +98,8 @@ export const PUT = factory.createHandlers(
 
       await docsEngine.writeFileContent(filePath, markdownText)
 
-      const response = zAppFileProperties.parse({
-        success: true,
-        frontMatter: draftFrontMatter,
-      })
+      // 更新後のファイル情報を統一フォーマットで返す
+      const response = await docsEngine.readFile(filePath)
 
       return c.json(response)
     }
@@ -143,20 +113,16 @@ export const PUT = factory.createHandlers(
 
       await docsEngine.writeFileContent(filePath, markdownText)
 
-      const response = zAppFileProperties.parse({
-        success: true,
-        frontMatter: draftDocFile.frontMatter.data,
-      })
+      const response = await docsEngine.readFile(filePath)
 
       return c.json(response)
     }
 
     if (body.description !== null && body.description !== undefined) {
-      // description更新の場合はH1の次の段落を更新しつつFrontMatterを保持
       const docFile = await docsEngine.getFile(filePath)
 
-      // H1がない場合のデフォルトタイトルを取得（ファイル名から）
       const fileName = path.basename(filePath, ".md")
+
       const defaultTitle = fileName === "index" ? "概要" : fileName
 
       const draftDocFile = docFile.withDescription(
@@ -167,10 +133,7 @@ export const PUT = factory.createHandlers(
 
       await docsEngine.writeFileContent(filePath, updatedMarkdown)
 
-      const response = zAppFileProperties.parse({
-        success: true,
-        frontMatter: draftDocFile.frontMatter.data,
-      })
+      const response = await docsEngine.readFile(filePath)
 
       return c.json(response)
     }
@@ -184,10 +147,7 @@ export const PUT = factory.createHandlers(
 
       await docsEngine.writeFileContent(filePath, fullMarkdown)
 
-      const response = zAppFileProperties.parse({
-        success: true,
-        frontMatter: draftFocFile.frontMatter.data,
-      })
+      const response = await docsEngine.readFile(filePath)
 
       return c.json(response)
     }
@@ -212,25 +172,28 @@ export const DELETE = factory.createHandlers(async (c) => {
 
   const docsEngine = new DocEngine({
     basePath: path.join(process.cwd(), "docs"),
+    indexFileName: null,
+    readmeFileName: null,
   })
 
   const filePath = currentPath
 
-  // ファイルの存在確認
-  if (!(await docsEngine.exists(filePath))) {
+  const exists = await docsEngine.exists(filePath)
+
+  if (!exists) {
     throw new HTTPException(404, {
       message: `ファイルが見つかりません: ${filePath}`,
     })
   }
 
-  // ファイルであることを確認
-  if (await docsEngine.isDirectory(filePath)) {
+  const isDirectory = await docsEngine.isDirectory(filePath)
+
+  if (isDirectory) {
     throw new HTTPException(400, {
       message: `指定されたパスはディレクトリです: ${filePath}`,
     })
   }
 
-  // ファイルを削除
   await docsEngine.deleteFile(filePath)
 
   return c.json({ success: true })

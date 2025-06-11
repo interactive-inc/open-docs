@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/app/_components/ui/select"
-import type { RelationOption, SchemaField } from "@/system/types"
+import type { RelationOption, SchemaField } from "@/lib/types"
 import { useEffect, useState } from "react"
 import { ArrayRelationSelect } from "./array-relation-select"
 import { SingleRelationSelect } from "./single-relation-select"

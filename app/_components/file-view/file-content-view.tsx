@@ -1,5 +1,6 @@
-import type { AppFileFrontMatter } from "@/system/models"
-import type { RelationInfo, SchemaDefinition } from "@/system/types"
+import type { appFileFrontMatterSchema } from "@/lib/models"
+import type { RelationInfo, SchemaDefinition } from "@/lib/types"
+import type { z } from "zod"
 import { CsvFileView } from "./csv-file-view"
 import { DefaultFileViewer } from "./default-file-view"
 import { JsonFileEditor } from "./json-file-editor"
@@ -13,7 +14,7 @@ type Props = {
   currentContent: string
   onChange: (content: string) => void
   onFrontMatterUpdate: (key: string, value: unknown) => void
-  schema?: SchemaDefinition  
+  schema?: SchemaDefinition
   relations?: RelationInfo[]
 }
 
@@ -27,7 +28,9 @@ export function FileContentView(props: Props) {
         fileName={props.fileData.path}
         content={props.currentContent}
         onChange={props.onChange}
-        frontMatter={props.fileData.frontMatter as AppFileFrontMatter}
+        frontMatter={
+          props.fileData.frontMatter as z.infer<typeof appFileFrontMatterSchema>
+        }
         onFrontMatterUpdate={props.onFrontMatterUpdate}
         schema={props.schema}
         relations={props.relations}

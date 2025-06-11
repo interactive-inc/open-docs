@@ -2,7 +2,7 @@
 
 import { Badge } from "@/app/_components/ui/badge"
 import { Button } from "@/app/_components/ui/button"
-import type { DirectoryFile } from "@/system/types"
+import type { DirectoryFile } from "@/lib/types"
 import { CheckCircle, Clock } from "lucide-react"
 
 type Priority = "high" | "medium" | "low"
@@ -12,9 +12,10 @@ type Props = {
 }
 
 export function FeatureItem(props: Props) {
-  const isDone = (props.feature.frontMatter?.["is-done"] as boolean) === true
-  const priority = (props.feature.frontMatter?.priority as Priority) || "low"
-  const milestone = props.feature.frontMatter?.milestone as string
+  const frontMatter = props.feature.frontMatter as Record<string, unknown>
+  const isDone = (frontMatter?.["is-done"] as boolean) === true
+  const priority = (frontMatter?.priority as Priority) || "low"
+  const milestone = frontMatter?.milestone as string
 
   const getPriorityColor = (priority: Priority): string => {
     switch (priority) {

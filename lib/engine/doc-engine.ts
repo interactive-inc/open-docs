@@ -1,12 +1,17 @@
 import path from "node:path"
-import { DocFileSystem } from "@/lib/docs-engine/doc-file-system"
-import type { DocsEngineProps } from "@/lib/docs-engine/models/docs-engine-props"
-import type { MarkdownFileData } from "@/lib/docs-engine/models/markdown-file-data"
+import { DocFileSystem } from "@/lib/engine/doc-file-system"
+import {
+  appFileFrontMatterSchema,
+  appFileSchema,
+  directorySchema,
+  fileNodeSchema,
+} from "@/lib/models"
 import { OpenMarkdown } from "@/lib/open-markdown/open-markdown"
-import { zAppFileFrontMatter } from "@/system/models"
-import { DocDirectory } from "./doc-directory"
-import { DocFile } from "./doc-file"
-// import { DocFileFrontMatter } from "./doc-file-front-matter"
+import type { DocsEngineProps, MarkdownFileData } from "@/lib/types"
+import type { z } from "zod"
+import { DocFileBuilder } from "./doc-file-builder"
+import { DocFrontMatterBuilder } from "./doc-front-matter-builder"
+import { DocIndexFileBuilder } from "./doc-index-file-builder"
 
 /**
  * Docsディレクトリのファイルシステムエンジン
@@ -21,8 +26,8 @@ export class DocEngine {
       fileSystem: new DocFileSystem({ basePath: props.basePath }),
     },
   ) {
-    this.indexFileName = props.indexFileName || "index.md"
-    this.readmeFileName = props.readmeFileName || "README.md"
+    this.indexFileName = props.indexFileName ?? "index.md"
+    this.readmeFileName = props.readmeFileName ?? "README.md"
   }
 
   /**
@@ -95,7 +100,7 @@ export class DocEngine {
   /**
    * インデックスファイルを読み込む
    */
-  async readIndexFile(directoryPath = ""): Promise<DocFile | null> {
+  async readIndexFile(directoryPath = ""): Promise<DocFileBuilder | null> {
     const indexPath = this.indexFilePath(directoryPath)
 
     const exists = await this.deps.fileSystem.fileExists(indexPath)
@@ -110,10 +115,10 @@ export class DocEngine {
 
     const fullPath = this.deps.fileSystem.resolve(indexPath)
 
-    return new DocFile({
+    return new DocFileBuilder({
       content: openMarkdown.content,
       filePath: fullPath,
-      frontMatter: { data: openMarkdown.frontMatter.data ?? {} },
+      frontMatter: DocFrontMatterBuilder.from(fileContent),
       title: openMarkdown.title,
     })
   }
@@ -164,7 +169,7 @@ export class DocEngine {
       const openMarkdown = this.markdown(fileContent)
 
       // frontMatterのバリデーション
-      const parsedFrontMatter = zAppFileFrontMatter.safeParse(
+      const parsedFrontMatter = appFileFrontMatterSchema.safeParse(
         openMarkdown.frontMatter.data || {},
       )
 
@@ -262,9 +267,9 @@ export class DocEngine {
   }
 
   /**
-   * ファイルデータを取得する（スキーマベースでFrontMatterを補完）
+   * ファイルデータを取得する（読み取り専用、スキーマ検証付き）
    */
-  async getFile(relativePath: string): Promise<DocFile> {
+  async readFile(relativePath: string) {
     const content = await this.deps.fileSystem.readFile(relativePath)
     const openMarkdown = this.markdown(content)
     const fullPath = this.deps.fileSystem.resolve(relativePath)
@@ -276,27 +281,101 @@ export class DocEngine {
       rawFrontMatter,
     )
 
-    return new DocFile({
+    // DocFileBuilderを作成してdescriptionを計算
+    const docFileBuilder = new DocFileBuilder({
       content: openMarkdown.content,
       filePath: fullPath,
-      frontMatter: { data: completeFrontMatter },
+      frontMatter: DocFrontMatterBuilder.fromData(completeFrontMatter),
+      title: openMarkdown.title,
+    })
+
+    // models.tsのappFileSchemaで検証してJSONで返す
+    const responseData = {
+      path: `docs/${relativePath}`,
+      frontMatter: completeFrontMatter,
+      content: openMarkdown.content,
+      cwd: process.cwd(),
+      title: openMarkdown.title || null,
+      description: docFileBuilder.description,
+    }
+
+    return appFileSchema.parse(responseData)
+  }
+
+  /**
+   * ファイルデータを取得する（修正用、Builderクラスを返す）
+   */
+  async getFile(relativePath: string): Promise<DocFileBuilder> {
+    const content = await this.deps.fileSystem.readFile(relativePath)
+    const openMarkdown = this.markdown(content)
+    const fullPath = this.deps.fileSystem.resolve(relativePath)
+
+    // スキーマベースでFrontMatterを補完
+    const rawFrontMatter = openMarkdown.frontMatter.data ?? {}
+    const completeFrontMatter = await this.getCompleteFrontMatterForFile(
+      relativePath,
+      rawFrontMatter,
+    )
+
+    return new DocFileBuilder({
+      content: openMarkdown.content,
+      filePath: fullPath,
+      frontMatter: DocFrontMatterBuilder.fromData(completeFrontMatter),
       title: openMarkdown.title,
     })
   }
 
   /**
-   * ディレクトリデータ取得
+   * ディレクトリデータ取得（読み取り専用、スキーマ検証付き）
    */
-  async getDirectory(relativePath: string): Promise<DocDirectory> {
+  async readDirectory(relativePath: string) {
+    const indexFile = await this.readIndexFile(relativePath)
+    const fullPath = this.resolve(relativePath)
+
+    if (indexFile === null) {
+      throw new Error(`Index file not found at path: ${fullPath}`)
+    }
+
+    const directoryName = relativePath.split("/").pop() || relativePath
+
+    const indexFileBuilder = DocIndexFileBuilder.fromDocFile(
+      fullPath,
+      indexFile,
+    )
+
+    return directorySchema.parse({
+      indexFile: {
+        path: indexFileBuilder.indexPath,
+        fileName: "index.md",
+        content: indexFileBuilder.content,
+        title: indexFileBuilder.title,
+        description: indexFileBuilder.description,
+        directoryName,
+        columns: indexFileBuilder.getTableColumns(),
+        frontMatter: indexFileBuilder.frontMatter.toJSON(),
+      },
+      files: await this.getDirectoryFiles(relativePath),
+      markdownFilePaths: (await this.readDirectoryFiles(relativePath)).map(
+        (f) => f,
+      ),
+      cwd: process.cwd(),
+      relations: await this.getRelationsFromSchema(indexFileBuilder.schema),
+    })
+  }
+
+  /**
+   * ディレクトリデータ取得（修正用、Builderクラスを返す）
+   */
+  async getIndexFile(relativePath: string): Promise<DocIndexFileBuilder> {
     const indexFile = await this.readIndexFile(relativePath)
 
     const fullPath = this.resolve(relativePath)
 
-    if (indexFile) {
-      return DocDirectory.fromDocFile(fullPath, indexFile)
+    if (indexFile === null) {
+      throw new Error(`Index file not found at path: ${fullPath}`)
     }
 
-    return DocDirectory.empty(fullPath)
+    return DocIndexFileBuilder.fromDocFile(fullPath, indexFile)
   }
 
   /**
@@ -304,12 +383,12 @@ export class DocEngine {
    */
   async getDirectoryOrFile(
     relativePath: string,
-  ): Promise<DocFile | DocDirectory> {
+  ): Promise<DocFileBuilder | DocIndexFileBuilder> {
     if (await this.isFile(relativePath)) {
       return this.getFile(relativePath)
     }
 
-    return this.getDirectory(relativePath)
+    return this.getIndexFile(relativePath)
   }
 
   /**
@@ -326,7 +405,7 @@ export class DocEngine {
       return rawFrontMatter
     }
 
-    const directoryData = await this.getDirectory(directoryPath)
+    const directoryData = await this.getIndexFile(directoryPath)
     if (
       !directoryData.schema ||
       Object.keys(directoryData.schema).length === 0
@@ -337,14 +416,23 @@ export class DocEngine {
     const schema = directoryData.schema
     const defaultFrontMatter: Record<string, unknown> = {}
     for (const [key, field] of Object.entries(schema)) {
-      if (field.type === "string") {
-        defaultFrontMatter[key] = ""
-      } else if (field.type === "boolean") {
-        defaultFrontMatter[key] = false
-      } else if (field.type === "number") {
-        defaultFrontMatter[key] = 0
-      } else if (field.type === "array-string") {
-        defaultFrontMatter[key] = []
+      const fieldData = field as { type: string; default?: unknown }
+      if (fieldData.type === "string") {
+        defaultFrontMatter[key] = fieldData.default ?? ""
+      } else if (fieldData.type === "boolean") {
+        defaultFrontMatter[key] = fieldData.default ?? false
+      } else if (fieldData.type === "number") {
+        defaultFrontMatter[key] = fieldData.default ?? 0
+      } else if (fieldData.type === "array-string") {
+        defaultFrontMatter[key] = fieldData.default ?? []
+      } else if (fieldData.type === "array-number") {
+        defaultFrontMatter[key] = fieldData.default ?? []
+      } else if (fieldData.type === "array-boolean") {
+        defaultFrontMatter[key] = fieldData.default ?? []
+      } else if (fieldData.type === "relation") {
+        defaultFrontMatter[key] = fieldData.default ?? null
+      } else if (fieldData.type === "array-relation") {
+        defaultFrontMatter[key] = fieldData.default ?? []
       }
     }
 
@@ -740,7 +828,7 @@ export class DocEngine {
       let directorySchema: Record<string, unknown> | null = null
 
       if (await this.hasIndexFile(entryPath)) {
-        const docDirectory = await this.getDirectory(entryPath)
+        const docDirectory = await this.getIndexFile(entryPath)
         directorySchema = docDirectory.schema
       }
 
@@ -761,87 +849,168 @@ export class DocEngine {
   }
 
   /**
-   * ディレクトリ情報を API レスポンス用に完全取得
+   * ディレクトリのファイル一覧を取得（index.md、README.mdを除外）
    */
-  async getDirectoryDataForApi(directoryPath: string) {
-    const docDirectory = await this.getDirectory(directoryPath)
-    const rawData = docDirectory.toJSON()
-
-    // ディレクトリのindex.mdからdescriptionを取得
-    let directoryDescription: string | null = null
-    const indexPath = `${directoryPath}/index.md`
-    if (await this.exists(indexPath)) {
-      const indexContent = await this.readFileContent(indexPath)
-      const openMarkdown = new OpenMarkdown(indexContent)
-      directoryDescription = openMarkdown.description
-    }
-
-    // ディレクトリ名を抽出
-    const directoryName =
-      directoryPath.split("/").filter(Boolean).pop() || "Root"
-
-    // ファイル一覧を取得
-    const files = await this.getDirectoryFilesForApi(directoryPath)
-
-    // スキーマを変換
-    const schema = docDirectory.convertSchemaForApi()
-
-    // カラムを生成
-    const columns = schema
-      ? Object.entries(schema).map(([key, field]) => ({
-          key,
-          label: field.description || key,
-          type: field.type,
-          relationPath: field.relationPath,
-        }))
-      : []
-
-    // リレーション情報を収集
-    const relations = await this.getRelationsFromSchema(rawData.schema)
-
-    return {
-      rawData,
-      directoryDescription,
-      directoryName,
-      files,
-      schema,
-      columns,
-      relations,
-    }
-  }
-
-  /**
-   * ディレクトリのファイル一覧を API レスポンス用に整形して取得
-   */
-  async getDirectoryFilesForApi(directoryPath: string) {
+  async getDirectoryFiles(directoryPath: string) {
     const markdownContents = await this.readMarkdownContents(directoryPath)
 
     return markdownContents
       .filter(
         (file) =>
-          !file.filePath.endsWith("README.md") &&
-          !file.filePath.endsWith("index.md"),
+          !(file.filePath as string).endsWith("README.md") &&
+          !(file.filePath as string).endsWith("index.md"),
       )
       .map((file) => {
-        // スキーマなどの特殊なプロパティを除外してfront matterをクリーンアップ
-        const cleanFrontMatter = file.frontMatter || {}
-        const { schema, ...validFrontMatter } = cleanFrontMatter as Record<
-          string,
-          unknown
-        > & { schema?: unknown }
-
-        // ファイル名を生成（拡張子なし）
-        const fileName =
-          file.filePath.split("/").pop()?.replace(/\.md$/, "") || ""
-
-        return {
-          path: `docs/${file.filePath}`,
-          fileName,
-          frontMatter: validFrontMatter,
+        const docFile = new DocFileBuilder({
           content: file.content,
-          title: file.title || null,
-          description: new OpenMarkdown(file.content).description,
-        }
+          filePath: `docs/${file.filePath as string}`,
+          frontMatter: DocFrontMatterBuilder.fromData(
+            (file.frontMatter as Record<string, unknown>) || {},
+          ),
+          title: (file.title as string) || "",
+        })
+
+        return docFile.toDirectoryFile()
       })
+  }
+
+  /**
+   * ファイルツリーを再帰的に取得（スキーマ検証付き）
+   */
+  async getFileTree(basePath = "") {
+    for await (const _result of this.normalizeFileTree(basePath)) {
+      // 結果を消費するだけ（ログは不要）
+    }
+
+    const entries = await this.deps.fileSystem.readDirectory(basePath)
+
+    const results: z.infer<typeof fileNodeSchema>[] = []
+
+    for (const entry of entries) {
+      const entryPath = basePath ? path.join(basePath, entry) : entry
+
+      const isDirectory = await this.isDirectory(entryPath)
+
+      if (!isDirectory) {
+        const fileNode = fileNodeSchema.parse({
+          name: entry,
+          path: `docs/${entryPath}`,
+          type: "file",
+          children: null,
+          icon: undefined,
+        })
+
+        results.push(fileNode)
+
+        continue
+      }
+
+      let icon: string | null = null
+
+      const hasIndexFile = await this.hasIndexFile(entryPath)
+
+      if (hasIndexFile) {
+        try {
+          const docDirectory = await this.getIndexFile(entryPath)
+          icon = docDirectory.icon
+        } catch (error) {
+          console.error(`Error reading directory ${entryPath}:`, error)
+        }
+      }
+
+      const children = await this.getFileTree(entryPath)
+
+      const directoryNode = fileNodeSchema.parse({
+        name: entry,
+        path: `docs/${entryPath}`,
+        type: "directory",
+        children,
+        icon: icon || undefined,
+      })
+
+      results.push(directoryNode)
+    }
+
+    return results
+  }
+
+  /**
+   * 新しいドラフトファイルを作成
+   */
+  async createDraftFile(directoryPath: string) {
+    // ディレクトリの存在確認
+    const directoryExists = await this.exists(directoryPath)
+    if (!directoryExists) {
+      throw new Error(`ディレクトリが見つかりません: ${directoryPath}`)
+    }
+
+    // 既存のドラフトファイルを検索
+    const entries = await this.deps.fileSystem.readDirectory(directoryPath)
+    const draftFiles = entries.filter((f) => f.match(/^draft-\d{2}\.md$/))
+
+    // 次の番号を決定
+    let nextNumber = 0
+    if (draftFiles.length > 0) {
+      const numbers = draftFiles.map((f) => {
+        const match = f.match(/^draft-(\d{2})\.md$/)
+        return match?.[1] ? Number.parseInt(match[1], 10) : 0
+      })
+      nextNumber = Math.max(...numbers) + 1
+    }
+
+    const fileName = `draft-${String(nextNumber).padStart(2, "0")}.md`
+    const filePath = path.join(directoryPath, fileName)
+
+    // ファイルの存在確認
+    const exists = await this.fileExists(filePath)
+    if (exists) {
+      throw new Error(`ファイルが既に存在します: ${filePath}`)
+    }
+
+    // ディレクトリのスキーマからデフォルトのFrontMatterを生成
+    const defaultFrontMatter: Record<string, unknown> = {}
+    try {
+      const directoryData = await this.getIndexFile(directoryPath)
+      const schema = directoryData.schema
+
+      if (schema) {
+        for (const [key, field] of Object.entries(schema)) {
+          const fieldDef = field as { type: string; default?: unknown }
+          if (fieldDef.type === "string") {
+            defaultFrontMatter[key] = fieldDef.default ?? ""
+          } else if (fieldDef.type === "boolean") {
+            defaultFrontMatter[key] = fieldDef.default ?? false
+          } else if (fieldDef.type === "number") {
+            defaultFrontMatter[key] = fieldDef.default ?? 0
+          } else if (
+            fieldDef.type === "array-string" ||
+            fieldDef.type === "array-number" ||
+            fieldDef.type === "array-boolean" ||
+            fieldDef.type === "array-relation"
+          ) {
+            defaultFrontMatter[key] = fieldDef.default ?? []
+          } else if (fieldDef.type === "relation") {
+            defaultFrontMatter[key] = fieldDef.default ?? null
+          }
+        }
+      }
+    } catch (error) {
+      // スキーマ取得に失敗しても続行
+    }
+
+    // ファイル名からタイトルを生成
+    const title = fileName.replace(/\.md$/, "")
+
+    // 新しいMarkdownコンテンツを作成
+    const openMarkdown = OpenMarkdown.fromProps({
+      frontMatter: defaultFrontMatter,
+      content: `# ${title}\n\n[ここに説明を入力]`,
+    })
+
+    // ファイルを書き込み
+    await this.writeFileContent(filePath, openMarkdown.text)
+
+    // 作成したファイルを読み込んで返す
+    return this.readFile(filePath)
   }
 }
