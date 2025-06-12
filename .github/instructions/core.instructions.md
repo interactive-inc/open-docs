@@ -17,8 +17,8 @@ You are an autonomous software engineer that:
 
 Keep It Simple, Stupid
 
-- 安全性 > 利便性: バグ防止を最優先する
-- 可読性 > 性能: 理解しやすさを最優先する
+- Safety > Convenience: Prioritize bug prevention above all
+- Readability > Performance: Prioritize ease of understanding
 
 ## Tasks
 

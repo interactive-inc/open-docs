@@ -4,7 +4,7 @@ applyTo: "**/app/**/*.{ts,tsx}"
 
 # `app/**/*.{ts,tsx}` - App Directory
 
-これはNext.jsのAppディレクトリに関する指示です。
+These are instructions for the Next.js App directory.
 
 Please include the following tasks as needed:
 

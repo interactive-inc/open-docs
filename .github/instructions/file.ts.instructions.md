@@ -6,19 +6,19 @@ applyTo: "**/*.{ts,tsx}"
 
 ## Code Structure and Design
 
-- 単一責任の原則
-- 開放閉鎖の原則  
-- 依存性逆転の原則
-- イミュータブル: データ変更でなく新しいデータ生成
-- 参照透明性: 純粋関数を作る
-- コンポジション: 継承でなく関数合成
-- 関心の分離: データ変換・副作用・ビジネスロジックを分離
+- Single Responsibility Principle
+- Open-Closed Principle  
+- Dependency Inversion Principle
+- Immutable: Generate new data instead of modifying data
+- Referential Transparency: Create pure functions
+- Composition: Function composition instead of inheritance
+- Separation of Concerns: Separate data transformation, side effects, and business logic
 
-## 推奨技法
+## Recommended Techniques
 
-- **デザインパターン**: Strategy, Factory Method, Adapter, Facade, Builder (Fluent Interface)
-- **DDD**: 値オブジェクト, エンティティ, 集約ルート
-- **その他**: DI, Reducer, Currying, Early Return
+- **Design Patterns**: Strategy, Factory Method, Adapter, Facade, Builder (Fluent Interface)
+- Value Objects, Entities, Aggregate Root
+- DI, Reducer, Currying, Early Return
 
 ## Fluent API Design
 
@@ -127,25 +127,6 @@ export class Document {
     return new Document({ ...this.props, title })
   }
 }
-```
-
-## Async Patterns
-
-- **Consistent async/await**: Never mix with .then() chains
-- **Concurrent Operations**: Use Promise.all for independent operations
-- **Sequential Operations**: Use await for dependent operations
-
-```ts
-// Good: Concurrent independent operations
-const [document, schema] = await Promise.all([
-  service.getDocument(path),
-  service.getSchema(directoryPath)
-])
-
-// Good: Sequential dependent operations
-const document = await service.getDocument(path)
-const updated = document.withContent(newContent)
-const saved = await service.saveDocument(updated)
 ```
 
 ## Testing Considerations
