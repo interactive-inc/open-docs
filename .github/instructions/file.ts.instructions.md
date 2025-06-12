@@ -6,18 +6,27 @@ applyTo: "**/*.{ts,tsx}"
 
 ## Code Structure and Design
 
-- Follow the Single Responsibility Principle
-- Ensure code is easily testable
-- Create highly reusable functions
+- 単一責任の原則
+- 開放閉鎖の原則  
+- 依存性逆転の原則
+- イミュータブル: データ変更でなく新しいデータ生成
+- 参照透明性: 純粋関数を作る
+- コンポジション: 継承でなく関数合成
+- 関心の分離: データ変換・副作用・ビジネスロジックを分離
 
-## Domain-Driven Design
+## 推奨技法
 
-- **Entity-Centric Architecture**: Design around domain entities with clear responsibilities
-- **Separation of Concerns**: Each class should have a single, well-defined purpose
-- **Encapsulation**: Hide implementation details behind appropriate interfaces
+- **デザインパターン**: Strategy, Factory Method, Adapter, Facade, Builder (Fluent Interface)
+- **DDD**: 値オブジェクト, エンティティ, 集約ルート
+- **その他**: DI, Reducer, Currying, Early Return
+
+## Fluent API Design
+
+- **Method Chaining**: Enable natural, readable operation sequences
+- **Immutability**: Return new objects instead of modifying existing ones
+- **Type Safety**: Leverage TypeScript's type system for compile-time validation
 
 ```ts
-// Good: Domain entity with clear responsibility
 export class DocumentEntity {
   constructor(private readonly content: string) {}
   
@@ -35,11 +44,7 @@ export class DocumentEntity {
 }
 ```
 
-## Fluent API Design
-
-- **Method Chaining**: Enable natural, readable operation sequences
-- **Immutability**: Return new objects instead of modifying existing ones
-- **Type Safety**: Leverage TypeScript's type system for compile-time validation
+Use like this:
 
 ```ts
 // Good: Fluent API with method chaining
@@ -142,7 +147,6 @@ const document = await service.getDocument(path)
 const updated = document.withContent(newContent)
 const saved = await service.saveDocument(updated)
 ```
-
 
 ## Testing Considerations
 
