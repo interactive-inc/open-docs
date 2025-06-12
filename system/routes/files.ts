@@ -23,7 +23,7 @@ export const POST = factory.createHandlers(
       readmeFileName: null,
     })
 
-    const response = await docsEngine.createDraftFile(body.directoryPath)
+    const response = await docsEngine.createFile(body.directoryPath)
 
     return c.json(response)
   },

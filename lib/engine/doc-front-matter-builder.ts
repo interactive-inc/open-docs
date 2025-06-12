@@ -41,4 +41,34 @@ export class DocFrontMatterBuilder {
       validatedData.success ? validatedData.data : data,
     )
   }
+
+  /**
+   * スキーマフィールドに基づいてデフォルト値を生成する
+   */
+  static generateDefaultValueFromSchemaField(fieldDef: {
+    type: string
+    default?: unknown
+  }): unknown {
+    if (fieldDef.type === "string") {
+      return fieldDef.default ?? ""
+    }
+    if (fieldDef.type === "boolean") {
+      return fieldDef.default ?? false
+    }
+    if (fieldDef.type === "number") {
+      return fieldDef.default ?? 0
+    }
+    if (
+      fieldDef.type === "array-string" ||
+      fieldDef.type === "array-number" ||
+      fieldDef.type === "array-boolean" ||
+      fieldDef.type === "array-relation"
+    ) {
+      return fieldDef.default ?? []
+    }
+    if (fieldDef.type === "relation") {
+      return fieldDef.default ?? null
+    }
+    return null
+  }
 }

@@ -416,24 +416,9 @@ export class DocEngine {
     const schema = directoryData.schema
     const defaultFrontMatter: Record<string, unknown> = {}
     for (const [key, field] of Object.entries(schema)) {
-      const fieldData = field as { type: string; default?: unknown }
-      if (fieldData.type === "string") {
-        defaultFrontMatter[key] = fieldData.default ?? ""
-      } else if (fieldData.type === "boolean") {
-        defaultFrontMatter[key] = fieldData.default ?? false
-      } else if (fieldData.type === "number") {
-        defaultFrontMatter[key] = fieldData.default ?? 0
-      } else if (fieldData.type === "array-string") {
-        defaultFrontMatter[key] = fieldData.default ?? []
-      } else if (fieldData.type === "array-number") {
-        defaultFrontMatter[key] = fieldData.default ?? []
-      } else if (fieldData.type === "array-boolean") {
-        defaultFrontMatter[key] = fieldData.default ?? []
-      } else if (fieldData.type === "relation") {
-        defaultFrontMatter[key] = fieldData.default ?? null
-      } else if (fieldData.type === "array-relation") {
-        defaultFrontMatter[key] = fieldData.default ?? []
-      }
+      const fieldDef = field as { type: string; default?: unknown }
+      defaultFrontMatter[key] =
+        DocFrontMatterBuilder.generateDefaultValueFromSchemaField(fieldDef)
     }
 
     return { ...defaultFrontMatter, ...rawFrontMatter }
@@ -808,6 +793,41 @@ export class DocEngine {
   }
 
   /**
+   * スキーマからデフォルトのFrontMatterを生成する
+   */
+  private async generateDefaultFrontMatterFromSchema(
+    directoryPath: string,
+  ): Promise<Record<string, unknown>> {
+    const defaultFrontMatter: Record<string, unknown> = {}
+
+    try {
+      const directoryData = await this.getIndexFile(directoryPath)
+      const schema = directoryData.schema
+
+      if (schema) {
+        for (const [key, field] of Object.entries(schema)) {
+          const fieldDef = field as { type: string; default?: unknown }
+          defaultFrontMatter[key] =
+            DocFrontMatterBuilder.generateDefaultValueFromSchemaField(fieldDef)
+        }
+      }
+    } catch (error) {
+      // スキーマ取得に失敗しても続行
+    }
+
+    return defaultFrontMatter
+  }
+
+  /**
+   * ファイルツリー正規化を実行（結果を消費するだけ）
+   */
+  async init(basePath = ""): Promise<void> {
+    for await (const _result of this.normalizeFileTree(basePath)) {
+      // 結果を消費するだけ（ログは不要）
+    }
+  }
+
+  /**
    * ディレクトリツリー全体のFrontMatterを再帰的に正規化 (Generator版)
    */
   async *normalizeFileTree(basePath = ""): AsyncGenerator<{
@@ -878,9 +898,7 @@ export class DocEngine {
    * ファイルツリーを再帰的に取得（スキーマ検証付き）
    */
   async getFileTree(basePath = "") {
-    for await (const _result of this.normalizeFileTree(basePath)) {
-      // 結果を消費するだけ（ログは不要）
-    }
+    await this.init(basePath)
 
     const entries = await this.deps.fileSystem.readDirectory(basePath)
 
@@ -935,20 +953,19 @@ export class DocEngine {
   }
 
   /**
-   * 新しいドラフトファイルを作成
+   * 新しいファイルを作成
    */
-  async createDraftFile(directoryPath: string) {
-    // ディレクトリの存在確認
+  async createFile(directoryPath: string) {
     const directoryExists = await this.exists(directoryPath)
+
     if (!directoryExists) {
       throw new Error(`ディレクトリが見つかりません: ${directoryPath}`)
     }
 
-    // 既存のドラフトファイルを検索
     const entries = await this.deps.fileSystem.readDirectory(directoryPath)
+
     const draftFiles = entries.filter((f) => f.match(/^draft-\d{2}\.md$/))
 
-    // 次の番号を決定
     let nextNumber = 0
     if (draftFiles.length > 0) {
       const numbers = draftFiles.map((f) => {
@@ -968,35 +985,8 @@ export class DocEngine {
     }
 
     // ディレクトリのスキーマからデフォルトのFrontMatterを生成
-    const defaultFrontMatter: Record<string, unknown> = {}
-    try {
-      const directoryData = await this.getIndexFile(directoryPath)
-      const schema = directoryData.schema
-
-      if (schema) {
-        for (const [key, field] of Object.entries(schema)) {
-          const fieldDef = field as { type: string; default?: unknown }
-          if (fieldDef.type === "string") {
-            defaultFrontMatter[key] = fieldDef.default ?? ""
-          } else if (fieldDef.type === "boolean") {
-            defaultFrontMatter[key] = fieldDef.default ?? false
-          } else if (fieldDef.type === "number") {
-            defaultFrontMatter[key] = fieldDef.default ?? 0
-          } else if (
-            fieldDef.type === "array-string" ||
-            fieldDef.type === "array-number" ||
-            fieldDef.type === "array-boolean" ||
-            fieldDef.type === "array-relation"
-          ) {
-            defaultFrontMatter[key] = fieldDef.default ?? []
-          } else if (fieldDef.type === "relation") {
-            defaultFrontMatter[key] = fieldDef.default ?? null
-          }
-        }
-      }
-    } catch (error) {
-      // スキーマ取得に失敗しても続行
-    }
+    const defaultFrontMatter =
+      await this.generateDefaultFrontMatterFromSchema(directoryPath)
 
     // ファイル名からタイトルを生成
     const title = fileName.replace(/\.md$/, "")

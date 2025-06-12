@@ -13,6 +13,8 @@ export const GET = factory.createHandlers(async (c) => {
     readmeFileName: null,
   })
 
+  await docsEngine.init()
+
   const files = await docsEngine.getFileTree()
 
   return c.json(files)
