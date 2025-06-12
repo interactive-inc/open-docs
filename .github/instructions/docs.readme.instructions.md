@@ -2,7 +2,7 @@
 applyTo: "**/docs/**/README.md"
 ---
 
-# README - `docs/**/*/README.md`
+# `docs/**/*/README.md` - README
 
 そのディレクトリの概要を記述。全てのディレクトリにREADMEが必要です。
 

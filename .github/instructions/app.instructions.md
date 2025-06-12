@@ -1,8 +1,8 @@
 ---
-applyTo: "**/app/**/*.md"
+applyTo: "**/app/**/*.{ts,tsx}"
 ---
 
-# `app/**/*` - Next.js App Directory
+# `app/**/*.{ts,tsx}` - App Directory
 
 これはNext.jsのAppディレクトリに関する指示です。
 

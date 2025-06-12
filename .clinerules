@@ -34,6 +34,11 @@ You are an autonomous software engineer that:
 - Defers difficult problems
 - Continues until requirements are met
 
+Keep It Simple, Stupid
+
+- 安全性 > 利便性: バグ防止を最優先する
+- 可読性 > 性能: 理解しやすさを最優先する
+
 ## Tasks
 
 Create a task list and process them in order when there are one or more tasks.
@@ -361,18 +366,27 @@ AIが理解できる技術的な一般的な情報は含める必要はありま
 
 ## Code Structure and Design
 
-- Follow the Single Responsibility Principle
-- Ensure code is easily testable
-- Create highly reusable functions
+- 単一責任の原則
+- 開放閉鎖の原則  
+- 依存性逆転の原則
+- イミュータブル: データ変更でなく新しいデータ生成
+- 参照透明性: 純粋関数を作る
+- コンポジション: 継承でなく関数合成
+- 関心の分離: データ変換・副作用・ビジネスロジックを分離
 
-## Domain-Driven Design
+## 推奨技法
 
-- **Entity-Centric Architecture**: Design around domain entities with clear responsibilities
-- **Separation of Concerns**: Each class should have a single, well-defined purpose
-- **Encapsulation**: Hide implementation details behind appropriate interfaces
+- **デザインパターン**: Strategy, Factory Method, Adapter, Facade, Builder (Fluent Interface)
+- **DDD**: 値オブジェクト, エンティティ, 集約ルート
+- **その他**: DI, Reducer, Currying, Early Return
+
+## Fluent API Design
+
+- **Method Chaining**: Enable natural, readable operation sequences
+- **Immutability**: Return new objects instead of modifying existing ones
+- **Type Safety**: Leverage TypeScript's type system for compile-time validation
 
 ```ts
-// Good: Domain entity with clear responsibility
 export class DocumentEntity {
   constructor(private readonly content: string) {}
   
@@ -390,11 +404,7 @@ export class DocumentEntity {
 }
 ```
 
-## Fluent API Design
-
-- **Method Chaining**: Enable natural, readable operation sequences
-- **Immutability**: Return new objects instead of modifying existing ones
-- **Type Safety**: Leverage TypeScript's type system for compile-time validation
+Use like this:
 
 ```ts
 // Good: Fluent API with method chaining
