@@ -43,6 +43,14 @@ Refactor the code after making changes.
 - Delete unnecessary files
 - Do NOT make index.ts files
 
+## Tools
+
+### Open simple browser
+
+The development server is already running. Do not start a new one.
+
+- http://localhost:3000 = Dev server
+
 ## Commands
 
 - `bun test` - Run tests
@@ -57,11 +65,3 @@ Refactor the code after making changes.
   - app/components/ui
 - Do Not install new packages
 - Do Not modify `next.config.mjs`
-
-## Tools
-
-### Open simple browser
-
-The development server is already running. Do not start a new one.
-
-- http://localhost:3000 = Dev server
