@@ -3,9 +3,8 @@
 import { Button } from "@/app/_components/ui/button"
 import { useSidebar } from "@/app/_components/ui/sidebar"
 import { PanelLeftIcon } from "lucide-react"
-import type { ReactNode } from "react"
 
-export function SidebarButton(): ReactNode {
+export function SidebarButton() {
   const sidebar = useSidebar()
 
   return (

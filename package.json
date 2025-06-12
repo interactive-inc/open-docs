@@ -5,9 +5,9 @@
   "scripts": {
     "format": "biome check . --fix --unsafe",
     "check": "tsgo --noEmit",
-    "dev": "next dev --turbopack",
+    "dev": "next dev --turbopack -p 4242",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 4242",
     "claude": "claude --dangerously-skip-permissions --mcp-config .mcp.json"
   },
   "dependencies": {

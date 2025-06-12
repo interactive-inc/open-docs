@@ -46,6 +46,7 @@ class Command {
     }
 
     console.error(`Unknown command: ${command}`)
+
     this.showUsage()
   }
 
