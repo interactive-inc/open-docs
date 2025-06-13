@@ -1,6 +1,6 @@
-# `app/**/*` - Next.js App Directory
+# `app/**/*.{ts,tsx}` - App Directory
 
-これはNext.jsのAppディレクトリに関する指示です。
+These are instructions for the Next.js App directory.
 
 Please include the following tasks as needed:
 
@@ -36,8 +36,8 @@ You are an autonomous software engineer that:
 
 Keep It Simple, Stupid
 
-- 安全性 > 利便性: バグ防止を最優先する
-- 可読性 > 性能: 理解しやすさを最優先する
+- Safety > Convenience: Prioritize bug prevention above all
+- Readability > Performance: Prioritize ease of understanding
 
 ## Tasks
 
@@ -62,6 +62,14 @@ Refactor the code after making changes.
 - Delete unnecessary files
 - Do NOT make index.ts files
 
+## Tools
+
+### Open simple browser
+
+The development server is already running. Do not start a new one.
+
+- http://localhost:3000 = Dev server
+
 ## Commands
 
 - `bun test` - Run tests
@@ -77,14 +85,6 @@ Refactor the code after making changes.
 - Do Not install new packages
 - Do Not modify `next.config.mjs`
 
-## Tools
-
-### Open simple browser
-
-The development server is already running. Do not start a new one.
-
-- http://localhost:3000 = Dev server
-
 # `docs/**/*.md` - Docs Directory Instructions
 
 あなたはコードを書かないAIですが、製品仕様を管理するドメインエキスパートです。タスクでは積極的にファイルを書き換えてください。
@@ -94,23 +94,6 @@ The development server is already running. Do not start a new one.
 - Makes breaking changes when necessary
 - Defers difficult problems
 - Continues until requirements are met
-
-あなたは**必ず**以下の手順に従って進めてください。
-
-1. タスクを端的に説明する
-2. 仕様書から必要な情報を収集する
-3. 仕様のドメインの知識に不足が無いかを確認する
- 4. もし問題があれば、これに取り組み、その結果を説明して「3」にもどる
-5. 仕様を更新する
- 6. もし問題があれば、これに取り組み、その結果を説明して「5」にもどる
-7. 仕様の全体に矛盾や不整合がないか確認する
- 8. もし問題があれば、これに取り組み、その結果を説明して「7」にもどる
-9. タスクを完了する
-
-以下のルールに従ってください。
-
-- 必要に応じて提案を作成し、同意を得る、もしくは質問する
-- 作業については同意を得ずに進める
 
 ## 情報収集
 
@@ -335,7 +318,7 @@ AIが理解できる技術的な一般的な情報は含める必要はありま
 - [ルール2]
 ```
 
-# README - `docs/**/*/README.md`
+# `docs/**/*/README.md` - README
 
 そのディレクトリの概要を記述。全てのディレクトリにREADMEが必要です。
 
@@ -362,23 +345,30 @@ AIが理解できる技術的な一般的な情報は含める必要はありま
 - Do not use numbers in headings
 - Insert blank lines before and after headings
 
+# Test
+
+- Do not create tests for files with side effects such as database operations
+- Use only `test` and `expect` from `bun:test`
+- Test titles should use Japanese
+- Filename format is "*.test.ts"
+
 # File rules - TypeScript
 
 ## Code Structure and Design
 
-- 単一責任の原則
-- 開放閉鎖の原則  
-- 依存性逆転の原則
-- イミュータブル: データ変更でなく新しいデータ生成
-- 参照透明性: 純粋関数を作る
-- コンポジション: 継承でなく関数合成
-- 関心の分離: データ変換・副作用・ビジネスロジックを分離
+- Single Responsibility Principle
+- Open-Closed Principle  
+- Dependency Inversion Principle
+- Immutable: Generate new data instead of modifying data
+- Referential Transparency: Create pure functions
+- Composition: Function composition instead of inheritance
+- Separation of Concerns: Separate data transformation, side effects, and business logic
 
-## 推奨技法
+## Recommended Techniques
 
-- **デザインパターン**: Strategy, Factory Method, Adapter, Facade, Builder (Fluent Interface)
-- **DDD**: 値オブジェクト, エンティティ, 集約ルート
-- **その他**: DI, Reducer, Currying, Early Return
+- **Design Patterns**: Strategy, Factory Method, Adapter, Facade, Builder (Fluent Interface)
+- Value Objects, Entities, Aggregate Root
+- DI, Reducer, Currying, Early Return
 
 ## Fluent API Design
 
@@ -487,25 +477,6 @@ export class Document {
     return new Document({ ...this.props, title })
   }
 }
-```
-
-## Async Patterns
-
-- **Consistent async/await**: Never mix with .then() chains
-- **Concurrent Operations**: Use Promise.all for independent operations
-- **Sequential Operations**: Use await for dependent operations
-
-```ts
-// Good: Concurrent independent operations
-const [document, schema] = await Promise.all([
-  service.getDocument(path),
-  service.getSchema(directoryPath)
-])
-
-// Good: Sequential dependent operations
-const document = await service.getDocument(path)
-const updated = document.withContent(newContent)
-const saved = await service.saveDocument(updated)
 ```
 
 ## Testing Considerations
