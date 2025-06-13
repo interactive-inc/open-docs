@@ -7,6 +7,7 @@ import { Button } from "@/app/_components/ui/button"
 import { Input } from "@/app/_components/ui/input"
 import { VscodeButton } from "@/app/_components/vscode-button"
 import { apiClient } from "@/lib/api-client"
+import { useFileContent } from "@/lib/hooks/use-file-content"
 import { useDirectorySchema } from "@/lib/hooks/use-directory-schema"
 import { useUpdateProperties } from "@/lib/hooks/use-update-properties"
 import { ArrowLeft } from "lucide-react"
@@ -20,13 +21,15 @@ type Props = {
 export function FilePageView(props: Props) {
   const router = useRouter()
 
-  const query = useDirectorySchema(props.filePath)
+  const fileQuery = useFileContent(props.filePath)
 
-  const fileData = query.data.indexFile
+  const directoryQuery = useDirectorySchema(props.filePath)
 
-  const directorySchema = query.data.indexFile.frontMatter.schema || {}
+  const fileData = fileQuery.data
 
-  const relations = query.data.relations || []
+  const directorySchema = directoryQuery.data.indexFile.frontMatter.schema || {}
+
+  const relations = directoryQuery.data.relations || []
 
   const [currentContent, setCurrentContent] = useState(fileData.content)
 
@@ -60,12 +63,12 @@ export function FilePageView(props: Props) {
   }
 
   const handleReload = async () => {
-    const result = await query.refetch()
+    const result = await fileQuery.refetch()
     if (result.data === undefined) return
-    setCurrentContent(result.data.indexFile.content)
+    setCurrentContent(result.data.content)
     // リロード時はAPIから返されたタイトルを使用
-    if (result.data.indexFile.title === null) return
-    setTitle(result.data.indexFile.title)
+    if (result.data.title === null) return
+    setTitle(result.data.title)
   }
 
   const handleFrontMatterUpdate = async (key: string, value: unknown) => {
@@ -117,7 +120,7 @@ export function FilePageView(props: Props) {
       <div className="flex items-center gap-2">
         <SidebarButton />
         <VscodeButton
-          cwd={query.data.cwd}
+          cwd={directoryQuery.data.cwd}
           filePath={fileData.path}
           size="icon"
           variant="outline"
@@ -136,7 +139,7 @@ export function FilePageView(props: Props) {
           onReload={handleReload}
           size="icon"
           variant="outline"
-          disabled={fileContentQuery.isLoading}
+          disabled={fileQuery.isLoading}
         />
       </div>
       <div className="h-full">
