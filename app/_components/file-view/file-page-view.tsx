@@ -7,9 +7,9 @@ import { Button } from "@/app/_components/ui/button"
 import { Input } from "@/app/_components/ui/input"
 import { VscodeButton } from "@/app/_components/vscode-button"
 import { apiClient } from "@/lib/api-client"
-import { useFileContent } from "@/lib/hooks/use-file-content"
-import { useDirectorySchema } from "@/lib/hooks/use-directory-schema"
-import { useUpdateProperties } from "@/lib/hooks/use-update-properties"
+import { useFileQuery } from "@/lib/hooks/use-file-query"
+import { useDirectoryQuery } from "@/lib/hooks/use-directory-query"
+import { useFilePropertiesMutation } from "@/lib/hooks/use-file-properties-mutation"
 import { ArrowLeft } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -21,9 +21,9 @@ type Props = {
 export function FilePageView(props: Props) {
   const router = useRouter()
 
-  const fileQuery = useFileContent(props.filePath)
+  const fileQuery = useFileQuery(props.filePath)
 
-  const directoryQuery = useDirectorySchema(props.filePath)
+  const directoryQuery = useDirectoryQuery(props.filePath)
 
   const fileData = fileQuery.data
 
@@ -41,7 +41,7 @@ export function FilePageView(props: Props) {
 
   const [title, setTitle] = useState(getInitialTitle())
 
-  const updateProperties = useUpdateProperties()
+  const updateProperties = useFilePropertiesMutation()
 
   const onChange = async (newContent: string) => {
     const normalizedPath = props.filePath.replace(/^docs\//, "")

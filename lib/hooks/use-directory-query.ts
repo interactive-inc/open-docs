@@ -1,0 +1,20 @@
+"use client"
+
+import { apiClient } from "@/lib/api-client"
+import { getDirectoryPath } from "@/lib/get-directory-path"
+import { useSuspenseQuery } from "@tanstack/react-query"
+
+const endpoint = apiClient.api.directories[":path{.+}"]
+
+export function useDirectoryQuery(filePath: string) {
+  const directoryPath = getDirectoryPath(filePath)
+
+  return useSuspenseQuery({
+    queryKey: [endpoint.$url({ param: { path: directoryPath } })],
+    async queryFn() {
+      const resp = await endpoint.$get({ param: { path: directoryPath } })
+
+      return resp.json()
+    },
+  })
+}
