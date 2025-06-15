@@ -1,0 +1,40 @@
+"use client"
+import { Input } from "@/app/_components/ui/input"
+import { useState } from "react"
+
+type Props = {
+  value: unknown
+  onUpdate: (value: unknown) => void
+}
+
+export function StringEditableCell(props: Props) {
+  const [editValue, setEditValue] = useState("")
+
+  const displayValue = props.value ? String(props.value) : ""
+
+  const handleBlur = () => {
+    if (editValue !== props.value) {
+      props.onUpdate(editValue || undefined)
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleBlur()
+    }
+    if (e.key === "Escape") {
+      setEditValue(displayValue)
+    }
+  }
+
+  return (
+    <Input
+      type="text"
+      value={editValue}
+      onChange={(e) => setEditValue(e.target.value)}
+      onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
+      placeholder={displayValue || "-"}
+    />
+  )
+}

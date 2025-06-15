@@ -1,8 +1,13 @@
 "use client"
-import { ArrayRelationSelect } from "@/app/_components/file-view/array-relation-select"
-import { SingleRelationSelect } from "@/app/_components/file-view/single-relation-select"
 import type { RelationOption } from "@/lib/types"
-import { useState } from "react"
+import { ArrayBooleanEditableCell } from "./editable-table-cell/array-boolean-editable-cell"
+import { ArrayNumberEditableCell } from "./editable-table-cell/array-number-editable-cell"
+import { ArrayRelationEditableCell } from "./editable-table-cell/array-relation-editable-cell"
+import { ArrayStringEditableCell } from "./editable-table-cell/array-string-editable-cell"
+import { BooleanEditableCell } from "./editable-table-cell/boolean-editable-cell"
+import { NumberEditableCell } from "./editable-table-cell/number-editable-cell"
+import { RelationEditableCell } from "./editable-table-cell/relation-editable-cell"
+import { StringEditableCell } from "./editable-table-cell/string-editable-cell"
 
 type Props = {
   value: unknown
@@ -13,147 +18,58 @@ type Props = {
 }
 
 export function EditableTableCell(props: Props) {
-  const [isEditing, setIsEditing] = useState(false)
-  const [editValue, setEditValue] = useState("")
-
-  const formatValue = (value: unknown, type: string): string => {
-    if (value === undefined || value === null) {
-      return ""
-    }
-
-    switch (type) {
-      case "boolean":
-        return value ? "true" : "false"
-      case "array-string":
-      case "array-number":
-      case "array-boolean":
-      case "array-relation":
-        return Array.isArray(value) ? value.join(", ") : ""
-      case "relation":
-        return value ? String(value) : ""
-      default:
-        return String(value)
-    }
+  // Boolean型の場合
+  if (props.type === "boolean") {
+    return <BooleanEditableCell value={props.value} onUpdate={props.onUpdate} />
   }
 
-  const parseValue = (text: string, type: string): unknown => {
-    if (text === "") {
-      return undefined
-    }
-
-    if (type === "number") {
-      const num = Number(text)
-      return Number.isNaN(num) ? undefined : num
-    }
-
-    if (type === "boolean") {
-      return text.toLowerCase() === "true"
-    }
-
-    if (type === "array-string") {
-      return text
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean)
-    }
-
-    if (type === "array-number") {
-      return text.split(",").map((s) => {
-        const n = Number(s.trim())
-        return Number.isNaN(n) ? 0 : n
-      })
-    }
-
-    if (type === "array-boolean") {
-      return text.split(",").map((s) => s.trim().toLowerCase() === "true")
-    }
-
-    if (type === "relation") {
-      return text || null
-    }
-
-    if (type === "array-relation") {
-      return text
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean)
-    }
-
-    return text
+  // 数値型の場合
+  if (props.type === "number") {
+    return (
+      <NumberEditableCell
+        value={props.value as number}
+        onUpdate={props.onUpdate}
+      />
+    )
   }
-
-  const displayValue = formatValue(props.value, props.type)
 
   // 単一リレーション型の場合
   if (props.type === "relation" && props.relationPath) {
     return (
-      <div className="px-3 py-2">
-        <SingleRelationSelect
-          value={(props.value as string) || ""}
-          relationOptions={props.relationOptions}
-          onValueChange={(value) => props.onUpdate(value)}
-        />
-      </div>
+      <RelationEditableCell
+        value={props.value}
+        onUpdate={props.onUpdate}
+        relationOptions={props.relationOptions}
+      />
     )
   }
 
   // 配列リレーション型の場合
   if (props.type === "array-relation" && props.relationPath) {
     return (
-      <div className="px-3 py-2">
-        <ArrayRelationSelect
-          value={Array.isArray(props.value) ? props.value : []}
-          relationOptions={props.relationOptions}
-          onValueChange={(value) => props.onUpdate(value)}
-        />
-      </div>
+      <ArrayRelationEditableCell
+        value={props.value}
+        onUpdate={props.onUpdate}
+        relationOptions={props.relationOptions}
+      />
     )
   }
 
-  const handleClick = () => {
-    setIsEditing(true)
-    setEditValue(displayValue)
+  // 配列文字列型の場合
+  if (props.type === "array-string") {
+    return <ArrayStringEditableCell value={props.value} onUpdate={props.onUpdate} />
   }
 
-  const handleBlur = () => {
-    setIsEditing(false)
-    const parsedValue = parseValue(editValue, props.type)
-    if (parsedValue !== props.value) {
-      props.onUpdate(parsedValue)
-    }
+  // 配列数値型の場合
+  if (props.type === "array-number") {
+    return <ArrayNumberEditableCell value={props.value} onUpdate={props.onUpdate} />
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleBlur()
-    }
-    if (e.key === "Escape") {
-      setIsEditing(false)
-      setEditValue(displayValue)
-    }
+  // 配列Boolean型の場合
+  if (props.type === "array-boolean") {
+    return <ArrayBooleanEditableCell value={props.value} onUpdate={props.onUpdate} />
   }
 
-  return (
-    <div className="relative">
-      {isEditing ? (
-        <input
-          type="text"
-          value={editValue}
-          onChange={(e) => setEditValue(e.target.value)}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          className="absolute inset-0 w-full bg-transparent px-3 py-2 outline-none"
-        />
-      ) : null}
-      <button
-        type="button"
-        onClick={handleClick}
-        className={`w-full cursor-pointer px-3 py-2 text-left hover:bg-muted/50 ${
-          isEditing ? "invisible" : ""
-        }`}
-      >
-        {displayValue || <span className="text-muted-foreground">-</span>}
-      </button>
-    </div>
-  )
+  // その他（文字列型）の場合
+  return <StringEditableCell value={props.value} onUpdate={props.onUpdate} />
 }

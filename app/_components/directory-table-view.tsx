@@ -158,7 +158,7 @@ export function DirectoryTableView(props: Props) {
         <TableHeader>
           <TableRow>
             <TableHead className="w-40">ファイル名</TableHead>
-            <TableHead className="w-40">タイトル</TableHead>
+            <TableHead className="min-w-64">タイトル</TableHead>
             {props.columns.map((column) => (
               <TableHead key={column.key}>{column.label}</TableHead>
             ))}
@@ -200,7 +200,7 @@ export function DirectoryTableView(props: Props) {
                   )?.[column.key]
 
                   return (
-                    <TableCell key={column.key} className="p-0">
+                    <TableCell key={column.key} className="p-1">
                       <EditableTableCell
                         value={cellValue}
                         type={column.type}

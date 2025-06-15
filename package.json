@@ -8,7 +8,7 @@
     "dev": "next dev --turbopack -p 4242",
     "build": "next build",
     "start": "next start -p 4242",
-    "claude": "claude --dangerously-skip-permissions --mcp-config .mcp.json"
+    "claude": "claude --continue --dangerously-skip-permissions --mcp-config .mcp.json"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.3.22",

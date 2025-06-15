@@ -1,7 +1,7 @@
 ---
 milestone: 2025.01.02
-is-done: false
-priority: 0
+is-done: true
+priority: 2
 related-entity: products/api/entities/supplier-entity.md
 related-pages:
   - products/client/pages/inventories.md

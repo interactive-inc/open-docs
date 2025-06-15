@@ -1,7 +1,7 @@
 ---
 milestone: 2028.01.02
 is-done: false
-priority: 0
+priority: 2
 related-entity: products/api/entities/inventory-entity.md
 related-pages:
   - products/client/pages/products.$product.md
