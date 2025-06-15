@@ -76,15 +76,13 @@ export function EditableFrontMatterView(props: Props) {
           const relationData = props.relations?.find((rel) => {
             return (
               rel.path ===
-              (schemaField && "relationPath" in schemaField
-                ? schemaField.relationPath
-                : null)
+              (schemaField && "path" in schemaField ? schemaField.path : null)
             )
           })
 
-          // array-系のフィールドは2カラムスペースを使用
-          const isArrayField = schemaField?.type?.startsWith("array-")
-          const columnSpan = isArrayField ? "md:col-span-2" : ""
+          // multi-系のフィールドは2カラムスペースを使用
+          const isMultiField = schemaField?.type?.startsWith("multi-")
+          const columnSpan = isMultiField ? "md:col-span-2" : ""
 
           return (
             <div key={key} className={cn("flex flex-col gap-1", columnSpan)}>

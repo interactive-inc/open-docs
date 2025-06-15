@@ -4,10 +4,10 @@ schema:
   name:
     type: string
     required: true
-    description: エンティティ名
+    title: エンティティ
   attributes:
-    type: array-string
-    description: 属性リスト
+    type: multi-text
+    title: 属性リスト
 ---
 
 # エンティティ定義

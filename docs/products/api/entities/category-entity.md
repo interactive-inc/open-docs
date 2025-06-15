@@ -1,6 +1,6 @@
 ---
-name: ""
-attributes: []
+name: aa
+attributes: null
 ---
 
 # カテゴリ

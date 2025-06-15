@@ -8,7 +8,7 @@ import {
 } from "@/app/_components/ui/select"
 import type { RelationOption, SchemaField } from "@/lib/types"
 import { useEffect, useState } from "react"
-import { ArrayRelationSelect } from "./array-relation-select"
+import { MultiRelationSelect } from "./multi-relation-select"
 import { SingleRelationSelect } from "./single-relation-select"
 
 type Props = {
@@ -51,7 +51,7 @@ export function FrontMatterInputField(props: Props) {
   if (
     props.schemaField &&
     props.schemaField.type === "relation" &&
-    props.schemaField.relationPath
+    props.schemaField.path
   ) {
     return (
       <SingleRelationSelect
@@ -65,8 +65,8 @@ export function FrontMatterInputField(props: Props) {
   // 配列リレーション型の場合
   if (
     props.schemaField &&
-    props.schemaField.type === "array-relation" &&
-    props.schemaField.relationPath
+    props.schemaField.type === "multi-relation" &&
+    props.schemaField.path
   ) {
     // 値を配列に正規化
     let normalizedValue: string[] = []
@@ -82,7 +82,7 @@ export function FrontMatterInputField(props: Props) {
     }
 
     return (
-      <ArrayRelationSelect
+      <MultiRelationSelect
         value={normalizedValue}
         relationOptions={props.relationOptions}
         onValueChange={(value) =>

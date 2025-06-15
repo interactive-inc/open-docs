@@ -1,6 +1,6 @@
 ---
 name: ""
-attributes: []
+attributes: null
 ---
 
 # 取引先

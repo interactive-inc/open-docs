@@ -90,19 +90,6 @@ export function DirectoryPageView(props: Props) {
     query.refetch()
   }
 
-  if (directoryData.files.length === 0) {
-    return (
-      <div className="p-4">
-        <h1 className="mb-4 font-bold text-xl">
-          {directoryData.indexFile.directoryName}
-        </h1>
-        <div className="text-center text-gray-500">
-          このディレクトリにはMarkdownファイルがありません
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="h-full overflow-x-hidden">
       <div className="space-y-2 p-4">

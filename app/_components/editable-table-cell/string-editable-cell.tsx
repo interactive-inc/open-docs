@@ -1,6 +1,6 @@
 "use client"
 import { Input } from "@/app/_components/ui/input"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 type Props = {
   value: unknown
@@ -8,9 +8,12 @@ type Props = {
 }
 
 export function StringEditableCell(props: Props) {
-  const [editValue, setEditValue] = useState("")
-
   const displayValue = props.value ? String(props.value) : ""
+  const [editValue, setEditValue] = useState(displayValue)
+
+  useEffect(() => {
+    setEditValue(displayValue)
+  }, [displayValue])
 
   const handleBlur = () => {
     if (editValue !== props.value) {

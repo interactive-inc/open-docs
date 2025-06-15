@@ -1,6 +1,6 @@
 ---
-milestone: 2028.01.02
-is-done: false
+milestone: products/client/milestones/2028.01.01.md
+is-done: true
 priority: 2
 ---
 

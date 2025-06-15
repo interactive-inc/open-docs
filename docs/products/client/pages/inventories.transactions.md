@@ -1,6 +1,5 @@
 ---
-features:
-  - products/client/features/add-inventory.md
+features: []
 ---
 
 # 在庫取引ページ

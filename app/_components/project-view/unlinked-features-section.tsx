@@ -2,13 +2,20 @@
 
 import { Badge } from "@/app/_components/ui/badge"
 import { Card } from "@/app/_components/ui/card"
-import type { DirectoryFile } from "@/lib/types"
+import type { DirectoryFile, RelationOption } from "@/lib/types"
 import { FeatureItem } from "./feature-item"
 
 type Priority = "high" | "medium" | "low"
 
 type Props = {
   unlinkedFeatures: DirectoryFile[]
+  milestoneOptions?: RelationOption[]
+  onMilestoneUpdate?: (featurePath: string, milestone: string) => void
+  onPropertyUpdate?: (
+    featurePath: string,
+    field: string,
+    value: unknown,
+  ) => void
 }
 
 export function UnlinkedFeaturesSection(props: Props) {
@@ -46,7 +53,13 @@ export function UnlinkedFeaturesSection(props: Props) {
         <div className="flex-1">
           <div className="space-y-3">
             {sortedFeatures.map((feature) => (
-              <FeatureItem key={feature.fileName} feature={feature} />
+              <FeatureItem
+                key={feature.fileName}
+                feature={feature}
+                milestoneOptions={props.milestoneOptions}
+                onMilestoneUpdate={props.onMilestoneUpdate}
+                onPropertyUpdate={props.onPropertyUpdate}
+              />
             ))}
           </div>
         </div>

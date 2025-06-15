@@ -6,7 +6,7 @@ schema:
     required: true
     description: ノートのタイトル
   tags:
-    type: array-string
+    type: multi-text
     description: タグ
   date:
     type: string

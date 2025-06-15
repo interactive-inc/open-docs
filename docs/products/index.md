@@ -12,7 +12,7 @@ schema:
     type: number
     description: 価格
   tags:
-    type: array-string
+    type: multi-text
     description: タグ一覧
   active:
     type: boolean

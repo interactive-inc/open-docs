@@ -17,9 +17,9 @@ type Props = {
 }
 
 /**
- * 配列リレーション用のSelectコンポーネント
+ * 複数リレーション用のSelectコンポーネント
  */
-export function ArrayRelationSelect(props: Props) {
+export function MultiRelationSelect(props: Props) {
   const options = props.relationOptions || []
   const selectedValues = Array.isArray(props.value) ? props.value : []
 

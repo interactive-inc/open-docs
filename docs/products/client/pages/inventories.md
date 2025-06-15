@@ -1,6 +1,5 @@
 ---
-features:
-  - products/client/features/create-product.md
+features: []
 ---
 
 # 在庫一覧ページ

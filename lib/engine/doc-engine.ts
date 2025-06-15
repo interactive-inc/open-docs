@@ -421,7 +421,14 @@ export class DocEngine {
         DocFrontMatterBuilder.generateDefaultValueFromSchemaField(fieldDef)
     }
 
-    return { ...defaultFrontMatter, ...rawFrontMatter }
+    // 既存の値が存在する場合はデフォルト値で上書きしない
+    const result = { ...defaultFrontMatter }
+    for (const key in rawFrontMatter) {
+      if (rawFrontMatter[key] !== undefined && rawFrontMatter[key] !== null) {
+        result[key] = rawFrontMatter[key]
+      }
+    }
+    return result
   }
 
   /**
@@ -481,7 +488,7 @@ export class DocEngine {
           return defaultValue
         }
 
-        case "array-string":
+        case "multi-string":
         case "array": {
           if (Array.isArray(value)) return value
           if (typeof value === "string") {
@@ -491,7 +498,7 @@ export class DocEngine {
           return defaultValue
         }
 
-        case "array-number": {
+        case "multi-number": {
           if (Array.isArray(value)) {
             return value.map((item) => {
               const num = Number(item)
@@ -507,7 +514,7 @@ export class DocEngine {
           return defaultValue
         }
 
-        case "array-boolean": {
+        case "multi-boolean": {
           if (Array.isArray(value)) {
             return value.map((item) => Boolean(item))
           }
@@ -526,7 +533,7 @@ export class DocEngine {
           return defaultValue
         }
 
-        case "array-relation": {
+        case "multi-relation": {
           if (Array.isArray(value)) {
             return value.filter((item) => typeof item === "string")
           }
@@ -582,10 +589,10 @@ export class DocEngine {
             defaultValue = 0
           } else if (
             fieldDef.type === "array" ||
-            fieldDef.type === "array-string" ||
-            fieldDef.type === "array-number" ||
-            fieldDef.type === "array-boolean" ||
-            fieldDef.type === "array-relation"
+            fieldDef.type === "multi-string" ||
+            fieldDef.type === "multi-number" ||
+            fieldDef.type === "multi-boolean" ||
+            fieldDef.type === "multi-relation"
           ) {
             defaultValue = []
           } else if (fieldDef.type === "relation") {
@@ -744,21 +751,19 @@ export class DocEngine {
     for (const field of Object.values(schema)) {
       const fieldDef = field as {
         type: string
-        relationPath?: string
+        path?: string
       }
 
       if (
-        (fieldDef.type === "relation" || fieldDef.type === "array-relation") &&
-        fieldDef.relationPath &&
-        !uniqueRelationPaths.has(fieldDef.relationPath)
+        (fieldDef.type === "relation" || fieldDef.type === "multi-relation") &&
+        fieldDef.path &&
+        !uniqueRelationPaths.has(fieldDef.path)
       ) {
-        uniqueRelationPaths.add(fieldDef.relationPath)
+        uniqueRelationPaths.add(fieldDef.path)
 
         // リレーションパスが存在するかチェック
-        if (await this.exists(fieldDef.relationPath)) {
-          const relationFiles = await this.readDirectoryFiles(
-            fieldDef.relationPath,
-          )
+        if (await this.exists(fieldDef.path)) {
+          const relationFiles = await this.readDirectoryFiles(fieldDef.path)
 
           const relationOptions = []
           for (const filePath of relationFiles) {
@@ -782,7 +787,7 @@ export class DocEngine {
           }
 
           relations.push({
-            path: fieldDef.relationPath,
+            path: fieldDef.path,
             files: relationOptions,
           })
         }

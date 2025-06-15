@@ -192,7 +192,7 @@ export function DirectoryTableView(props: Props) {
                 {props.columns.map((column) => {
                   // リレーション情報を取得
                   const relationData = props.relations?.find(
-                    (rel) => rel.path === column.relationPath,
+                    (rel) => rel.path === column.path,
                   )
 
                   const cellValue = (
@@ -204,8 +204,9 @@ export function DirectoryTableView(props: Props) {
                       <EditableTableCell
                         value={cellValue}
                         type={column.type}
-                        relationPath={column.relationPath}
+                        path={column.path}
                         relationOptions={relationData?.files}
+                        selectOptions={column.options}
                         onUpdate={(newValue) => {
                           return updateCellMutation.mutate({
                             path: fileData.path || "",

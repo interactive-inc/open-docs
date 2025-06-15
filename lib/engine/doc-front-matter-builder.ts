@@ -59,10 +59,10 @@ export class DocFrontMatterBuilder {
       return fieldDef.default ?? 0
     }
     if (
-      fieldDef.type === "array-string" ||
-      fieldDef.type === "array-number" ||
-      fieldDef.type === "array-boolean" ||
-      fieldDef.type === "array-relation"
+      fieldDef.type === "multi-string" ||
+      fieldDef.type === "multi-number" ||
+      fieldDef.type === "multi-boolean" ||
+      fieldDef.type === "multi-relation"
     ) {
       return fieldDef.default ?? []
     }

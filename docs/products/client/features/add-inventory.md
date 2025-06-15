@@ -1,10 +1,10 @@
 ---
-milestone: products/client/milestones/2028.01.01.md
-is-done: true
+milestone: 2028.01.01
+is-done: false
 priority: 2
 ---
 
-# 入庫処理を行う
+# undefined
 
 在庫管理者が商品の入庫（仕入れ、返品など）を記録する機能。
 

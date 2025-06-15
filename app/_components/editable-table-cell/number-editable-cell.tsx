@@ -1,6 +1,6 @@
 "use client"
 import { Input } from "@/app/_components/ui/input"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 type Props = {
   value: number | null
@@ -10,10 +10,13 @@ type Props = {
 export function NumberEditableCell(props: Props) {
   const [isEditing, setIsEditing] = useState(false)
 
-  const [editValue, setEditValue] = useState(props.value ?? "")
-
   const displayValue =
     props.value !== undefined && props.value !== null ? String(props.value) : ""
+  const [editValue, setEditValue] = useState(displayValue)
+
+  useEffect(() => {
+    setEditValue(displayValue)
+  }, [displayValue])
 
   const handleClick = () => {
     setIsEditing(true)

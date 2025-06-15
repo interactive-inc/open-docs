@@ -102,13 +102,13 @@ export class DocIndexFileBuilder {
     for (const [fieldName, field] of Object.entries(this.schema)) {
       const fieldDef = field as SchemaField
       if (
-        (fieldDef.type === "relation" || fieldDef.type === "array-relation") &&
-        fieldDef.relationPath
+        (fieldDef.type === "relation" || fieldDef.type === "multi-relation") &&
+        fieldDef.path
       ) {
         relationFields.push({
           fieldName,
-          relationPath: fieldDef.relationPath,
-          isArray: fieldDef.type === "array-relation",
+          relationPath: fieldDef.path,
+          isArray: fieldDef.type === "multi-relation",
         })
       }
     }
@@ -127,8 +127,9 @@ export class DocIndexFileBuilder {
         key,
         type: field.type,
         required: field.required || false,
-        description: field.description || key,
-        relationPath: "relationPath" in field ? field.relationPath : null,
+        title: field.title || key,
+        description: field.description,
+        path: "path" in field ? field.path : null,
         default: field.default || null,
       }
 
@@ -147,8 +148,9 @@ export class DocIndexFileBuilder {
         key,
         type: "string",
         required: false,
-        description: key,
-        relationPath: null,
+        title: key,
+        description: undefined,
+        path: null,
         default: null,
       }
     })
@@ -161,9 +163,10 @@ export class DocIndexFileBuilder {
     return this.getSchemaFields().map((field) => {
       const columnData = {
         key: field.key,
-        label: field.description,
+        label: field.title,
         type: field.type,
-        relationPath: field.relationPath,
+        path: field.path,
+        options: "options" in field ? field.options : undefined,
       }
 
       // tableColumnSchemaで検証
@@ -181,7 +184,7 @@ export class DocIndexFileBuilder {
         key: field.key,
         label: field.key,
         type: "string",
-        relationPath: null,
+        path: null,
       }
     })
   }

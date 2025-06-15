@@ -9,7 +9,9 @@ applyTo: "**/*.{ts,tsx}"
 - Single Responsibility Principle
 - Open-Closed Principle  
 - Dependency Inversion Principle
-- Immutable: Generate new data instead of modifying data
+- Immutable: Generate new d  constructor(private readonly props: Props) {
+    Object.freeze(this)
+  }ta instead of modifying data
 - Referential Transparency: Create pure functions
 - Composition: Function composition instead of inheritance
 - Separation of Concerns: Separate data transformation, side effects, and business logic
@@ -198,6 +200,11 @@ export function FunctionName(props: Props) {
 - Do NOT define classes with only static members
 - Avoid class inheritance
 - Make classes immutable
+- Do NOT explicitly write public modifier
+- Use getters actively instead of defining getXxx methods
+- Do not define return types for getter methods
+- All properties must be readonly
+- Constructor must call Object.freeze(this) for immutability
 
 ```ts
 type Props = {}
@@ -206,12 +213,14 @@ type Props = {}
  * Class Name
  */
 export class ClassName {
-  constructor(private readonly props: Props) {}
+  constructor(private readonly props: Props) {
+    Object.freeze(this)
+  }
 
   /**
    * Public method description
    */
-  public method() {
+  method() {
     // method implementation
   }
 }
@@ -221,13 +230,3 @@ export class ClassName {
 
 - Add comments only when function behavior is not easily predictable
 - Do NOT use param or return annotations
-
-## React
-
-- Use TailwindCSS
-- Use shadcn/ui
-- Do NOT use useMemo or useCallback
-
-## TailwindCSS
-
-- Use `space-` or `gap-` instead of `pb-`

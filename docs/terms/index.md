@@ -10,10 +10,10 @@ schema:
     required: true
     description: 定義
   examples:
-    type: array-string
+    type: multi-text
     description: 使用例
   relatedTerms:
-    type: array-string
+    type: multi-text
     description: 関連用語
 ---
 

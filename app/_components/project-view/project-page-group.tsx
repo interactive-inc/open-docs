@@ -1,6 +1,13 @@
 "use client"
 import { Card } from "@/app/_components/ui/card"
-import type { DirectoryFile } from "@/lib/types"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/app/_components/ui/select"
+import type { DirectoryFile, RelationOption } from "@/lib/types"
 import { FeatureItem } from "./feature-item"
 
 type Priority = "high" | "medium" | "low"
@@ -12,6 +19,16 @@ type PageGroup = {
 
 type Props = {
   group: PageGroup
+  milestoneOptions?: RelationOption[]
+  onMilestoneUpdate?: (featurePath: string, milestone: string) => void
+  onPropertyUpdate?: (
+    featurePath: string,
+    field: string,
+    value: unknown,
+  ) => void
+  allFeatures?: DirectoryFile[]
+  onFeatureAdd?: (pagePath: string, featurePath: string) => void
+  onFeatureRemove?: (pagePath: string, featurePath: string) => void
 }
 
 export function ProjectPageGroup(props: Props) {
@@ -29,6 +46,18 @@ export function ProjectPageGroup(props: Props) {
       "low"
     return (priorityOrder[aPriority] || 2) - (priorityOrder[bPriority] || 2)
   })
+
+  // このページに関連付けられていない機能を取得
+  const linkedFeaturePaths = props.group.features.map((f) => f.path)
+  const availableFeatures = (props.allFeatures || []).filter(
+    (feature) => !linkedFeaturePaths.includes(feature.path),
+  )
+
+  const handleFeatureAdd = (featureValue: string) => {
+    if (featureValue && props.onFeatureAdd) {
+      props.onFeatureAdd(props.group.page.path || "", featureValue)
+    }
+  }
 
   return (
     <Card className="w-full rounded-md p-2">
@@ -53,12 +82,40 @@ export function ProjectPageGroup(props: Props) {
           <div className="space-y-3">
             {sortedFeatures.length > 0 ? (
               sortedFeatures.map((feature) => (
-                <FeatureItem key={feature.fileName} feature={feature} />
+                <FeatureItem
+                  key={feature.fileName}
+                  feature={feature}
+                  milestoneOptions={props.milestoneOptions}
+                  onMilestoneUpdate={props.onMilestoneUpdate}
+                  onPropertyUpdate={props.onPropertyUpdate}
+                  onFeatureRemove={(featurePath) =>
+                    props.onFeatureRemove?.(
+                      props.group.page.path || "",
+                      featurePath,
+                    )
+                  }
+                />
               ))
             ) : (
               <p className="text-gray-500 text-sm italic">
                 このページに関連する機能はありません
               </p>
+            )}
+
+            {/* 機能追加用Select */}
+            {availableFeatures.length > 0 && (
+              <Select value="" onValueChange={handleFeatureAdd}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="機能を追加..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableFeatures.map((feature) => (
+                    <SelectItem key={feature.path} value={feature.path || ""}>
+                      {feature.title || feature.fileName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             )}
           </div>
         </div>

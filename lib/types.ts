@@ -22,11 +22,15 @@ export type FieldType =
   | "string"
   | "number"
   | "boolean"
-  | "array-string"
-  | "array-number"
-  | "array-boolean"
+  | "multi-text"
+  | "multi-number"
+  | "multi-boolean"
   | "relation"
-  | "array-relation"
+  | "multi-relation"
+  | "select-text"
+  | "select-number"
+  | "multi-select-text"
+  | "multi-select-number"
 
 /**
  * スキーマフィールドの型

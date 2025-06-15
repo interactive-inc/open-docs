@@ -1,5 +1,5 @@
 "use client"
-import { ArrayRelationSelect } from "@/app/_components/file-view/array-relation-select"
+import { MultiRelationSelect } from "@/app/_components/file-view/multi-relation-select"
 import type { RelationOption } from "@/lib/types"
 
 type Props = {
@@ -8,9 +8,9 @@ type Props = {
   relationOptions?: RelationOption[]
 }
 
-export function ArrayRelationEditableCell(props: Props) {
+export function MultiRelationEditableCell(props: Props) {
   return (
-    <ArrayRelationSelect
+    <MultiRelationSelect
       value={Array.isArray(props.value) ? props.value : []}
       relationOptions={props.relationOptions}
       onValueChange={(value) => props.onUpdate(value)}

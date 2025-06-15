@@ -2,11 +2,11 @@
 icon: 📁
 schema:
   features:
-    type: array-relation
+    type: multi-relation
     required: false
-    description: 機能
-    relationPath: products/client/features
-    default: []
+    title: 機能
+    description: ページに関連する機能の一覧
+    path: products/client/features
 ---
 
 # ダッシュボード

@@ -4,18 +4,21 @@ schema:
   milestone:
     type: relation
     required: false
-    description: マイルストーン
+    title: マイルストーン
+    description: 開発のマイルストーン
     default: null
-    relationPath: products/client/milestones
+    path: products/client/milestones
   is-done:
     type: boolean
     required: false
-    description: 完了フラグ
+    title: 完了フラグ
+    description: 機能の実装が完了したかどうか
     default: false
   priority:
     type: number
     required: false
-    description: 優先度
+    title: 優先度
+    description: 実装の優先順位（0が最低）
     default: 0
 ---
 

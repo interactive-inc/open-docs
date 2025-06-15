@@ -1,60 +1,101 @@
 "use client"
 
-import { Badge } from "@/app/_components/ui/badge"
+import { SingleRelationSelect } from "@/app/_components/file-view/single-relation-select"
 import { Button } from "@/app/_components/ui/button"
-import type { DirectoryFile } from "@/lib/types"
-import { CheckCircle } from "lucide-react"
+import type { DirectoryFile, RelationOption } from "@/lib/types"
+import { cn } from "@/lib/utils"
+import { CheckCircle, X } from "lucide-react"
 
 type Priority = "high" | "medium" | "low"
 
 type Props = {
   feature: DirectoryFile
+  milestoneOptions?: RelationOption[]
+  onMilestoneUpdate?: (featurePath: string, milestone: string) => void
+  onPropertyUpdate?: (
+    featurePath: string,
+    field: string,
+    value: unknown,
+  ) => void
+  onFeatureRemove?: (featurePath: string) => void
 }
 
 export function FeatureItem(props: Props) {
   const frontMatter = props.feature.frontMatter as Record<string, unknown>
   const isDone = (frontMatter?.["is-done"] as boolean) === true
-  const priority = (frontMatter?.priority as Priority) || "low"
+  const priorityNumber = (frontMatter?.priority as number) || 0
+  const priority =
+    priorityNumber === 2 ? "high" : priorityNumber === 1 ? "medium" : "low"
   const milestone = frontMatter?.milestone as string
+
+  const getCurrentValue = () => {
+    const matchingOption = props.milestoneOptions?.find(
+      (option) => option.label === milestone,
+    )
+    return matchingOption?.value || ""
+  }
+
+  const handleMilestoneChange = (value: string) => {
+    if (!value) {
+      props.onMilestoneUpdate?.(props.feature.path || "", "")
+      return
+    }
+
+    const selectedOption = props.milestoneOptions?.find(
+      (option) => option.value === value,
+    )
+    const labelToSave = selectedOption?.label || value
+    props.onMilestoneUpdate?.(props.feature.path || "", labelToSave)
+  }
+
+  const handleDoneToggle = () => {
+    props.onPropertyUpdate?.(props.feature.path || "", "is-done", !isDone)
+  }
+
+  const handlePriorityClick = () => {
+    const currentValue = (frontMatter?.priority as number) || 0
+    const nextValue = (currentValue + 1) % 3
+    props.onPropertyUpdate?.(props.feature.path || "", "priority", nextValue)
+  }
 
   const getPriorityColor = (priority: Priority): string => {
     switch (priority) {
       case "high":
-        return "bg-red-100 text-red-800 border-red-200"
+        return "border-red-500"
       case "medium":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200"
+        return "border-yellow-500"
       case "low":
-        return "bg-green-100 text-green-800 border-green-200"
+        return "border-green-500"
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200"
+        return "border-gray-500"
     }
   }
 
   const getPriorityLabel = (priority: Priority): string => {
     switch (priority) {
       case "high":
-        return "高"
+        return "2"
       case "medium":
-        return "中"
+        return "1"
       case "low":
-        return "低"
+        return "0"
       default:
-        return "低"
+        return "0"
     }
   }
 
   return (
     <div className={`rounded-lg border p-3 ${isDone ? "opacity-75" : ""}`}>
       <div className="flex items-start gap-3">
-        <div className="flex-1">
+        <div className="flex-1 space-y-1">
           <div className="flex items-center justify-between gap-2">
-            <div className="flex gap-2">
+            <div className="flex items-center gap-3">
               <Button
                 variant={isDone ? "default" : "secondary"}
-                size="icon"
-                className="h-6 w-6"
+                size="sm"
+                onClick={handleDoneToggle}
               >
-                <CheckCircle className="h-4 w-4" />
+                <CheckCircle className="size-4" />
               </Button>
               <h3
                 className={`font-bold ${isDone ? "line-through opacity-80" : ""}`}
@@ -62,31 +103,40 @@ export function FeatureItem(props: Props) {
                 {props.feature.title || props.feature.fileName}
               </h3>
             </div>
-            <div className="flex gap-2">
-              {milestone && <Badge variant="outline">{milestone}</Badge>}
-              <Badge className={getPriorityColor(priority)}>
-                {getPriorityLabel(priority)}
-              </Badge>
-            </div>
           </div>
-
           {props.feature.description && (
             <p className="mb-2 text-sm opacity-80">
               {props.feature.description}
             </p>
           )}
-
-          <div className="flex items-center justify-between">
+          <div className="flex items-end justify-between">
             <div className="text-gray-500 text-xs">
               {props.feature.fileName}
             </div>
-            <div className="flex gap-1">
-              <Button variant="ghost" size="sm">
-                編集
+            <div className="flex gap-2">
+              <SingleRelationSelect
+                value={getCurrentValue()}
+                relationOptions={props.milestoneOptions || []}
+                onValueChange={handleMilestoneChange}
+              />
+              <Button
+                variant="outline"
+                className={cn("w-8", getPriorityColor(priority))}
+                onClick={handlePriorityClick}
+              >
+                {getPriorityLabel(priority)}
               </Button>
-              <Button variant="ghost" size="sm">
-                詳細
-              </Button>
+              {props.onFeatureRemove && (
+                <Button
+                  variant="outline"
+                  className="w-8"
+                  onClick={() =>
+                    props.onFeatureRemove?.(props.feature.path || "")
+                  }
+                >
+                  <X className="size-3" />
+                </Button>
+              )}
             </div>
           </div>
         </div>

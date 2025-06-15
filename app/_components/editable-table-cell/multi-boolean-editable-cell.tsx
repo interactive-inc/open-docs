@@ -1,15 +1,13 @@
 "use client"
 import { Input } from "@/app/_components/ui/input"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 type Props = {
   value: unknown
   onUpdate: (value: unknown) => void
 }
 
-export function ArrayStringEditableCell(props: Props) {
-  const [editValue, setEditValue] = useState("")
-
+export function MultiBooleanEditableCell(props: Props) {
   const formatValue = (value: unknown): string => {
     if (value === undefined || value === null) {
       return ""
@@ -17,14 +15,17 @@ export function ArrayStringEditableCell(props: Props) {
     return Array.isArray(value) ? value.join(", ") : ""
   }
 
+  const [editValue, setEditValue] = useState(formatValue(props.value))
+
+  useEffect(() => {
+    setEditValue(formatValue(props.value))
+  }, [props.value])
+
   const parseValue = (text: string): unknown => {
     if (text === "") {
       return undefined
     }
-    return text
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean)
+    return text.split(",").map((s) => s.trim().toLowerCase() === "true")
   }
 
   const displayValue = formatValue(props.value)
