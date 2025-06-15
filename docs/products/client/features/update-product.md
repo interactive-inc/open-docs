@@ -2,8 +2,6 @@
 milestone: 2028.01.01
 is-done: false
 priority: 0
-related-entity: null
-related-pages: []
 ---
 
 # 商品情報を更新する

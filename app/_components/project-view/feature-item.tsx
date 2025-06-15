@@ -3,7 +3,7 @@
 import { Badge } from "@/app/_components/ui/badge"
 import { Button } from "@/app/_components/ui/button"
 import type { DirectoryFile } from "@/lib/types"
-import { CheckCircle, Clock } from "lucide-react"
+import { CheckCircle } from "lucide-react"
 
 type Priority = "high" | "medium" | "low"
 
@@ -30,14 +30,6 @@ export function FeatureItem(props: Props) {
     }
   }
 
-  const getStatusIcon = (isDone: boolean) => {
-    return isDone ? (
-      <CheckCircle className="h-4 w-4 text-green-600" />
-    ) : (
-      <Clock className="h-4 w-4 text-gray-400" />
-    )
-  }
-
   const getPriorityLabel = (priority: Priority): string => {
     switch (priority) {
       case "high":
@@ -55,27 +47,31 @@ export function FeatureItem(props: Props) {
     <div className={`rounded-lg border p-3 ${isDone ? "opacity-75" : ""}`}>
       <div className="flex items-start gap-3">
         <div className="flex-1">
-          <div className="mb-1 flex items-center gap-2">
-            <Button
-              variant={isDone ? "default" : "secondary"}
-              size="icon"
-              className="h-6 w-6"
-            >
-              <CheckCircle className="h-4 w-4" />
-            </Button>
-            <h3
-              className={`font-medium ${isDone ? "text-gray-600 line-through" : ""}`}
-            >
-              {props.feature.title || props.feature.fileName}
-            </h3>
-            <Badge className={getPriorityColor(priority)}>
-              {getPriorityLabel(priority)}
-            </Badge>
-            {milestone && <Badge variant="outline">{milestone}</Badge>}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex gap-2">
+              <Button
+                variant={isDone ? "default" : "secondary"}
+                size="icon"
+                className="h-6 w-6"
+              >
+                <CheckCircle className="h-4 w-4" />
+              </Button>
+              <h3
+                className={`font-bold ${isDone ? "line-through opacity-80" : ""}`}
+              >
+                {props.feature.title || props.feature.fileName}
+              </h3>
+            </div>
+            <div className="flex gap-2">
+              {milestone && <Badge variant="outline">{milestone}</Badge>}
+              <Badge className={getPriorityColor(priority)}>
+                {getPriorityLabel(priority)}
+              </Badge>
+            </div>
           </div>
 
           {props.feature.description && (
-            <p className="mb-2 text-gray-600 text-sm">
+            <p className="mb-2 text-sm opacity-80">
               {props.feature.description}
             </p>
           )}

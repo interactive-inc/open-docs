@@ -2,10 +2,6 @@
 milestone: 2028.01.01
 is-done: false
 priority: 0
-related-entity: products/api/entities/product-entity.md
-related-pages:
-  - products/client/pages/categories.$category.md
-  - products/client/pages/products.$product.md
 ---
 
 # 出庫処理を行う

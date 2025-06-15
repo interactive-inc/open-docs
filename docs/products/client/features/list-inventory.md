@@ -2,9 +2,6 @@
 milestone: 2028.01.01
 is-done: false
 priority: 2
-related-entity: null
-related-pages:
-  - products/client/pages/inventories.md
 ---
 
 # 在庫一覧を表示する

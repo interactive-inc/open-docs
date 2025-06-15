@@ -2,10 +2,11 @@
 icon: 🏢
 schema:
   milestone:
-    type: string
+    type: relation
     required: false
     description: マイルストーン
     default: null
+    relationPath: products/client/milestones
   is-done:
     type: boolean
     required: false
@@ -14,20 +15,8 @@ schema:
   priority:
     type: number
     required: false
-    description: 優先度（0-100）
+    description: 優先度
     default: 0
-  related-entity:
-    type: relation
-    required: false
-    description: 関連エンティティ
-    relationPath: products/api/entities
-    default: null
-  related-pages:
-    type: array-relation
-    required: false
-    description: 関連ページ
-    relationPath: products/client/pages
-    default: []
 ---
 
 # 機能
