@@ -1,3 +1,10 @@
+---
+name: ""
+purpose: ""
+attributes: []
+business_rules: []
+---
+
 # DocumentPath
 
 ドキュメントのファイルシステムパスを表す値オブジェクト。

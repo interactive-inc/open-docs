@@ -4,6 +4,7 @@ import {
   PUT as updateDirectory,
 } from "@/system/routes/directories.path"
 import { POST as createFile } from "@/system/routes/files"
+import { POST as archiveFile } from "@/system/routes/files.archive"
 import { PUT as moveFile } from "@/system/routes/files.move"
 import {
   DELETE as deleteFile,
@@ -23,6 +24,7 @@ export const app = factory
   .put("/directories/:path{.+}", ...updateDirectory)
   .get("/files/tree", ...getFileTree)
   .post("/files", ...createFile)
+  .post("/files/archive", ...archiveFile)
   .put("/files/move", ...moveFile)
   .put("/files/:path{.+}", ...updateFile) // ファイルの更新
   .get("/files/:path{.+}", ...getFile)

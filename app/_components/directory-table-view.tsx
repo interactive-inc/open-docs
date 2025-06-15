@@ -15,7 +15,7 @@ import { apiClient } from "@/lib/api-client"
 import type { DirectoryFile } from "@/lib/types"
 import type { TableColumn } from "@/lib/types"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { Plus, Trash2 } from "lucide-react"
+import { Archive, Plus, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 
@@ -137,6 +137,26 @@ export function DirectoryTableView(props: Props) {
     },
   })
 
+  const archiveFileMutation = useMutation({
+    async mutationFn(filePath: string) {
+      const endpoint = apiClient.api.files.archive
+      const resp = await endpoint.$post({
+        json: {
+          path: formatPath(filePath),
+        },
+      })
+
+      return resp.json()
+    },
+    onSuccess() {
+      // ファイルツリーキャッシュを無効化
+      queryClient.invalidateQueries({ queryKey: ["file-tree"] })
+
+      if (!props.onDataChanged) return
+      props.onDataChanged()
+    },
+  })
+
   const formatPath = (path: string) => {
     return path.replace(/^docs\//, "")
   }
@@ -150,6 +170,10 @@ export function DirectoryTableView(props: Props) {
       // 1回目のクリック - 確認状態にする
       setDeleteConfirmFiles(new Set([filePath]))
     }
+  }
+
+  const handleArchiveClick = (filePath: string) => {
+    archiveFileMutation.mutate(filePath)
   }
 
   return (
@@ -219,19 +243,32 @@ export function DirectoryTableView(props: Props) {
                   )
                 })}
                 <TableCell className="p-2">
-                  <Button
-                    size="sm"
-                    variant={
-                      deleteConfirmFiles.has(fileData.path)
-                        ? "destructive"
-                        : "ghost"
-                    }
-                    onClick={() => handleDeleteClick(fileData.path)}
-                    disabled={deleteFileMutation.isPending}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex gap-1 justify-end">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleArchiveClick(fileData.path)}
+                      disabled={archiveFileMutation.isPending}
+                      className="h-8 w-8 p-0"
+                      title="アーカイブする"
+                    >
+                      <Archive className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={
+                        deleteConfirmFiles.has(fileData.path)
+                          ? "destructive"
+                          : "ghost"
+                      }
+                      onClick={() => handleDeleteClick(fileData.path)}
+                      disabled={deleteFileMutation.isPending}
+                      className="h-8 w-8 p-0"
+                      title="削除する"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             )

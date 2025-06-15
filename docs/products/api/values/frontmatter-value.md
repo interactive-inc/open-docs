@@ -1,3 +1,10 @@
+---
+name: ""
+purpose: ""
+attributes: []
+business_rules: []
+---
+
 # FrontMatter
 
 Markdownファイルのメタデータを表す値オブジェクト。

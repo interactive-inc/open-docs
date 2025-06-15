@@ -1,3 +1,10 @@
+---
+name: ""
+purpose: ""
+attributes: []
+business_rules: []
+---
+
 # FieldType
 
 スキーマフィールドのデータ型を表す値オブジェクト。

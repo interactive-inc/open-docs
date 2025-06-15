@@ -272,6 +272,14 @@ const relationSchema = z.object({
 })
 
 /**
+ * アーカイブ情報のスキーマ
+ */
+const archiveInfoSchema = z.object({
+  hasArchive: z.boolean(),
+  archiveFileCount: z.number(),
+})
+
+/**
  * ディレクトリのスキーマ
  * ディレクトリの情報とスキーマ、ファイル一覧を含む
  */
@@ -281,6 +289,7 @@ export const directorySchema = z.object({
   markdownFilePaths: z.array(z.string()),
   cwd: z.string(),
   relations: z.array(relationSchema),
+  archiveInfo: archiveInfoSchema.optional(),
 })
 
 /**

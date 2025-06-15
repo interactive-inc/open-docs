@@ -1,3 +1,10 @@
+---
+name: ""
+purpose: ""
+attributes: []
+business_rules: []
+---
+
 # FieldDefinition Entity
 
 スキーマフィールドの定義を表すエンティティ。

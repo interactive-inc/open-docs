@@ -134,4 +134,13 @@ export class DocFileSystem {
   resolve(relativePath: string): string {
     return path.join(this.basePath, relativePath)
   }
+
+  /**
+   * ディレクトリを作成する
+   */
+  async createDirectory(relativePath: string): Promise<void> {
+    const fullPath = path.join(this.basePath, relativePath)
+    await fs.mkdir(fullPath, { recursive: true })
+  }
+
 }

@@ -1,3 +1,10 @@
+---
+name: ""
+purpose: ""
+attributes: []
+business_rules: []
+---
+
 # Schema Entity
 
 ディレクトリ内のドキュメント構造を定義するスキーマエンティティ。

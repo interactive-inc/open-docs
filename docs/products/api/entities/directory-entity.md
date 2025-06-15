@@ -1,3 +1,10 @@
+---
+name: ""
+purpose: ""
+attributes: []
+business_rules: []
+---
+
 # Directory Entity
 
 ドキュメントを階層化して管理するディレクトリエンティティ。

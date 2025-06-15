@@ -39,8 +39,17 @@ export const GET = factory.createHandlers(async (c) => {
   }
 
   const responseData = await mainEngine.readDirectory(currentPath)
-
-  return c.json(responseData)
+  
+  // アーカイブ情報を追加
+  const archiveInfo = await mainEngine.readDirectoryWithArchiveHandling(currentPath)
+  
+  return c.json({
+    ...responseData,
+    archiveInfo: {
+      hasArchive: archiveInfo.hasArchive,
+      archiveFileCount: archiveInfo.archiveFiles.length
+    }
+  })
 })
 
 /**

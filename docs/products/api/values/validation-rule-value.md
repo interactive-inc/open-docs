@@ -1,3 +1,10 @@
+---
+name: ""
+purpose: ""
+attributes: []
+business_rules: []
+---
+
 # ValidationRule
 
 フィールドのバリデーションルールを表す値オブジェクト。

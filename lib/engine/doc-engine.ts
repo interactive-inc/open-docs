@@ -1008,4 +1008,110 @@ export class DocEngine {
     // 作成したファイルを読み込んで返す
     return this.readFile(filePath)
   }
+
+  /**
+   * ディレクトリ名が「_」で始まるかどうかをチェック
+   */
+  isArchiveDirectory(directoryPath: string): boolean {
+    const dirName = path.basename(directoryPath)
+    return dirName === "_" || dirName.startsWith("_")
+  }
+
+  /**
+   * アーカイブディレクトリのパスを生成
+   */
+  getArchiveDirectoryPath(parentDirectory: string): string {
+    return path.join(parentDirectory, "_")
+  }
+
+  /**
+   * アーカイブディレクトリが存在するかチェック、なければ作成
+   */
+  async ensureArchiveDirectory(parentDirectory: string): Promise<string> {
+    const archivePath = this.getArchiveDirectoryPath(parentDirectory)
+    
+    if (!(await this.exists(archivePath))) {
+      await this.deps.fileSystem.createDirectory(archivePath)
+    }
+    
+    return archivePath
+  }
+
+  /**
+   * ファイルをアーカイブディレクトリに移動
+   */
+  async moveFileToArchive(filePath: string): Promise<string> {
+    const parentDirectory = path.dirname(filePath)
+    const fileName = path.basename(filePath)
+    
+    // アーカイブディレクトリを確保
+    const archivePath = await this.ensureArchiveDirectory(parentDirectory)
+    
+    // 移動先パス
+    const destinationPath = path.join(archivePath, fileName)
+    
+    // ファイルが既に存在する場合は連番をつける
+    let finalDestinationPath = destinationPath
+    let counter = 1
+    
+    while (await this.exists(finalDestinationPath)) {
+      const nameWithoutExt = fileName.replace(/\.md$/, "")
+      finalDestinationPath = path.join(archivePath, `${nameWithoutExt}_${counter}.md`)
+      counter++
+    }
+    
+    // ファイルを移動
+    await this.moveFile(filePath, finalDestinationPath)
+    
+    return finalDestinationPath
+  }
+
+  /**
+   * ファイルを移動
+   */
+  async moveFile(sourcePath: string, destinationPath: string): Promise<void> {
+    // ファイル内容を読み取り
+    const content = await this.readFileContent(sourcePath)
+    
+    // 移動先ディレクトリを確保
+    const destinationDir = path.dirname(destinationPath)
+    if (!(await this.exists(destinationDir))) {
+      await this.deps.fileSystem.createDirectory(destinationDir)
+    }
+    
+    // 新しい場所に書き込み
+    await this.writeFileContent(destinationPath, content)
+    
+    // 元のファイルを削除
+    await this.deps.fileSystem.deleteFile(sourcePath)
+  }
+
+  /**
+   * ディレクトリ読み込み時にアーカイブディレクトリを特別扱い
+   */
+  async readDirectoryWithArchiveHandling(directoryPath: string): Promise<{
+    regularFiles: string[]
+    archiveFiles: string[]
+    hasArchive: boolean
+  }> {
+    const files = await this.readDirectoryFiles(directoryPath)
+    const archivePath = this.getArchiveDirectoryPath(directoryPath)
+    const hasArchive = await this.exists(archivePath)
+    
+    let archiveFiles: string[] = []
+    if (hasArchive) {
+      try {
+        archiveFiles = await this.readDirectoryFiles(archivePath)
+      } catch {
+        // アーカイブディレクトリが読めない場合は空配列
+        archiveFiles = []
+      }
+    }
+    
+    return {
+      regularFiles: files,
+      archiveFiles,
+      hasArchive
+    }
+  }
 }

@@ -1,3 +1,10 @@
+---
+name: ""
+purpose: ""
+attributes: []
+business_rules: []
+---
+
 # Document Entity
 
 ドキュメント管理システムの中核となるドキュメントエンティティ。Markdownファイルとフロントマターで構成される。
