@@ -201,6 +201,70 @@ export class DocEngine {
     return results
   }
 
+  /**
+   * ディレクトリ内の全ファイル（.md以外も含む）を取得
+   */
+  async readAllFiles(directoryPath: string): Promise<{
+    markdownFiles: Array<{
+      path: string
+      relativePath: string
+      fileName: string
+      content: string
+      title: string | null
+      description: string | null
+      frontMatter: Record<string, unknown> | null
+    }>
+    otherFiles: Array<{
+      path: string
+      fileName: string
+      extension: string
+      size?: number
+    }>
+  }> {
+    const entries = await this.deps.fileSystem.readDirectory(directoryPath)
+    const markdownFiles = []
+    const otherFiles = []
+
+    for (const entry of entries) {
+      const filePath = directoryPath ? path.join(directoryPath, entry) : entry
+
+      // ディレクトリは除外
+      if (await this.deps.fileSystem.isDirectory(filePath)) {
+        continue
+      }
+
+      // index.md, README.mdは除外
+      if (entry === this.indexFileName || entry === this.readmeFileName) {
+        continue
+      }
+
+      const extension = path.extname(entry).toLowerCase()
+
+      if (extension === ".md") {
+        // Markdownファイル
+        const fileData = await this.getFile(filePath)
+        markdownFiles.push({
+          path: fileData.filePath,
+          relativePath: filePath,
+          fileName: fileData.fileName,
+          content: fileData.content,
+          title: fileData.title,
+          description: fileData.description,
+          frontMatter: fileData.frontMatter.data,
+        })
+      } else if ([".json", ".csv", ".txt"].includes(extension)) {
+        // その他対応ファイル
+        otherFiles.push({
+          path: filePath,
+          fileName: path.basename(entry, extension),
+          extension: extension.substring(1), // ドットを除去
+        })
+      }
+    }
+
+    return { markdownFiles, otherFiles }
+  }
+
   private async readAllMarkdownFilesRecursive(
     directoryPath: string,
     results: string[],
@@ -292,6 +356,7 @@ export class DocEngine {
     // models.tsのappFileSchemaで検証してJSONで返す
     const responseData = {
       path: `docs/${relativePath}`,
+      relativePath: relativePath,
       frontMatter: completeFrontMatter,
       content: openMarkdown.content,
       cwd: process.cwd(),
@@ -343,6 +408,9 @@ export class DocEngine {
       indexFile,
     )
 
+    // 全ファイル（マークダウン以外も含む）を取得
+    const allFiles = await this.readAllFiles(relativePath)
+
     return directorySchema.parse({
       indexFile: {
         path: indexFileBuilder.indexPath,
@@ -354,7 +422,8 @@ export class DocEngine {
         columns: indexFileBuilder.getTableColumns(),
         frontMatter: indexFileBuilder.frontMatter.toJSON(),
       },
-      files: await this.getDirectoryFiles(relativePath),
+      files: allFiles.markdownFiles,
+      otherFiles: allFiles.otherFiles,
       markdownFilePaths: (await this.readDirectoryFiles(relativePath)).map(
         (f) => f,
       ),
@@ -398,7 +467,12 @@ export class DocEngine {
     filePath: string,
     rawFrontMatter: Record<string, unknown>,
   ): Promise<Record<string, unknown>> {
-    const directoryPath = path.dirname(filePath)
+    let directoryPath = path.dirname(filePath)
+
+    // アーカイブディレクトリの場合は親ディレクトリを使用
+    if (this.isArchiveDirectory(directoryPath)) {
+      directoryPath = path.dirname(directoryPath)
+    }
 
     const directoryExists = await this.exists(directoryPath)
     if (!directoryExists) {
@@ -910,6 +984,11 @@ export class DocEngine {
     const results: z.infer<typeof fileNodeSchema>[] = []
 
     for (const entry of entries) {
+      // アーカイブディレクトリ（「_」で始まる）は除外
+      if (entry.startsWith("_")) {
+        continue
+      }
+
       const entryPath = basePath ? path.join(basePath, entry) : entry
 
       const isDirectory = await this.isDirectory(entryPath)
@@ -1029,11 +1108,11 @@ export class DocEngine {
    */
   async ensureArchiveDirectory(parentDirectory: string): Promise<string> {
     const archivePath = this.getArchiveDirectoryPath(parentDirectory)
-    
+
     if (!(await this.exists(archivePath))) {
       await this.deps.fileSystem.createDirectory(archivePath)
     }
-    
+
     return archivePath
   }
 
@@ -1043,26 +1122,29 @@ export class DocEngine {
   async moveFileToArchive(filePath: string): Promise<string> {
     const parentDirectory = path.dirname(filePath)
     const fileName = path.basename(filePath)
-    
+
     // アーカイブディレクトリを確保
     const archivePath = await this.ensureArchiveDirectory(parentDirectory)
-    
+
     // 移動先パス
     const destinationPath = path.join(archivePath, fileName)
-    
+
     // ファイルが既に存在する場合は連番をつける
     let finalDestinationPath = destinationPath
     let counter = 1
-    
+
     while (await this.exists(finalDestinationPath)) {
       const nameWithoutExt = fileName.replace(/\.md$/, "")
-      finalDestinationPath = path.join(archivePath, `${nameWithoutExt}_${counter}.md`)
+      finalDestinationPath = path.join(
+        archivePath,
+        `${nameWithoutExt}_${counter}.md`,
+      )
       counter++
     }
-    
+
     // ファイルを移動
     await this.moveFile(filePath, finalDestinationPath)
-    
+
     return finalDestinationPath
   }
 
@@ -1072,16 +1154,16 @@ export class DocEngine {
   async moveFile(sourcePath: string, destinationPath: string): Promise<void> {
     // ファイル内容を読み取り
     const content = await this.readFileContent(sourcePath)
-    
+
     // 移動先ディレクトリを確保
     const destinationDir = path.dirname(destinationPath)
     if (!(await this.exists(destinationDir))) {
       await this.deps.fileSystem.createDirectory(destinationDir)
     }
-    
+
     // 新しい場所に書き込み
     await this.writeFileContent(destinationPath, content)
-    
+
     // 元のファイルを削除
     await this.deps.fileSystem.deleteFile(sourcePath)
   }
@@ -1097,7 +1179,7 @@ export class DocEngine {
     const files = await this.readDirectoryFiles(directoryPath)
     const archivePath = this.getArchiveDirectoryPath(directoryPath)
     const hasArchive = await this.exists(archivePath)
-    
+
     let archiveFiles: string[] = []
     if (hasArchive) {
       try {
@@ -1107,11 +1189,61 @@ export class DocEngine {
         archiveFiles = []
       }
     }
-    
+
     return {
       regularFiles: files,
       archiveFiles,
-      hasArchive
+      hasArchive,
+    }
+  }
+
+  /**
+   * アーカイブされたファイルの詳細情報を取得
+   */
+  async getArchivedFiles(directoryPath: string): Promise<
+    Array<{
+      path: string
+      relativePath: string
+      fileName: string
+      title: string | null
+      description: string | null
+    }>
+  > {
+    const archivePath = this.getArchiveDirectoryPath(directoryPath)
+
+    if (!(await this.exists(archivePath))) {
+      return []
+    }
+
+    try {
+      const archiveFiles = await this.readDirectoryFiles(archivePath)
+      const result = []
+
+      for (const filePath of archiveFiles) {
+        try {
+          const fileData = await this.getFile(filePath)
+          result.push({
+            path: filePath,
+            relativePath: filePath,
+            fileName: fileData.fileName,
+            title: fileData.title,
+            description: fileData.description,
+          })
+        } catch {
+          // ファイルが読めない場合はファイル名のみ
+          result.push({
+            path: filePath,
+            relativePath: filePath,
+            fileName: path.basename(filePath, ".md"),
+            title: null,
+            description: null,
+          })
+        }
+      }
+
+      return result
+    } catch {
+      return []
     }
   }
 }

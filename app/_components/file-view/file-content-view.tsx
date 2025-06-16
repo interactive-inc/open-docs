@@ -1,5 +1,5 @@
 import type { appFileFrontMatterSchema } from "@/lib/models"
-import type { RelationInfo, SchemaDefinition } from "@/lib/types"
+import type { RelationGroup, SchemaDefinition } from "@/lib/types"
 import type { z } from "zod"
 import { CsvFileView } from "./csv-file-view"
 import { DefaultFileViewer } from "./default-file-view"
@@ -15,7 +15,7 @@ type Props = {
   onChange: (content: string) => void
   onFrontMatterUpdate: (key: string, value: unknown) => void
   schema?: SchemaDefinition
-  relations?: RelationInfo[]
+  relations?: RelationGroup[]
 }
 
 /**

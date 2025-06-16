@@ -142,5 +142,4 @@ export class DocFileSystem {
     const fullPath = path.join(this.basePath, relativePath)
     await fs.mkdir(fullPath, { recursive: true })
   }
-
 }

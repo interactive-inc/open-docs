@@ -41,14 +41,11 @@ export function ProjectView(props: Props) {
 
   const features = featuresQuery.data.files || []
 
-  // featuresディレクトリのリレーション情報からマイルストーンを取得
-  console.log("Available relations:", featuresQuery.data.relations)
   const milestoneRelation = featuresQuery.data.relations?.find(
     (rel) => rel.path === `products/${props.project}/milestones`,
   )
-  console.log("Milestone relation found:", milestoneRelation)
+
   const milestoneOptions = milestoneRelation?.files || []
-  console.log("Milestone options:", milestoneOptions)
 
   const updatePropertiesMutation = useFilePropertiesMutation()
 
@@ -86,38 +83,53 @@ export function ProjectView(props: Props) {
   }
 
   const handleFeatureAdd = async (pagePath: string, featurePath: string) => {
-    try {
-      // ページのfeaturesフィールドに新しい機能を追加
-      const page = pages.find((p) => p.path === pagePath)
-      if (!page) return
+    // ページのfeaturesフィールドに新しい機能を追加
+    const page = pages.find((p) => p.path === pagePath)
+    if (!page) return
 
-      const currentFeatures =
-        ((page.frontMatter as Record<string, unknown>)?.features as string[]) ||
-        []
-      const updatedFeatures = [...currentFeatures, featurePath]
+    const currentFeatures =
+      ((page.frontMatter as Record<string, unknown>)?.features as string[]) ||
+      []
+    const updatedFeatures = [...currentFeatures, featurePath]
 
-      await updatePropertiesMutation.mutateAsync({
-        path: pagePath,
-        field: "features",
-        value: updatedFeatures,
-      })
+    await updatePropertiesMutation.mutateAsync({
+      path: pagePath,
+      field: "features",
+      value: updatedFeatures,
+    })
 
-      // 両方のクエリを再取得
-      await Promise.all([pagesQuery.refetch(), featuresQuery.refetch()])
-    } catch (error) {
-      console.error("Failed to add feature to page:", error)
-    }
+    // 両方のクエリを再取得
+    await Promise.all([pagesQuery.refetch(), featuresQuery.refetch()])
   }
 
   const handleFeatureRemove = async (pagePath: string, featurePath: string) => {
     try {
+      console.log("Removing feature:", { pagePath, featurePath })
       const page = pages.find((p) => p.path === pagePath)
       if (!page) return
 
       const currentFeatures =
         ((page.frontMatter as Record<string, unknown>)?.features as string[]) ||
         []
-      const updatedFeatures = currentFeatures.filter((f) => f !== featurePath)
+      console.log("Current features:", currentFeatures)
+
+      // パスを正規化する関数
+      const normalizePath = (path: string) => {
+        return path
+          .replace(/^.*\/docs\//, "") // 絶対パスの場合は/docs/より前を除去
+          .replace(/^docs\//, "") // 相対パスの場合はdocs/を除去
+      }
+
+      // relativePathがある場合はそれを使用、なければ正規化
+      const normalizedFeaturePath = features.find(f => f.path === featurePath)?.relativePath 
+        || normalizePath(featurePath)
+      console.log("Normalized feature path:", normalizedFeaturePath)
+
+      const updatedFeatures = currentFeatures.filter((f) => {
+        const normalizedCurrentPath = normalizePath(f)
+        return normalizedCurrentPath !== normalizedFeaturePath
+      })
+      console.log("Updated features:", updatedFeatures)
 
       await updatePropertiesMutation.mutateAsync({
         path: pagePath,

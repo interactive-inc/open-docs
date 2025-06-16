@@ -239,6 +239,7 @@ export const indexFileSchema = z.object({
  */
 export const fileSchema = z.object({
   path: z.string(),
+  relativePath: z.string(),
   fileName: z.string(),
   content: z.string(),
   title: z.string().nullable(),
@@ -280,16 +281,38 @@ const archiveInfoSchema = z.object({
 })
 
 /**
+ * その他のファイル（非マークダウン）のスキーマ
+ */
+const otherFileSchema = z.object({
+  path: z.string(),
+  fileName: z.string(),
+  extension: z.string(), // json, csv, txt など
+  size: z.number().optional(),
+})
+
+/**
+ * アーカイブされたファイルのスキーマ
+ */
+const archivedFileSchema = z.object({
+  path: z.string(),
+  fileName: z.string(),
+  title: z.string().nullable(),
+  description: z.string().nullable(),
+})
+
+/**
  * ディレクトリのスキーマ
  * ディレクトリの情報とスキーマ、ファイル一覧を含む
  */
 export const directorySchema = z.object({
   indexFile: indexFileSchema,
   files: z.array(fileSchema),
+  otherFiles: z.array(otherFileSchema),
   markdownFilePaths: z.array(z.string()),
   cwd: z.string(),
   relations: z.array(relationSchema),
   archiveInfo: archiveInfoSchema.optional(),
+  archivedFiles: z.array(archivedFileSchema).optional(),
 })
 
 /**
@@ -309,4 +332,21 @@ export const docsEnginePropsSchema = z.object({
   basePath: z.string(),
   indexFileName: z.string().nullable().default("index.md"),
   readmeFileName: z.string().nullable().default("README.md"),
+})
+
+/**
+ * リレーションオプションのスキーマ
+ */
+export const relationOptionSchema = z.object({
+  value: z.string(),
+  label: z.string(),
+  path: z.string(),
+})
+
+/**
+ * リレーショングループのスキーマ
+ */
+export const relationGroupSchema = z.object({
+  path: z.string(),
+  files: z.array(relationOptionSchema),
 })

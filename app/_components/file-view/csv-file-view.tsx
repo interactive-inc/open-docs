@@ -2,14 +2,21 @@
 
 import { FileCsvColumns } from "@/app/_components/file-view/file-csv-columns-view"
 import { FileCsvTable } from "@/app/_components/file-view/file-csv-table"
-import { PageHeader } from "@/app/_components/page-header"
+import { FileHeader } from "@/app/_components/file-view/file-header"
 import { Button } from "@/app/_components/ui/button"
 import { useState } from "react"
 
 export type Props = {
-  fileName: string
+  filePath: string
+  fileData: {
+    path: string
+    title: string | null
+  }
+  cwd: string
   content: string
   onChange(content: string): void
+  onReload: () => void
+  isLoading: boolean
 }
 
 export function CsvFileView(props: Props) {
@@ -20,16 +27,21 @@ export function CsvFileView(props: Props) {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-2">
-        <PageHeader filePath={props.fileName} />
+    <div className="space-y-2">
+      <FileHeader
+        filePath={props.filePath}
+        fileData={props.fileData}
+        cwd={props.cwd}
+        onReload={props.onReload}
+        isLoading={props.isLoading}
+      >
         <Button
           onClick={toggleColumnEditMode}
           variant={isColumnEditMode ? "default" : "secondary"}
         >
           {"カラム"}
         </Button>
-      </div>
+      </FileHeader>
       {isColumnEditMode ? (
         <FileCsvColumns content={props.content} onChange={props.onChange} />
       ) : (

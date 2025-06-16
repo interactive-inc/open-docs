@@ -10,6 +10,8 @@ import type {
   fileTreeResponseSchema,
   indexFrontMatterSchema,
   markdownFileDataSchema,
+  relationGroupSchema,
+  relationOptionSchema,
   schemaDefinitionSchema,
   schemaFieldSchema,
   tableColumnSchema,
@@ -88,6 +90,27 @@ export type AppFileFrontMatter = z.infer<typeof appFileFrontMatterSchema>
 export type DirectoryFile = z.infer<typeof fileSchema>
 
 /**
+ * その他のファイル（非マークダウン）の型
+ */
+export type OtherFile = {
+  path: string
+  fileName: string
+  extension: string
+  size?: number
+}
+
+/**
+ * アーカイブされたファイルの型
+ */
+export type ArchivedFile = {
+  path: string
+  relativePath: string
+  fileName: string
+  title: string | null
+  description: string | null
+}
+
+/**
  * ディレクトリFrontMatterの型
  */
 export type DirectoryFrontMatter = z.infer<typeof indexFrontMatterSchema>
@@ -105,16 +128,9 @@ export type DocsEngineProps = z.infer<typeof docsEnginePropsSchema>
 /**
  * リレーションオプションの型
  */
-export type RelationOption = {
-  value: string
-  label: string
-  path: string
-}
+export type RelationOption = z.infer<typeof relationOptionSchema>
 
 /**
  * リレーション情報の型
  */
-export type RelationInfo = {
-  path: string
-  files: RelationOption[]
-}
+export type RelationGroup = z.infer<typeof relationGroupSchema>

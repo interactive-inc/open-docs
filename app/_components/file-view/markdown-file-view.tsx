@@ -1,7 +1,8 @@
 import { EditableFrontMatterView } from "@/app/_components/file-view/editable-front-matter-view"
+import { FileHeader } from "@/app/_components/file-view/file-header"
 import { Card } from "@/app/_components/ui/card"
 import type { appFileFrontMatterSchema } from "@/lib/models"
-import type { RelationInfo, SchemaDefinition } from "@/lib/types"
+import type { RelationGroup, SchemaDefinition } from "@/lib/types"
 import { marked } from "marked"
 import type { ReactNode } from "react"
 import type { z } from "zod"
@@ -9,13 +10,20 @@ import type { z } from "zod"
 import "github-markdown-css"
 
 type Props = {
-  fileName: string
+  filePath: string
+  fileData: {
+    path: string
+    title: string | null
+  }
+  cwd: string
   content: string
   onChange(content: string): void
   frontMatter: z.infer<typeof appFileFrontMatterSchema>
   onFrontMatterUpdate: (key: string, value: unknown) => void
+  onReload: () => void
+  isLoading: boolean
   schema?: SchemaDefinition
-  relations?: RelationInfo[]
+  relations?: RelationGroup[]
 }
 
 export function MarkdownFileView(props: Props): ReactNode {
@@ -28,6 +36,13 @@ export function MarkdownFileView(props: Props): ReactNode {
 
   return (
     <div className="h-full space-y-2">
+      <FileHeader
+        filePath={props.filePath}
+        fileData={props.fileData}
+        cwd={props.cwd}
+        onReload={props.onReload}
+        isLoading={props.isLoading}
+      />
       {hasFrontMatter && (
         <EditableFrontMatterView
           frontMatter={frontMatter as z.infer<typeof appFileFrontMatterSchema>}

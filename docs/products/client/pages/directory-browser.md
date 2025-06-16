@@ -1,8 +1,7 @@
 ---
 features:
   - docs/products/client/features/view-document-list.md
-  - docs/products/client/features/create-document.md
-  - docs/products/client/features/delete-document.md
+  - /Users/n/Documents/open-docs/docs/products/client/features/delete-document.md
 ---
 
 # ディレクトリブラウザページ

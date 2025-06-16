@@ -1,4 +1,6 @@
 "use client"
+import { ArchivedFileListView } from "@/app/_components/archived-file-list-view"
+import { DirectoryFileListView } from "@/app/_components/directory-file-list-view"
 import { DirectoryTableView } from "@/app/_components/directory-table-view"
 import { SidebarButton } from "@/app/_components/sidebar-button"
 import { EmojiPicker } from "@/app/_components/ui/emoji-picker"
@@ -92,7 +94,7 @@ export function DirectoryPageView(props: Props) {
 
   return (
     <div className="h-full overflow-x-hidden">
-      <div className="space-y-2 p-4">
+      <div className="space-y-2 p-2">
         <div className="flex items-center gap-2">
           <SidebarButton />
           {directoryData.indexFile && (
@@ -126,17 +128,15 @@ export function DirectoryPageView(props: Props) {
           relations={directoryData.relations}
           onDataChanged={() => query.refetch()}
         />
-        {directoryData.archiveInfo?.hasArchive && (
-          <div className="mt-4">
-            <div className="flex items-center gap-2 text-sm">
-              <span>📦</span>
-              <span>
-                {directoryData.archiveInfo.archiveFileCount}
-                件のファイルが整理されています。
-              </span>
-            </div>
-          </div>
-        )}
+        <DirectoryFileListView
+          files={directoryData.otherFiles || []}
+          onDataChanged={() => query.refetch()}
+        />
+        <ArchivedFileListView
+          files={directoryData.archivedFiles || []}
+          directoryPath={props.currentPath}
+          refetch={() => query.refetch()}
+        />
       </div>
     </div>
   )

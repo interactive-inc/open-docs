@@ -1,7 +1,7 @@
 ---
 milestone: 2028.01.01
 is-done: false
-priority: 1
+priority: 2
 ---
 
 # ドキュメントを削除する

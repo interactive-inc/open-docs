@@ -130,9 +130,10 @@ export function FeatureItem(props: Props) {
                 <Button
                   variant="outline"
                   className="w-8"
-                  onClick={() =>
+                  onClick={() => {
+                    console.log("Feature remove clicked, path:", props.feature.path)
                     props.onFeatureRemove?.(props.feature.path || "")
-                  }
+                  }}
                 >
                   <X className="size-3" />
                 </Button>

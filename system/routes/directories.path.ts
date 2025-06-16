@@ -38,17 +38,27 @@ export const GET = factory.createHandlers(async (c) => {
     })
   }
 
-  const responseData = await mainEngine.readDirectory(currentPath)
-  
+  // アーカイブディレクトリの場合は親ディレクトリのindex.mdを使用
+  let responseData
+  if (mainEngine.isArchiveDirectory(currentPath)) {
+    const parentPath = path.dirname(currentPath)
+    responseData = await mainEngine.readDirectory(parentPath)
+  } else {
+    responseData = await mainEngine.readDirectory(currentPath)
+  }
+
   // アーカイブ情報を追加
-  const archiveInfo = await mainEngine.readDirectoryWithArchiveHandling(currentPath)
-  
+  const archiveInfo =
+    await mainEngine.readDirectoryWithArchiveHandling(currentPath)
+  const archivedFiles = await mainEngine.getArchivedFiles(currentPath)
+
   return c.json({
     ...responseData,
     archiveInfo: {
       hasArchive: archiveInfo.hasArchive,
-      archiveFileCount: archiveInfo.archiveFiles.length
-    }
+      archiveFileCount: archiveInfo.archiveFiles.length,
+    },
+    archivedFiles,
   })
 })
 

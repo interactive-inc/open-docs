@@ -101,7 +101,7 @@ export function FileCsvTable(props: Props) {
   }
 
   return (
-    <Card className="h-full max-h-fit max-w-none overflow-hidden p-0">
+    <Card className="h-full max-h-fit max-w-none overflow-hidden rounded-md p-0">
       <Table className="w-full border-collapse">
         <TableHeader>
           <TableRow>

@@ -48,10 +48,14 @@ export const PUT = factory.createHandlers(
       body: z.string().nullable(),
       title: z.string().nullable(),
       description: z.string().nullable(),
+      isArchived: z.boolean().nullable(),
     }),
   ),
   async (c) => {
     const body = c.req.valid("json")
+
+    // デバッグログ
+    console.log("PUT request body:", body)
 
     const rawPath = c.req.param("path")
 
@@ -61,6 +65,10 @@ export const PUT = factory.createHandlers(
 
     const filePath = rawPath
 
+    // パスのデバッグログ
+    console.log("Raw path:", rawPath)
+    console.log("File path:", filePath)
+
     const docsEngine = new DocEngine({
       basePath: path.join(process.cwd(), "docs"),
       indexFileName: null,
@@ -68,10 +76,38 @@ export const PUT = factory.createHandlers(
     })
 
     const exists = await docsEngine.exists(filePath)
+    console.log("File exists:", exists)
 
     if (!exists) {
       throw new HTTPException(404, {
         message: `ファイルが見つかりません: ${filePath}`,
+      })
+    }
+
+    // アーカイブ操作を最初に処理
+    console.log("Checking isArchived:", body.isArchived, typeof body.isArchived)
+    if (body.isArchived !== null && body.isArchived !== undefined) {
+      console.log("Processing archive operation:", body.isArchived)
+      if (body.isArchived) {
+        // アーカイブする
+        const newPath = await docsEngine.moveFileToArchive(filePath)
+        return c.json({
+          success: true,
+          message: "ファイルをアーカイブしました",
+          newPath: newPath,
+        })
+      }
+
+      // 復元する（アーカイブから元の場所に戻す）
+      const parentDir = path.dirname(filePath)
+      const fileName = path.basename(filePath)
+      const originalPath = path.join(parentDir.replace(/\/_$/, ""), fileName)
+
+      await docsEngine.moveFile(filePath, originalPath)
+      return c.json({
+        success: true,
+        message: "ファイルを復元しました",
+        newPath: originalPath,
       })
     }
 
@@ -153,7 +189,7 @@ export const PUT = factory.createHandlers(
     }
 
     throw new HTTPException(400, {
-      message: `Invalid request: properties=${!!body.properties}, body=${!!body.body}, title=${!!body.title}, description=${!!body.description}`,
+      message: `Invalid request: properties=${!!body.properties}, body=${!!body.body}, title=${!!body.title}, description=${!!body.description}, isArchived=${body.isArchived}`,
     })
   },
 )

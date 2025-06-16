@@ -12,8 +12,7 @@ import {
   TableRow,
 } from "@/app/_components/ui/table"
 import { apiClient } from "@/lib/api-client"
-import type { DirectoryFile } from "@/lib/types"
-import type { TableColumn } from "@/lib/types"
+import type { DirectoryFile, RelationGroup, TableColumn } from "@/lib/types"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Archive, Plus, Trash2 } from "lucide-react"
 import Link from "next/link"
@@ -24,14 +23,7 @@ type Props = {
   columns: TableColumn[]
   directoryPath: string
   onDataChanged?: () => void
-  relations?: Array<{
-    path: string
-    files: Array<{
-      value: string
-      label: string
-      path: string
-    }>
-  }>
+  relations?: RelationGroup[]
 }
 
 export function DirectoryTableView(props: Props) {
@@ -74,6 +66,7 @@ export function DirectoryTableView(props: Props) {
           body: null,
           title: null,
           description: null,
+          isArchived: null,
         },
       })
 
@@ -98,6 +91,7 @@ export function DirectoryTableView(props: Props) {
           properties: null,
           body: null,
           description: null,
+          isArchived: null,
         },
       })
 
@@ -139,10 +133,15 @@ export function DirectoryTableView(props: Props) {
 
   const archiveFileMutation = useMutation({
     async mutationFn(filePath: string) {
-      const endpoint = apiClient.api.files.archive
-      const resp = await endpoint.$post({
+      const endpoint = apiClient.api.files[":path{.+}"]
+      const resp = await endpoint.$put({
+        param: { path: formatPath(filePath) },
         json: {
-          path: formatPath(filePath),
+          properties: null,
+          body: null,
+          title: null,
+          description: null,
+          isArchived: true,
         },
       })
 
@@ -158,6 +157,11 @@ export function DirectoryTableView(props: Props) {
   })
 
   const formatPath = (path: string) => {
+    // 絶対パスの場合は相対パスに変換
+    if (path.includes("/docs/")) {
+      return path.split("/docs/")[1] ?? ""
+    }
+    // docs/ プレフィックスを除去
     return path.replace(/^docs\//, "")
   }
 
@@ -173,6 +177,8 @@ export function DirectoryTableView(props: Props) {
   }
 
   const handleArchiveClick = (filePath: string) => {
+    console.log("Archive click - original path:", filePath)
+    console.log("Archive click - formatted path:", formatPath(filePath))
     archiveFileMutation.mutate(filePath)
   }
 
@@ -243,7 +249,7 @@ export function DirectoryTableView(props: Props) {
                   )
                 })}
                 <TableCell className="p-2">
-                  <div className="flex gap-1 justify-end">
+                  <div className="flex justify-end gap-1">
                     <Button
                       size="sm"
                       variant="ghost"
