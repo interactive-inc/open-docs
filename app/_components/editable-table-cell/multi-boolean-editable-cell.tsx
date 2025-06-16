@@ -17,6 +17,7 @@ export function MultiBooleanEditableCell(props: Props) {
 
   const [editValue, setEditValue] = useState(formatValue(props.value))
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     setEditValue(formatValue(props.value))
   }, [props.value])

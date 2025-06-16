@@ -3,7 +3,7 @@
 import { Button } from "@/app/_components/ui/button"
 import { apiClient } from "@/lib/api-client"
 import { useFilePropertiesMutation } from "@/lib/hooks/use-file-properties-mutation"
-import type { DirectoryFile, DirectoryResponse } from "@/lib/types"
+import type { DirectoryFile, DocDirectory } from "@/lib/types"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import { ProjectPageGroup } from "./project-page-group"
@@ -19,7 +19,7 @@ type PageGroup = {
 }
 
 export function ProjectView(props: Props) {
-  const pagesQuery = useSuspenseQuery<DirectoryResponse>({
+  const pagesQuery = useSuspenseQuery<DocDirectory>({
     queryKey: ["directories", `products/${props.project}/pages`],
     queryFn: async () => {
       const response = await apiClient.api.directories[":path{.+}"].$get({
@@ -29,7 +29,7 @@ export function ProjectView(props: Props) {
     },
   })
 
-  const featuresQuery = useSuspenseQuery<DirectoryResponse>({
+  const featuresQuery = useSuspenseQuery<DocDirectory>({
     queryKey: ["directories", `products/${props.project}/features`],
     queryFn: async () => {
       const response = await apiClient.api.directories[":path{.+}"].$get({

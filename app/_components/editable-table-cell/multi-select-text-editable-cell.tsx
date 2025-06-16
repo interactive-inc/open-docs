@@ -66,6 +66,7 @@ export function MultiSelectTextEditableCell(props: Props) {
             .filter((option) => !currentValues.includes(option))
             .map((option) => (
               <button
+                type="button"
                 key={option}
                 className="w-full px-3 py-2 text-left hover:bg-gray-100"
                 onClick={() => {

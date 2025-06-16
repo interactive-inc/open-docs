@@ -3,7 +3,7 @@ import type {
   appFileFrontMatterSchema,
   appFileSchema,
   appResultSchema,
-  directorySchema,
+  docDirectorySchema,
   docsEnginePropsSchema,
   fileNodeSchema,
   fileSchema,
@@ -67,7 +67,7 @@ export type FileTreeResponse = z.infer<typeof fileTreeResponseSchema>
 /**
  * ディレクトリレスポンスの型
  */
-export type DirectoryResponse = z.infer<typeof directorySchema>
+export type DocDirectory = z.infer<typeof docDirectorySchema>
 
 /**
  * アプリファイルの型

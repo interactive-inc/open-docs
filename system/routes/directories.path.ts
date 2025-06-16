@@ -38,8 +38,9 @@ export const GET = factory.createHandlers(async (c) => {
     })
   }
 
-  // アーカイブディレクトリの場合は親ディレクトリのindex.mdを使用
+  // biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
   let responseData
+
   if (mainEngine.isArchiveDirectory(currentPath)) {
     const parentPath = path.dirname(currentPath)
     responseData = await mainEngine.readDirectory(parentPath)

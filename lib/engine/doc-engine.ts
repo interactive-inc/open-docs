@@ -3,11 +3,15 @@ import { DocFileSystem } from "@/lib/engine/doc-file-system"
 import {
   appFileFrontMatterSchema,
   appFileSchema,
-  directorySchema,
+  docDirectorySchema,
   fileNodeSchema,
 } from "@/lib/models"
 import { OpenMarkdown } from "@/lib/open-markdown/open-markdown"
-import type { DocsEngineProps, MarkdownFileData } from "@/lib/types"
+import type {
+  DocDirectory,
+  DocsEngineProps,
+  MarkdownFileData,
+} from "@/lib/types"
 import type { z } from "zod"
 import { DocFileBuilder } from "./doc-file-builder"
 import { DocFrontMatterBuilder } from "./doc-front-matter-builder"
@@ -393,7 +397,7 @@ export class DocEngine {
   /**
    * ディレクトリデータ取得（読み取り専用、スキーマ検証付き）
    */
-  async readDirectory(relativePath: string) {
+  async readDirectory(relativePath: string): Promise<DocDirectory> {
     const indexFile = await this.readIndexFile(relativePath)
     const fullPath = this.resolve(relativePath)
 
@@ -411,7 +415,11 @@ export class DocEngine {
     // 全ファイル（マークダウン以外も含む）を取得
     const allFiles = await this.readAllFiles(relativePath)
 
-    return directorySchema.parse({
+    const markdownFilePaths = await this.readDirectoryFiles(relativePath)
+
+    const relations = await this.getRelationsFromSchema(indexFileBuilder.schema)
+
+    return docDirectorySchema.parse({
       indexFile: {
         path: indexFileBuilder.indexPath,
         fileName: "index.md",
@@ -424,11 +432,9 @@ export class DocEngine {
       },
       files: allFiles.markdownFiles,
       otherFiles: allFiles.otherFiles,
-      markdownFilePaths: (await this.readDirectoryFiles(relativePath)).map(
-        (f) => f,
-      ),
+      markdownFilePaths: markdownFilePaths,
       cwd: process.cwd(),
-      relations: await this.getRelationsFromSchema(indexFileBuilder.schema),
+      relations: relations,
     })
   }
 

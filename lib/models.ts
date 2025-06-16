@@ -304,7 +304,7 @@ const archivedFileSchema = z.object({
  * ディレクトリのスキーマ
  * ディレクトリの情報とスキーマ、ファイル一覧を含む
  */
-export const directorySchema = z.object({
+export const docDirectorySchema = z.object({
   indexFile: indexFileSchema,
   files: z.array(fileSchema),
   otherFiles: z.array(otherFileSchema),
