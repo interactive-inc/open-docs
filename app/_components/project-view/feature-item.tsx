@@ -22,10 +22,14 @@ type Props = {
 
 export function FeatureItem(props: Props) {
   const frontMatter = props.feature.frontMatter as Record<string, unknown>
+
   const isDone = (frontMatter?.["is-done"] as boolean) === true
+
   const priorityNumber = (frontMatter?.priority as number) || 0
+
   const priority =
     priorityNumber === 2 ? "high" : priorityNumber === 1 ? "medium" : "low"
+
   const milestone = frontMatter?.milestone as string
 
   const getCurrentValue = () => {
@@ -72,74 +76,56 @@ export function FeatureItem(props: Props) {
   }
 
   const getPriorityLabel = (priority: Priority): string => {
-    switch (priority) {
-      case "high":
-        return "2"
-      case "medium":
-        return "1"
-      case "low":
-        return "0"
-      default:
-        return "0"
-    }
+    if (priority === "high") return "高"
+    if (priority === "medium") return "中"
+    return "低"
   }
 
   return (
-    <div className={`rounded-lg border p-3 ${isDone ? "opacity-75" : ""}`}>
-      <div className="flex items-start gap-3">
-        <div className="flex-1 space-y-1">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-3">
-              <Button
-                variant={isDone ? "default" : "secondary"}
-                size="sm"
-                onClick={handleDoneToggle}
-              >
-                <CheckCircle className="size-4" />
-              </Button>
-              <h3
-                className={`font-bold ${isDone ? "line-through opacity-80" : ""}`}
-              >
-                {props.feature.title || props.feature.fileName}
-              </h3>
-            </div>
-          </div>
-          {props.feature.description && (
-            <p className="mb-2 text-sm opacity-80">
-              {props.feature.description}
-            </p>
+    <div
+      className={cn("space-y-2 rounded-md border p-2", isDone && "opacity-75")}
+    >
+      <div className="flex items-center gap-3">
+        <Button
+          variant={isDone ? "default" : "secondary"}
+          size="sm"
+          onClick={handleDoneToggle}
+        >
+          <CheckCircle className="size-4" />
+        </Button>
+        <h3 className={`font-bold ${isDone ? "line-through opacity-80" : ""}`}>
+          {props.feature.title || props.feature.fileName}
+        </h3>
+      </div>
+      {props.feature.description && (
+        <p className="text-sm opacity-80">{props.feature.description}</p>
+      )}
+      <div className="flex flex-col items-end justify-between gap-2 lg:flex-row">
+        <div className="text-xs opacity-50">{props.feature.fileName}</div>
+        <div className="flex gap-2">
+          <SingleRelationSelect
+            value={getCurrentValue()}
+            relationOptions={props.milestoneOptions || []}
+            onValueChange={handleMilestoneChange}
+          />
+          <Button
+            variant="outline"
+            className={cn("w-8", getPriorityColor(priority))}
+            onClick={handlePriorityClick}
+          >
+            {getPriorityLabel(priority)}
+          </Button>
+          {props.onFeatureRemove && (
+            <Button
+              variant="outline"
+              className="w-8"
+              onClick={() => {
+                props.onFeatureRemove?.(props.feature.path || "")
+              }}
+            >
+              <X className="size-3" />
+            </Button>
           )}
-          <div className="flex items-end justify-between">
-            <div className="text-gray-500 text-xs">
-              {props.feature.fileName}
-            </div>
-            <div className="flex gap-2">
-              <SingleRelationSelect
-                value={getCurrentValue()}
-                relationOptions={props.milestoneOptions || []}
-                onValueChange={handleMilestoneChange}
-              />
-              <Button
-                variant="outline"
-                className={cn("w-8", getPriorityColor(priority))}
-                onClick={handlePriorityClick}
-              >
-                {getPriorityLabel(priority)}
-              </Button>
-              {props.onFeatureRemove && (
-                <Button
-                  variant="outline"
-                  className="w-8"
-                  onClick={() => {
-                    console.log("Feature remove clicked, path:", props.feature.path)
-                    props.onFeatureRemove?.(props.feature.path || "")
-                  }}
-                >
-                  <X className="size-3" />
-                </Button>
-              )}
-            </div>
-          </div>
         </div>
       </div>
     </div>

@@ -1,9 +1,11 @@
 "use client"
 
+import { Button } from "@/app/_components/ui/button"
 import { apiClient } from "@/lib/api-client"
 import { useFilePropertiesMutation } from "@/lib/hooks/use-file-properties-mutation"
 import type { DirectoryFile, DirectoryResponse } from "@/lib/types"
 import { useSuspenseQuery } from "@tanstack/react-query"
+import { useState } from "react"
 import { ProjectPageGroup } from "./project-page-group"
 import { UnlinkedFeaturesSection } from "./unlinked-features-section"
 
@@ -46,6 +48,11 @@ export function ProjectView(props: Props) {
   )
 
   const milestoneOptions = milestoneRelation?.files || []
+
+  // マイルストーンフィルター状態
+  const [selectedMilestone, setSelectedMilestone] = useState<string | null>(
+    null,
+  )
 
   const updatePropertiesMutation = useFilePropertiesMutation()
 
@@ -121,8 +128,9 @@ export function ProjectView(props: Props) {
       }
 
       // relativePathがある場合はそれを使用、なければ正規化
-      const normalizedFeaturePath = features.find(f => f.path === featurePath)?.relativePath 
-        || normalizePath(featurePath)
+      const normalizedFeaturePath =
+        features.find((f) => f.path === featurePath)?.relativePath ||
+        normalizePath(featurePath)
       console.log("Normalized feature path:", normalizedFeaturePath)
 
       const updatedFeatures = currentFeatures.filter((f) => {
@@ -143,6 +151,16 @@ export function ProjectView(props: Props) {
     }
   }
 
+  // フィルタリング関数
+  const filterFeaturesByMilestone = (features: DirectoryFile[]) => {
+    if (!selectedMilestone) return features
+    return features.filter((feature) => {
+      const milestone = (feature.frontMatter as Record<string, unknown>)
+        ?.milestone as string
+      return milestone === selectedMilestone
+    })
+  }
+
   // ページと関連機能をグループ化
   const pageGroups: PageGroup[] = pages.map((page: DirectoryFile) => {
     const pageFeatures =
@@ -161,9 +179,12 @@ export function ProjectView(props: Props) {
       )
     })
 
+    // フィルタリング適用
+    const filteredFeatures = filterFeaturesByMilestone(relatedFeatures)
+
     return {
       page,
-      features: relatedFeatures,
+      features: filteredFeatures,
     }
   })
 
@@ -172,30 +193,58 @@ export function ProjectView(props: Props) {
     group.features.map((f) => f.fileName),
   )
 
-  const unlinkedFeatures = features.filter(
-    (feature: DirectoryFile) => !allLinkedFeatures.includes(feature.fileName),
+  const unlinkedFeatures = filterFeaturesByMilestone(
+    features.filter(
+      (feature: DirectoryFile) => !allLinkedFeatures.includes(feature.fileName),
+    ),
   )
 
   return (
-    <main className="w-full space-y-2 p-4">
-      {pageGroups.map((group) => (
-        <ProjectPageGroup
-          key={group.page.fileName}
-          group={group}
+    <main className="w-full space-y-2 p-2">
+      {/* マイルストーンフィルターボタン */}
+      <div className="flex flex-wrap gap-2">
+        <Button
+          variant={selectedMilestone === null ? "default" : "secondary"}
+          onClick={() => setSelectedMilestone(null)}
+          size="sm"
+        >
+          すべて
+        </Button>
+        {milestoneOptions.map((milestone) => (
+          <Button
+            key={milestone.value}
+            variant={
+              selectedMilestone === milestone.label ? "default" : "secondary"
+            }
+            onClick={() => setSelectedMilestone(milestone.label)}
+            size="sm"
+          >
+            {milestone.label}
+          </Button>
+        ))}
+      </div>
+
+      {/* ページグループ */}
+      <div className="space-y-2">
+        {pageGroups.map((group) => (
+          <ProjectPageGroup
+            key={group.page.fileName}
+            group={group}
+            milestoneOptions={milestoneOptions}
+            onMilestoneUpdate={handleMilestoneUpdate}
+            onPropertyUpdate={handlePropertyUpdate}
+            allFeatures={features}
+            onFeatureAdd={handleFeatureAdd}
+            onFeatureRemove={handleFeatureRemove}
+          />
+        ))}
+        <UnlinkedFeaturesSection
+          unlinkedFeatures={unlinkedFeatures}
           milestoneOptions={milestoneOptions}
           onMilestoneUpdate={handleMilestoneUpdate}
           onPropertyUpdate={handlePropertyUpdate}
-          allFeatures={features}
-          onFeatureAdd={handleFeatureAdd}
-          onFeatureRemove={handleFeatureRemove}
         />
-      ))}
-      <UnlinkedFeaturesSection
-        unlinkedFeatures={unlinkedFeatures}
-        milestoneOptions={milestoneOptions}
-        onMilestoneUpdate={handleMilestoneUpdate}
-        onPropertyUpdate={handlePropertyUpdate}
-      />
+      </div>
     </main>
   )
 }

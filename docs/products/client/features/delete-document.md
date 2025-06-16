@@ -1,5 +1,5 @@
 ---
-milestone: 2028.01.01
+milestone: draft-00
 is-done: false
 priority: 2
 ---

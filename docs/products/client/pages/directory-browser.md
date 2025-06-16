@@ -2,6 +2,8 @@
 features:
   - docs/products/client/features/view-document-list.md
   - /Users/n/Documents/open-docs/docs/products/client/features/delete-document.md
+  - /Users/n/Documents/open-docs/docs/products/client/features/delete-document.md
+  - /Users/n/Documents/open-docs/docs/products/client/features/edit-document-metadata.md
 ---
 
 # ディレクトリブラウザページ

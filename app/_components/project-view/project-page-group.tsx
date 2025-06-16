@@ -61,9 +61,9 @@ export function ProjectPageGroup(props: Props) {
 
   return (
     <Card className="w-full rounded-md p-2">
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2 lg:flex-row">
         {/* 左側: ページ情報 */}
-        <div className="w-1/3 space-y-2 border-r pr-4">
+        <div className="space-y-2 lg:w-1/3">
           <h2 className="font-semibold text-lg">
             {props.group.page.title || props.group.page.fileName}
           </h2>
@@ -76,10 +76,9 @@ export function ProjectPageGroup(props: Props) {
             </p>
           )}
         </div>
-
         {/* 右側: 関連機能一覧 */}
         <div className="flex-1">
-          <div className="space-y-3">
+          <div className="space-y-2">
             {sortedFeatures.length > 0 ? (
               sortedFeatures.map((feature) => (
                 <FeatureItem

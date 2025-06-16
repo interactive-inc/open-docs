@@ -1,7 +1,7 @@
 ---
 milestone: 2028.01.01
 is-done: false
-priority: 2
+priority: 1
 ---
 
 # ドキュメント一覧を表示する
