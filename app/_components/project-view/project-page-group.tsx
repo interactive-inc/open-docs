@@ -67,13 +67,9 @@ export function ProjectPageGroup(props: Props) {
           <h2 className="font-semibold text-lg">
             {props.group.page.title || props.group.page.fileName}
           </h2>
-          <div className=" text-gray-500 text-xs">
-            {props.group.page.fileName}
-          </div>
+          <div className="text-xs opacity-50">{props.group.page.fileName}</div>
           {props.group.page.description && (
-            <p className="text-gray-600 text-sm">
-              {props.group.page.description}
-            </p>
+            <p className="text-sm opacity-50">{props.group.page.description}</p>
           )}
         </div>
         {/* 右側: 関連機能一覧 */}
@@ -96,7 +92,7 @@ export function ProjectPageGroup(props: Props) {
                 />
               ))
             ) : (
-              <p className="text-gray-500 text-sm italic">
+              <p className="text-sm italic opacity-50">
                 このページに関連する機能はありません
               </p>
             )}
