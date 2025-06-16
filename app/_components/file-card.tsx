@@ -110,9 +110,7 @@ export function FileCard(props: Props) {
           <Button
             size="sm"
             variant={
-              deleteConfirmFiles.has(props.file.path)
-                ? "destructive"
-                : "ghost"
+              deleteConfirmFiles.has(props.file.path) ? "destructive" : "ghost"
             }
             onClick={() => handleDeleteClick(props.file.path)}
             disabled={deleteFileMutation.isPending}
