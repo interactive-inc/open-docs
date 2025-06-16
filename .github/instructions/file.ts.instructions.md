@@ -9,9 +9,7 @@ applyTo: "**/*.{ts,tsx}"
 - Single Responsibility Principle
 - Open-Closed Principle  
 - Dependency Inversion Principle
-- Immutable: Generate new d  constructor(private readonly props: Props) {
-    Object.freeze(this)
-  }ta instead of modifying data
+- Immutable: Generate new data instead of modifying existing data, with constructor calling Object.freeze(this)
 - Referential Transparency: Create pure functions
 - Composition: Function composition instead of inheritance
 - Separation of Concerns: Separate data transformation, side effects, and business logic
@@ -228,5 +226,7 @@ export class ClassName {
 
 ## Comments
 
+- Add comments only when function behavior is not easily predictable
+- Do NOT use param or return annotations
 - Add comments only when function behavior is not easily predictable
 - Do NOT use param or return annotations
