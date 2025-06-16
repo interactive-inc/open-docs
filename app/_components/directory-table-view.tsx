@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/app/_components/ui/table"
-import { apiClient } from "@/lib/api-client"
+import { apiClient } from "@/lib/system/api-client"
 import type { DirectoryFile, RelationGroup, TableColumn } from "@/lib/types"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Archive, Plus, Trash2 } from "lucide-react"

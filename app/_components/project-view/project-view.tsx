@@ -1,8 +1,8 @@
 "use client"
 
 import { Button } from "@/app/_components/ui/button"
-import { apiClient } from "@/lib/api-client"
-import { useFilePropertiesMutation } from "@/lib/hooks/use-file-properties-mutation"
+import { useFilePropertiesMutation } from "@/app/_hooks/use-file-properties-mutation"
+import { apiClient } from "@/lib/system/api-client"
 import type { DirectoryFile, DocDirectory } from "@/lib/types"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { useState } from "react"

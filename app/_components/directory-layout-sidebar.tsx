@@ -13,7 +13,7 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from "@/app/_components/ui/sidebar"
-import { apiClient } from "@/lib/api-client"
+import { apiClient } from "@/lib/system/api-client"
 import type { FileNode } from "@/lib/types"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import Link from "next/link"

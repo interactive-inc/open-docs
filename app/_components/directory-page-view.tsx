@@ -7,7 +7,7 @@ import { EmojiPicker } from "@/app/_components/ui/emoji-picker"
 import { Input } from "@/app/_components/ui/input"
 import { Textarea } from "@/app/_components/ui/textarea"
 import { VscodeButton } from "@/app/_components/vscode-button"
-import { apiClient } from "@/lib/api-client"
+import { apiClient } from "@/lib/system/api-client"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { useState } from "react"
 

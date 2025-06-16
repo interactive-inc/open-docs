@@ -1,6 +1,6 @@
 "use client"
 
-import { apiClient } from "@/lib/api-client"
+import { apiClient } from "@/lib/system/api-client"
 import { useMutation } from "@tanstack/react-query"
 
 type Params = {

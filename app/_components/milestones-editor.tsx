@@ -1,7 +1,7 @@
 "use client"
 
 import { Card } from "@/app/_components/ui/card"
-import { apiClient } from "@/lib/api-client"
+import { apiClient } from "@/lib/system/api-client"
 import type { DirectoryFile } from "@/lib/types"
 import { useSuspenseQuery } from "@tanstack/react-query"
 

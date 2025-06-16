@@ -1,7 +1,7 @@
 import path from "node:path"
 import { DocEngine } from "@/lib/engine/doc-engine"
-import { factory } from "@/lib/factory"
 import { OpenMarkdown } from "@/lib/open-markdown/open-markdown"
+import { factory } from "@/lib/system/factory"
 import { zValidator } from "@hono/zod-validator"
 import { HTTPException } from "hono/http-exception"
 import { z } from "zod"

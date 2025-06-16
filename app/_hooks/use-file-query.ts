@@ -1,6 +1,6 @@
 "use client"
 
-import { apiClient } from "@/lib/api-client"
+import { apiClient } from "@/lib/system/api-client"
 import { useSuspenseQuery } from "@tanstack/react-query"
 
 const endpoint = apiClient.api.files[":path{.+}"]

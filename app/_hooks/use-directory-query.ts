@@ -1,7 +1,7 @@
 "use client"
 
-import { apiClient } from "@/lib/api-client"
-import { getDirectoryPath } from "@/lib/get-directory-path"
+import { getDirectoryPath } from "@/app/_utils/get-directory-path"
+import { apiClient } from "@/lib/system/api-client"
 import { useSuspenseQuery } from "@tanstack/react-query"
 
 const endpoint = apiClient.api.directories[":path{.+}"]

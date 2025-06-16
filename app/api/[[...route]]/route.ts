@@ -1,16 +1,16 @@
-import { factory } from "@/lib/factory"
+import { factory } from "@/lib/system/factory"
 import {
   GET as getDirectory,
   PUT as updateDirectory,
-} from "@/system/routes/directories.path"
-import { POST as createFile } from "@/system/routes/files"
-import { PUT as moveFile } from "@/system/routes/files.move"
+} from "@/lib/system/routes/directories.path"
+import { POST as createFile } from "@/lib/system/routes/files"
+import { PUT as moveFile } from "@/lib/system/routes/files.move"
 import {
   DELETE as deleteFile,
   GET as getFile,
   PUT as updateFile,
-} from "@/system/routes/files.path"
-import { GET as getFileTree } from "@/system/routes/files.tree"
+} from "@/lib/system/routes/files.path"
+import { GET as getFileTree } from "@/lib/system/routes/files.tree"
 import { HTTPException } from "hono/http-exception"
 import { handle } from "hono/vercel"
 

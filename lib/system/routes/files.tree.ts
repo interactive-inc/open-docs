@@ -1,6 +1,6 @@
 import path from "node:path"
 import { DocEngine } from "@/lib/engine/doc-engine"
-import { factory } from "@/lib/factory"
+import { factory } from "@/lib/system/factory"
 
 /**
  * ファイルツリーを取得する
