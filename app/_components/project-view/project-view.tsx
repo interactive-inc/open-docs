@@ -111,33 +111,19 @@ export function ProjectView(props: Props) {
 
   const handleFeatureRemove = async (pagePath: string, featurePath: string) => {
     try {
-      console.log("Removing feature:", { pagePath, featurePath })
       const page = pages.find((p) => p.path === pagePath)
       if (!page) return
 
       const currentFeatures =
         ((page.frontMatter as Record<string, unknown>)?.features as string[]) ||
         []
-      console.log("Current features:", currentFeatures)
 
-      // パスを正規化する関数
-      const normalizePath = (path: string) => {
-        return path
-          .replace(/^.*\/docs\//, "") // 絶対パスの場合は/docs/より前を除去
-          .replace(/^docs\//, "") // 相対パスの場合はdocs/を除去
-      }
+      // フィーチャーのIDを取得
+      const featureId = features.find((f) => f.path === featurePath)?.id
 
-      // relativePathがある場合はそれを使用、なければ正規化
-      const normalizedFeaturePath =
-        features.find((f) => f.path === featurePath)?.relativePath ||
-        normalizePath(featurePath)
-      console.log("Normalized feature path:", normalizedFeaturePath)
+      if (!featureId) return
 
-      const updatedFeatures = currentFeatures.filter((f) => {
-        const normalizedCurrentPath = normalizePath(f)
-        return normalizedCurrentPath !== normalizedFeaturePath
-      })
-      console.log("Updated features:", updatedFeatures)
+      const updatedFeatures = currentFeatures.filter((f) => f !== featureId)
 
       await updatePropertiesMutation.mutateAsync({
         path: pagePath,
@@ -167,16 +153,7 @@ export function ProjectView(props: Props) {
       ((page.frontMatter as Record<string, unknown>)?.features as string[]) ||
       []
     const relatedFeatures = features.filter((feature: DirectoryFile) => {
-      const featureFileName = feature.fileName
-      const featureFileNameWithExt = `${featureFileName}.md`
-
-      return pageFeatures.some(
-        (pf: string) =>
-          pf.endsWith(`/${featureFileNameWithExt}`) ||
-          pf.endsWith(`/${featureFileName}`) ||
-          pf === featureFileNameWithExt ||
-          pf === featureFileName,
-      )
+      return pageFeatures.includes(feature.id)
     })
 
     // フィルタリング適用
@@ -190,12 +167,12 @@ export function ProjectView(props: Props) {
 
   // 関連付けられていない機能
   const allLinkedFeatures = pageGroups.flatMap((group) =>
-    group.features.map((f) => f.fileName),
+    group.features.map((f) => f.id),
   )
 
   const unlinkedFeatures = filterFeaturesByMilestone(
     features.filter(
-      (feature: DirectoryFile) => !allLinkedFeatures.includes(feature.fileName),
+      (feature: DirectoryFile) => !allLinkedFeatures.includes(feature.id),
     ),
   )
 

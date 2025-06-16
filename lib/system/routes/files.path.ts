@@ -7,6 +7,47 @@ import { HTTPException } from "hono/http-exception"
 import { z } from "zod"
 
 /**
+ * ファイル名からフルパスを検索する
+ */
+async function findFileByName(
+  engine: DocEngine,
+  fileName: string,
+): Promise<string> {
+  // 再帰的にディレクトリを検索
+  async function searchInDirectory(dirPath: string): Promise<string | null> {
+    try {
+      const entries = await engine.deps.fileSystem.readDirectory(dirPath)
+
+      for (const entry of entries) {
+        const entryPath = path.join(dirPath, entry)
+        const isDirectory = await engine.isDirectory(entryPath)
+
+        if (isDirectory) {
+          // ディレクトリの場合は再帰的に検索
+          const found = await searchInDirectory(entryPath)
+          if (found) return found
+        } else if (entry === fileName) {
+          // ファイルが見つかった場合
+          return entryPath
+        }
+      }
+    } catch {
+      // ディレクトリが読み取れない場合は無視
+    }
+    return null
+  }
+
+  const found = await searchInDirectory("")
+  if (!found) {
+    throw new HTTPException(404, {
+      message: `ファイルが見つかりません: ${fileName}`,
+    })
+  }
+
+  return found
+}
+
+/**
  * ファイルコンテンツを取得する
  * @param path ファイルパス
  * @returns ファイル情報とコンテンツ
@@ -54,20 +95,11 @@ export const PUT = factory.createHandlers(
   async (c) => {
     const body = c.req.valid("json")
 
-    // デバッグログ
-    console.log("PUT request body:", body)
-
     const rawPath = c.req.param("path")
 
     if (rawPath === undefined) {
       throw new HTTPException(400, { message: "Path parameter is required" })
     }
-
-    const filePath = rawPath
-
-    // パスのデバッグログ
-    console.log("Raw path:", rawPath)
-    console.log("File path:", filePath)
 
     const docsEngine = new DocEngine({
       basePath: path.join(process.cwd(), "docs"),
@@ -75,8 +107,15 @@ export const PUT = factory.createHandlers(
       readmeFileName: null,
     })
 
+    // ファイル名のみの場合はフルパスを解決
+    let filePath = rawPath
+
+    if (!rawPath.includes("/") && !rawPath.endsWith(".md")) {
+      // ファイル名のみの場合、全ディレクトリから検索
+      filePath = await findFileByName(docsEngine, `${rawPath}.md`)
+    }
+
     const exists = await docsEngine.exists(filePath)
-    console.log("File exists:", exists)
 
     if (!exists) {
       throw new HTTPException(404, {
@@ -85,9 +124,7 @@ export const PUT = factory.createHandlers(
     }
 
     // アーカイブ操作を最初に処理
-    console.log("Checking isArchived:", body.isArchived, typeof body.isArchived)
     if (body.isArchived !== null && body.isArchived !== undefined) {
-      console.log("Processing archive operation:", body.isArchived)
       if (body.isArchived) {
         // アーカイブする
         const newPath = await docsEngine.moveFileToArchive(filePath)

@@ -7,15 +7,17 @@ import { factory } from "@/lib/system/factory"
  * @returns ファイルツリー情報
  */
 export const GET = factory.createHandlers(async (c) => {
-  const docsEngine = new DocEngine({
+  const engine = new DocEngine({
     basePath: path.join(process.cwd(), "docs"),
     indexFileName: null,
     readmeFileName: null,
   })
 
-  await docsEngine.init()
+  await engine.validateDirectories()
 
-  const files = await docsEngine.getFileTree()
+  await engine.validateFiles()
+
+  const files = await engine.getFileTree()
 
   return c.json(files)
 })

@@ -1,6 +1,6 @@
 ---
 features:
-  - docs/products/client/features/manage-relations.md
+  - manage-relations
 ---
 
 # リレーション可視化ページ

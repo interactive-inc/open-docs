@@ -210,6 +210,7 @@ export class DocEngine {
    */
   async readAllFiles(directoryPath: string): Promise<{
     markdownFiles: Array<{
+      id: string
       path: string
       relativePath: string
       fileName: string
@@ -247,7 +248,9 @@ export class DocEngine {
       if (extension === ".md") {
         // Markdownファイル
         const fileData = await this.getFile(filePath)
+        const fileNameWithoutExt = path.basename(entry, ".md")
         markdownFiles.push({
+          id: fileNameWithoutExt,
           path: fileData.filePath,
           relativePath: filePath,
           fileName: fileData.fileName,
@@ -608,17 +611,32 @@ export class DocEngine {
         }
 
         case "relation": {
-          if (typeof value === "string") return value
+          if (typeof value === "string") {
+            // パス形式の場合はファイル名のみを取得し、拡張子を除去
+            const fileName = value.split("/").pop() || value
+            return fileName.replace(/\.md$/, "")
+          }
           if (value === null || value === undefined) return defaultValue
           return defaultValue
         }
 
         case "multi-relation": {
           if (Array.isArray(value)) {
-            return value.filter((item) => typeof item === "string")
+            return value
+              .filter((item) => typeof item === "string")
+              .map((item) => {
+                // パス形式の場合はファイル名のみを取得し、拡張子を除去
+                const fileName = item.split("/").pop() || item
+                return fileName.replace(/\.md$/, "")
+              })
           }
           if (typeof value === "string") {
-            return value.split(",").map((item) => item.trim())
+            return value.split(",").map((item) => {
+              const trimmed = item.trim()
+              // パス形式の場合はファイル名のみを取得し、拡張子を除去
+              const fileName = trimmed.split("/").pop() || trimmed
+              return fileName.replace(/\.md$/, "")
+            })
           }
           return defaultValue
         }
@@ -856,12 +874,12 @@ export class DocEngine {
 
             const docFile = await this.getFile(filePath)
 
+            const fileName =
+              filePath.split("/").pop()?.replace(".md", "") || filePath
+
             relationOptions.push({
-              value: filePath,
-              label:
-                docFile.title ||
-                filePath.split("/").pop()?.replace(".md", "") ||
-                filePath,
+              value: fileName,
+              label: docFile.title || fileName,
               path: filePath,
             })
           }
@@ -906,7 +924,7 @@ export class DocEngine {
   /**
    * ファイルツリー正規化を実行（結果を消費するだけ）
    */
-  async init(basePath = ""): Promise<void> {
+  async validateFiles(basePath = ""): Promise<void> {
     for await (const _result of this.normalizeFileTree(basePath)) {
       // 結果を消費するだけ（ログは不要）
     }
@@ -983,7 +1001,7 @@ export class DocEngine {
    * ファイルツリーを再帰的に取得（スキーマ検証付き）
    */
   async getFileTree(basePath = "") {
-    await this.init(basePath)
+    await this.validateFiles(basePath)
 
     const entries = await this.deps.fileSystem.readDirectory(basePath)
 
@@ -1040,6 +1058,53 @@ export class DocEngine {
     }
 
     return results
+  }
+
+  /**
+   * 全ディレクトリを検証し、index.mdが無いディレクトリに自動作成する
+   */
+  async validateDirectories(basePath = ""): Promise<void> {
+    const entries = await this.deps.fileSystem.readDirectory(basePath)
+
+    for (const entry of entries) {
+      // アーカイブディレクトリ（「_」で始まる）は除外
+      if (entry.startsWith("_")) {
+        continue
+      }
+
+      const entryPath = basePath ? path.join(basePath, entry) : entry
+
+      const isDirectory = await this.isDirectory(entryPath)
+
+      if (!isDirectory) {
+        continue
+      }
+
+      // index.mdが存在しない場合は作成
+      const hasIndexFile = await this.hasIndexFile(entryPath)
+      if (!hasIndexFile) {
+        await this.createIndexFile(entryPath)
+      }
+
+      // 再帰的に子ディレクトリもチェック
+      await this.validateDirectories(entryPath)
+    }
+  }
+
+  /**
+   * ディレクトリにindex.mdを作成する
+   */
+  private async createIndexFile(directoryPath: string): Promise<void> {
+    const indexPath = this.indexFilePath(directoryPath)
+    const dirName = path.basename(directoryPath)
+
+    // デフォルトのindex.mdコンテンツを作成
+    const defaultContent = `# ${dirName}
+
+${dirName}に関する概要をここに記載してください。
+`
+
+    await this.deps.fileSystem.writeFile(indexPath, defaultContent)
   }
 
   /**

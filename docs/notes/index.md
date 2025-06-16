@@ -1,18 +1,7 @@
 ---
-icon: 📝
-schema:
-  title:
-    type: string
-    required: true
-    description: ノートのタイトル
-  tags:
-    type: multi-text
-    description: タグ
-  date:
-    type: string
-    description: 作成日
+icon: 📁
 ---
 
-# ノート
+# notes
 
-このディレクトリには、システムに取り込めない補足事項やメモを格納します。
+notesに関する概要をここに記載してください。

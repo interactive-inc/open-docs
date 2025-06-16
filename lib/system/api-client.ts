@@ -1,7 +1,7 @@
 import type { app } from "@/app/api/[[...route]]/route"
 import { hc } from "hono/client"
 
-export const apiClient = hc<typeof app>("http://localhost:4242", {
+export const apiClient = hc<typeof app>("", {
   async fetch(input: RequestInfo | URL, requestInit?: RequestInit) {
     const resp = await fetch(input, {
       ...requestInit,

@@ -1,8 +1,6 @@
 ---
 features:
-  - docs/products/client/features/view-document-content.md
-  - docs/products/client/features/edit-document-content.md
-  - docs/products/client/features/edit-document-metadata.md
+  - view-document-content
 ---
 
 # ドキュメントエディタページ

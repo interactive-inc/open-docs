@@ -53,14 +53,16 @@ export const GET = factory.createHandlers(async (c) => {
     await mainEngine.readDirectoryWithArchiveHandling(currentPath)
   const archivedFiles = await mainEngine.getArchivedFiles(currentPath)
 
-  return c.json({
+  const finalResponse = {
     ...responseData,
     archiveInfo: {
       hasArchive: archiveInfo.hasArchive,
       archiveFileCount: archiveInfo.archiveFiles.length,
     },
     archivedFiles,
-  })
+  }
+
+  return c.json(finalResponse)
 })
 
 /**

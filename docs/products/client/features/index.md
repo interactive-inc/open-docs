@@ -17,7 +17,7 @@ schema:
     type: number
     required: false
     title: 優先度
-    description: 実装の優先順位（0=低、1=中、2=高）
+    description: 0=低, 1=中, 2=高
     default: 0
 ---
 

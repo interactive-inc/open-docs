@@ -1,6 +1,6 @@
 ---
 features:
-  - docs/products/client/features/manage-schema.md
+  - manage-schema
 ---
 
 # スキーマ管理ページ

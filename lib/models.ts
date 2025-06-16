@@ -238,6 +238,7 @@ export const indexFileSchema = z.object({
  * 一般的なファイルのスキーマ
  */
 export const fileSchema = z.object({
+  id: z.string(),
   path: z.string(),
   relativePath: z.string(),
   fileName: z.string(),

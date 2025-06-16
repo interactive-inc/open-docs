@@ -60,7 +60,7 @@ export function DirectoryTableView(props: Props) {
     }) {
       const endpoint = apiClient.api.files[":path{.+}"]
       const resp = await endpoint.$put({
-        param: { path: params.path.replace(/^docs\//, "") },
+        param: { path: params.path },
         json: {
           properties: { [params.field]: params.value },
           body: null,
@@ -85,7 +85,7 @@ export function DirectoryTableView(props: Props) {
     }) {
       const endpoint = apiClient.api.files[":path{.+}"]
       const resp = await endpoint.$put({
-        param: { path: params.path.replace(/^docs\//, "") },
+        param: { path: params.path },
         json: {
           title: params.title,
           properties: null,
@@ -105,12 +105,8 @@ export function DirectoryTableView(props: Props) {
 
   const deleteFileMutation = useMutation({
     async mutationFn(filePath: string) {
-      const path = filePath.replace(/^docs\//, "")
-      // パスの各セグメントを個別にエンコードしてから結合
-      const pathSegments = path
-        .split("/")
-        .map((segment) => encodeURIComponent(segment))
-      const encodedPath = pathSegments.join("/")
+      // ファイル名をエンコード
+      const encodedPath = encodeURIComponent(filePath)
       const resp = await fetch(`/api/files/${encodedPath}`, {
         method: "DELETE",
       })
@@ -135,7 +131,7 @@ export function DirectoryTableView(props: Props) {
     async mutationFn(filePath: string) {
       const endpoint = apiClient.api.files[":path{.+}"]
       const resp = await endpoint.$put({
-        param: { path: formatPath(filePath) },
+        param: { path: filePath },
         json: {
           properties: null,
           body: null,
@@ -177,8 +173,6 @@ export function DirectoryTableView(props: Props) {
   }
 
   const handleArchiveClick = (filePath: string) => {
-    console.log("Archive click - original path:", filePath)
-    console.log("Archive click - formatted path:", formatPath(filePath))
     archiveFileMutation.mutate(filePath)
   }
 
@@ -198,10 +192,12 @@ export function DirectoryTableView(props: Props) {
         <TableBody>
           {props.files.map((fileData) => {
             return (
-              <TableRow key={fileData.path}>
+              <TableRow
+                key={fileData.id || fileData.relativePath || fileData.path}
+              >
                 <TableCell className="font-medium">
                   <Link
-                    href={`/${formatPath(fileData.path || "")}`}
+                    href={`/${formatPath(fileData.relativePath || "")}`}
                     className="text-blue-600 hover:underline"
                   >
                     {fileData.fileName}
@@ -213,7 +209,7 @@ export function DirectoryTableView(props: Props) {
                     type="string"
                     onUpdate={(newValue) => {
                       return updateTitleMutation.mutate({
-                        path: fileData.path || "",
+                        path: fileData.id || "",
                         title: String(newValue),
                       })
                     }}
@@ -239,7 +235,7 @@ export function DirectoryTableView(props: Props) {
                         selectOptions={column.options}
                         onUpdate={(newValue) => {
                           return updateCellMutation.mutate({
-                            path: fileData.path || "",
+                            path: fileData.id || "",
                             field: column.key,
                             value: newValue,
                           })
@@ -253,7 +249,7 @@ export function DirectoryTableView(props: Props) {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => handleArchiveClick(fileData.path)}
+                      onClick={() => handleArchiveClick(fileData.id)}
                       disabled={archiveFileMutation.isPending}
                       className="h-8 w-8 p-0"
                       title="アーカイブする"
@@ -263,11 +259,11 @@ export function DirectoryTableView(props: Props) {
                     <Button
                       size="sm"
                       variant={
-                        deleteConfirmFiles.has(fileData.path)
+                        deleteConfirmFiles.has(fileData.id)
                           ? "destructive"
                           : "ghost"
                       }
-                      onClick={() => handleDeleteClick(fileData.path)}
+                      onClick={() => handleDeleteClick(fileData.id)}
                       disabled={deleteFileMutation.isPending}
                       className="h-8 w-8 p-0"
                       title="削除する"
