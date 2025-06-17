@@ -10,8 +10,6 @@
   "chat.agent.enabled": true,
   "chat.agent.maxRequests": 128,
   "chat.edits2.enabled": true,
-  "chat.promptFiles": true,
-  "chat.tools.autoApprove": true,
   "files.associations": {
     "*.json": "json"
   },

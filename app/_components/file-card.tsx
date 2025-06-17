@@ -2,14 +2,14 @@
 
 import { Button } from "@/app/_components/ui/button"
 import { apiClient } from "@/lib/system/api-client"
-import type { OtherFile } from "@/lib/types"
+import type { DocFileUnknown } from "@/lib/types"
 import { useMutation } from "@tanstack/react-query"
 import { Archive, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 
 type Props = {
-  file: OtherFile
+  file: DocFileUnknown
   onDataChanged?: () => void
 }
 

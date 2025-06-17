@@ -1,5 +1,6 @@
 import path from "node:path"
 import { DocEngine } from "@/lib/engine/doc-engine"
+import { zDocFileMdFrontMatter } from "@/lib/models"
 import { OpenMarkdown } from "@/lib/open-markdown/open-markdown"
 import { factory } from "@/lib/system/factory"
 import { zValidator } from "@hono/zod-validator"
@@ -17,52 +18,21 @@ export const GET = factory.createHandlers(async (c) => {
   }
 
   const docsPath = "docs"
+  
+  // currentPathからdocsプレフィックスを削除
+  const relativePath = currentPath.startsWith("docs/") 
+    ? currentPath.substring(5) 
+    : currentPath
 
-  const mainEngine = new DocEngine({
+  const engine = new DocEngine({
     basePath: path.join(process.cwd(), docsPath),
     indexFileName: null,
     readmeFileName: null,
   })
 
-  // パスの存在確認
-  if (!(await mainEngine.exists(currentPath))) {
-    throw new HTTPException(404, {
-      message: `ディレクトリが見つかりません: ${currentPath}`,
-    })
-  }
+  const directory = await engine.readDirectory(relativePath)
 
-  // ディレクトリであることを確認
-  if (!(await mainEngine.isDirectory(currentPath))) {
-    throw new HTTPException(400, {
-      message: `指定されたパスはディレクトリではありません: ${currentPath}`,
-    })
-  }
-
-  // biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
-  let responseData
-
-  if (mainEngine.isArchiveDirectory(currentPath)) {
-    const parentPath = path.dirname(currentPath)
-    responseData = await mainEngine.readDirectory(parentPath)
-  } else {
-    responseData = await mainEngine.readDirectory(currentPath)
-  }
-
-  // アーカイブ情報を追加
-  const archiveInfo =
-    await mainEngine.readDirectoryWithArchiveHandling(currentPath)
-  const archivedFiles = await mainEngine.getArchivedFiles(currentPath)
-
-  const finalResponse = {
-    ...responseData,
-    archiveInfo: {
-      hasArchive: archiveInfo.hasArchive,
-      archiveFileCount: archiveInfo.archiveFiles.length,
-    },
-    archivedFiles,
-  }
-
-  return c.json(finalResponse)
+  return c.json(directory.toJson())
 })
 
 /**
@@ -102,9 +72,9 @@ export const PUT = factory.createHandlers(
       })
     }
 
-    const indexPath = docsEngine.indexFilePath(directoryPath)
+    const indexPath = path.join(directoryPath, "index.md")
 
-    const indexExists = await docsEngine.fileExists(indexPath)
+    const indexExists = await docsEngine.exists(indexPath)
 
     if (!indexExists) {
       throw new HTTPException(404, {
@@ -117,7 +87,10 @@ export const PUT = factory.createHandlers(
     const docFile = await docsEngine.getFile(indexPath)
 
     let updatedContent = markdownContent
-    let updatedFrontMatter = { ...docFile.frontMatter.data }
+    let updatedFrontMatter = { ...docFile.frontMatter.value } as Record<
+      string,
+      unknown
+    >
 
     // titleが指定されている場合はH1を更新
     if (body.title !== null) {
@@ -137,9 +110,10 @@ export const PUT = factory.createHandlers(
     }
 
     if (body.properties) {
+      const validatedProperties = zDocFileMdFrontMatter.parse(body.properties)
       updatedFrontMatter = {
         ...updatedFrontMatter,
-        ...body.properties,
+        ...validatedProperties,
       }
 
       // undefinedの値を削除
@@ -156,6 +130,6 @@ export const PUT = factory.createHandlers(
 
     const directory = await docsEngine.readDirectory(directoryPath)
 
-    return c.json(directory)
+    return c.json(directory.toJson())
   },
 )

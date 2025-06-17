@@ -69,36 +69,43 @@ export function FileHeader(props: Props) {
   const handleBackClick = () => {
     const pathSegments = props.filePath.split("/")
     pathSegments.pop()
-    const directoryPath = pathSegments.join("/")
+
+    // アーカイブディレクトリ（_）を削除
+    const filteredSegments = pathSegments.filter((segment) => segment !== "_")
+    const directoryPath = filteredSegments.join("/")
+
     router.push(`/${directoryPath}`)
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <SidebarButton />
-      <VscodeButton
-        cwd={props.cwd}
-        filePath={props.fileData.path}
-        size="icon"
-        variant="outline"
-      />
-      <Button onClick={handleBackClick} size="icon" variant="outline">
-        <ArrowLeft className="h-4 w-4" />
-      </Button>
-      <Input
-        value={title}
-        onChange={handleTitleChange}
-        onBlur={handleTitleBlur}
-        placeholder="タイトルを入力"
-        className="flex-1"
-      />
-      <ReloadButton
-        onReload={props.onReload}
-        size="icon"
-        variant="outline"
-        disabled={props.isLoading}
-      />
-      {props.children}
-    </div>
+    <>
+      <div className="flex items-center gap-2">
+        <SidebarButton />
+        <VscodeButton
+          cwd={props.cwd}
+          filePath={props.fileData.path}
+          size="icon"
+          variant="outline"
+        />
+        <Button onClick={handleBackClick} size="icon" variant="outline">
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+
+        <Input
+          value={title}
+          onChange={handleTitleChange}
+          onBlur={handleTitleBlur}
+          placeholder="タイトルを入力"
+          className="flex-1"
+        />
+        <ReloadButton
+          onReload={props.onReload}
+          size="icon"
+          variant="outline"
+          disabled={props.isLoading}
+        />
+        {props.children}
+      </div>
+    </>
   )
 }

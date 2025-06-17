@@ -24,20 +24,31 @@ export function DirectoryPageView(props: Props) {
           path: props.currentPath,
         },
       })
-      return response.json()
+      const data = await response.json()
+
+      // デバッグ: APIレスポンスの詳細を確認
+      console.log("API Response for path:", props.currentPath)
+      console.log("IndexFile data:", {
+        title: data.indexFile?.title,
+        columnsCount: data.indexFile?.columns?.length || 0,
+        hasColumns: !!data.indexFile?.columns,
+        columns: data.indexFile?.columns,
+      })
+
+      return data
     },
   })
 
   const directoryData = query.data
 
-  const [title, setTitle] = useState(directoryData.indexFile.title || "")
+  const [title, setTitle] = useState(directoryData.indexFile?.title || "")
 
   const [description, setDescription] = useState(
-    directoryData.indexFile.description || "",
+    directoryData.indexFile?.description || "",
   )
 
   const [icon, setIcon] = useState(
-    (directoryData.indexFile.frontMatter.icon as string) || "📁",
+    (directoryData.indexFile?.frontMatter?.icon as string) || "📁",
   )
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,7 +134,7 @@ export function DirectoryPageView(props: Props) {
         />
         <DirectoryTableView
           files={directoryData.files}
-          columns={directoryData.indexFile.columns || []}
+          columns={directoryData.indexFile?.columns || []}
           directoryPath={props.currentPath}
           relations={directoryData.relations}
           onDataChanged={() => query.refetch()}

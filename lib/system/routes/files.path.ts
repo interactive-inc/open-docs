@@ -16,7 +16,7 @@ async function findFileByName(
   // 再帰的にディレクトリを検索
   async function searchInDirectory(dirPath: string): Promise<string | null> {
     try {
-      const entries = await engine.deps.fileSystem.readDirectory(dirPath)
+      const entries = await engine.readDirectoryEntries(dirPath)
 
       for (const entry of entries) {
         const entryPath = path.join(dirPath, entry)
@@ -73,9 +73,9 @@ export const GET = factory.createHandlers(async (c) => {
     throw new HTTPException(400, {})
   }
 
-  const response = await docsEngine.readFile(currentPath)
+  const docFileEntity = await docsEngine.getFile(currentPath)
 
-  return c.json(response)
+  return c.json(docFileEntity.toJson())
 })
 
 /**
@@ -136,22 +136,18 @@ export const PUT = factory.createHandlers(
       }
 
       // 復元する（アーカイブから元の場所に戻す）
-      const parentDir = path.dirname(filePath)
-      const fileName = path.basename(filePath)
-      const originalPath = path.join(parentDir.replace(/\/_$/, ""), fileName)
-
-      await docsEngine.moveFile(filePath, originalPath)
+      const newPath = await docsEngine.restoreFileFromArchive(filePath)
       return c.json({
         success: true,
         message: "ファイルを復元しました",
-        newPath: originalPath,
+        newPath: newPath,
       })
     }
 
     if (body.properties) {
       const docFile = await docsEngine.getFile(filePath)
 
-      const completeFrontMatter = docFile.frontMatter.data
+      const completeFrontMatter = docFile.frontMatter.value
 
       const draftFrontMatter: Record<string, unknown> = {
         ...completeFrontMatter,
@@ -172,9 +168,9 @@ export const PUT = factory.createHandlers(
       await docsEngine.writeFileContent(filePath, markdownText)
 
       // 更新後のファイル情報を統一フォーマットで返す
-      const response = await docsEngine.readFile(filePath)
+      const docFileEntity = await docsEngine.getFile(filePath)
 
-      return c.json(response)
+      return c.json(docFileEntity.toJson())
     }
 
     if (body.title) {
@@ -186,9 +182,9 @@ export const PUT = factory.createHandlers(
 
       await docsEngine.writeFileContent(filePath, markdownText)
 
-      const response = await docsEngine.readFile(filePath)
+      const docFileEntity = await docsEngine.getFile(filePath)
 
-      return c.json(response)
+      return c.json(docFileEntity.toJson())
     }
 
     if (body.description !== null && body.description !== undefined) {
@@ -206,9 +202,9 @@ export const PUT = factory.createHandlers(
 
       await docsEngine.writeFileContent(filePath, updatedMarkdown)
 
-      const response = await docsEngine.readFile(filePath)
+      const docFileEntity = await docsEngine.getFile(filePath)
 
-      return c.json(response)
+      return c.json(docFileEntity.toJson())
     }
 
     if (body.body) {
@@ -220,9 +216,9 @@ export const PUT = factory.createHandlers(
 
       await docsEngine.writeFileContent(filePath, fullMarkdown)
 
-      const response = await docsEngine.readFile(filePath)
+      const docFileEntity = await docsEngine.getFile(filePath)
 
-      return c.json(response)
+      return c.json(docFileEntity.toJson())
     }
 
     throw new HTTPException(400, {

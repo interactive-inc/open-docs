@@ -2,7 +2,7 @@
 
 import { Card } from "@/app/_components/ui/card"
 import { apiClient } from "@/lib/system/api-client"
-import type { DirectoryFile } from "@/lib/types"
+import type { DocFileMd } from "@/lib/types"
 import { useSuspenseQuery } from "@tanstack/react-query"
 
 type Props = {
@@ -36,8 +36,8 @@ export function MilestonesEditor(props: Props) {
     },
   })
 
-  const milestones: DirectoryFile[] = milestonesData.files || []
-  const features: DirectoryFile[] = featuresData.files || []
+  const milestones: DocFileMd[] = milestonesData.files || []
+  const features: DocFileMd[] = featuresData.files || []
 
   function getFeaturesByMilestone(milestoneId: string) {
     return features.filter(

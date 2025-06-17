@@ -1,125 +1,196 @@
 import { z } from "zod"
 
-/**
- * スキーマフィールドのUnion型定義
- * 各フィールドタイプに応じた厳密な型チェックを提供
- */
-export const schemaFieldSchema = z.union([
-  z.object({
-    type: z.literal("string"),
-    required: z.boolean().default(false),
-    title: z.string(),
-    description: z.string().optional(),
-    default: z.string().nullable().optional(),
-  }),
-  z.object({
-    type: z.literal("number"),
-    required: z.boolean().default(false),
-    title: z.string(),
-    description: z.string().optional(),
-    default: z.number().nullable().optional(),
-  }),
-  z.object({
-    type: z.literal("boolean"),
-    required: z.boolean().default(false),
-    title: z.string(),
-    description: z.string().optional(),
-    default: z.boolean().nullable().optional(),
-  }),
-  z.object({
-    type: z.literal("multi-text"),
-    required: z.boolean().default(false),
-    title: z.string(),
-    description: z.string().optional(),
-    default: z.array(z.string()).nullable().optional(),
-  }),
-  z.object({
-    type: z.literal("multi-number"),
-    required: z.boolean().default(false),
-    title: z.string(),
-    description: z.string().optional(),
-    default: z.array(z.number()).nullable().optional(),
-  }),
-  z.object({
-    type: z.literal("multi-boolean"),
-    required: z.boolean().default(false),
-    title: z.string(),
-    description: z.string().optional(),
-    default: z.array(z.boolean()).nullable().optional(),
-  }),
-  z.object({
-    type: z.literal("relation"),
-    required: z.boolean().default(false),
-    title: z.string(),
-    description: z.string().optional(),
-    path: z.string(),
-    default: z.string().nullable().optional(),
-  }),
-  z.object({
-    type: z.literal("multi-relation"),
-    required: z.boolean().default(false),
-    title: z.string(),
-    description: z.string().optional(),
-    path: z.string(),
-    default: z.array(z.string()).nullable().optional(),
-  }),
-  z.object({
-    type: z.literal("select-text"),
-    required: z.boolean().default(false),
-    title: z.string(),
-    description: z.string().optional(),
-    options: z.array(z.string()),
-    default: z.string().nullable().optional(),
-  }),
-  z.object({
-    type: z.literal("select-number"),
-    required: z.boolean().default(false),
-    title: z.string(),
-    description: z.string().optional(),
-    options: z.array(z.number()),
-    default: z.number().nullable().optional(),
-  }),
-  z.object({
-    type: z.literal("multi-select-text"),
-    required: z.boolean().default(false),
-    title: z.string(),
-    description: z.string().optional(),
-    options: z.array(z.string()),
-    default: z.array(z.string()).nullable().optional(),
-  }),
-  z.object({
-    type: z.literal("multi-select-number"),
-    required: z.boolean().default(false),
-    title: z.string(),
-    description: z.string().optional(),
-    options: z.array(z.number()),
-    default: z.array(z.number()).nullable().optional(),
-  }),
-])
+const zDocSchemaFieldTypeText = z.literal("text")
+const zDocSchemaFieldTypeNumber = z.literal("number")
+const zDocSchemaFieldTypeBoolean = z.literal("boolean")
+const zDocSchemaFieldTypeMultiText = z.literal("multi-text")
+const zDocSchemaFieldTypeMultiNumber = z.literal("multi-number")
+const zDocSchemaFieldTypeMultiBoolean = z.literal("multi-boolean")
+const zDocSchemaFieldTypeRelation = z.literal("relation")
+const zDocSchemaFieldTypeMultiRelation = z.literal("multi-relation")
+const zDocSchemaFieldTypeSelectText = z.literal("select-text")
+const zDocSchemaFieldTypeSelectNumber = z.literal("select-number")
+const zDocSchemaFieldTypeMultiSelectText = z.literal("multi-select-text")
+const zDocSchemaFieldTypeMultiSelectNumber = z.literal("multi-select-number")
 
 /**
  * スキーマフィールドで使用可能な型の定義
  */
-const fieldTypeSchema = z.enum([
-  "string",
-  "number",
-  "boolean",
-  "multi-text",
-  "multi-number",
-  "multi-boolean",
-  "relation",
-  "multi-relation",
-  "select-text",
-  "select-number",
-  "multi-select-text",
-  "multi-select-number",
+export const zDocSchemaFieldType = z.union([
+  zDocSchemaFieldTypeText,
+  zDocSchemaFieldTypeNumber,
+  zDocSchemaFieldTypeBoolean,
+  zDocSchemaFieldTypeMultiText,
+  zDocSchemaFieldTypeMultiNumber,
+  zDocSchemaFieldTypeMultiBoolean,
+  zDocSchemaFieldTypeRelation,
+  zDocSchemaFieldTypeMultiRelation,
+  zDocSchemaFieldTypeSelectText,
+  zDocSchemaFieldTypeSelectNumber,
+  zDocSchemaFieldTypeMultiSelectText,
+  zDocSchemaFieldTypeMultiSelectNumber,
 ])
 
 /**
- * アプリファイルのfrontMatterスキーマ
- * 様々な型の値を持つことができるレコード形式
+ * 文字列フィールド
  */
-export const appFileFrontMatterSchema = z.record(
+export const zDocSchemaFieldText = z.object({
+  type: zDocSchemaFieldTypeText,
+  required: z.boolean(),
+  title: z.string(),
+  description: z.string(),
+  default: z.string(),
+})
+
+/**
+ * 数値フィールド
+ */
+export const zDocSchemaFieldNumber = z.object({
+  type: zDocSchemaFieldTypeNumber,
+  required: z.boolean(),
+  title: z.string(),
+  description: z.string(),
+  default: z.number(),
+})
+
+/**
+ * ブールフィールド
+ */
+export const zDocSchemaFieldBoolean = z.object({
+  type: zDocSchemaFieldTypeBoolean,
+  required: z.boolean(),
+  title: z.string(),
+  description: z.string(),
+  default: z.boolean(),
+})
+
+/**
+ * マルチテキストフィールド
+ */
+export const zDocSchemaFieldMultiText = z.object({
+  type: zDocSchemaFieldTypeMultiText,
+  required: z.boolean(),
+  title: z.string(),
+  description: z.string(),
+  default: z.array(z.string()),
+})
+
+/**
+ * マルチ数値フィールド
+ */
+export const zDocSchemaFieldMultiNumber = z.object({
+  type: zDocSchemaFieldTypeMultiNumber,
+  required: z.boolean(),
+  title: z.string(),
+  description: z.string(),
+  default: z.array(z.number()),
+})
+
+/**
+ * マルチブールフィールド
+ */
+export const zDocSchemaFieldMultiBoolean = z.object({
+  type: zDocSchemaFieldTypeMultiBoolean,
+  required: z.boolean(),
+  title: z.string(),
+  description: z.string(),
+  default: z.array(z.boolean()),
+})
+
+/**
+ * リレーションフィールド
+ */
+export const zDocSchemaFieldRelation = z.object({
+  type: zDocSchemaFieldTypeRelation,
+  required: z.boolean(),
+  title: z.string(),
+  description: z.string(),
+  path: z.string(),
+  default: z.string(),
+})
+
+/**
+ * マルチリレーションフィールド
+ */
+export const zDocSchemaFieldMultiRelation = z.object({
+  type: zDocSchemaFieldTypeMultiRelation,
+  required: z.boolean(),
+  title: z.string(),
+  description: z.string(),
+  path: z.string(),
+  default: z.array(z.string()),
+})
+
+/**
+ * 選択テキストフィールド
+ */
+export const zDocSchemaFieldSelectText = z.object({
+  type: zDocSchemaFieldTypeSelectText,
+  required: z.boolean(),
+  title: z.string(),
+  description: z.string(),
+  options: z.array(z.string()),
+  default: z.string(),
+})
+
+/**
+ * 選択数値フィールド
+ */
+export const zDocSchemaFieldSelectNumber = z.object({
+  type: zDocSchemaFieldTypeSelectNumber,
+  required: z.boolean(),
+  title: z.string(),
+  description: z.string(),
+  options: z.array(z.number()),
+  default: z.number(),
+})
+
+/**
+ * マルチ選択テキストフィールド
+ */
+export const zDocSchemaFieldMultiSelectText = z.object({
+  type: zDocSchemaFieldTypeMultiSelectText,
+  required: z.boolean(),
+  title: z.string(),
+  description: z.string(),
+  options: z.array(z.string()),
+  default: z.array(z.string()),
+})
+
+/**
+ * マルチ選択数値フィールド
+ */
+export const zDocSchemaFieldMultiSelectNumber = z.object({
+  type: zDocSchemaFieldTypeMultiSelectNumber,
+  required: z.boolean(),
+  title: z.string(),
+  description: z.string(),
+  options: z.array(z.number()),
+  default: z.array(z.number()),
+})
+
+/**
+ * スキーマフィールドのUnion型定義
+ */
+export const zDocSchemaField = z.union([
+  zDocSchemaFieldText,
+  zDocSchemaFieldNumber,
+  zDocSchemaFieldBoolean,
+  zDocSchemaFieldMultiText,
+  zDocSchemaFieldMultiNumber,
+  zDocSchemaFieldMultiBoolean,
+  zDocSchemaFieldRelation,
+  zDocSchemaFieldMultiRelation,
+  zDocSchemaFieldSelectText,
+  zDocSchemaFieldSelectNumber,
+  zDocSchemaFieldMultiSelectText,
+  zDocSchemaFieldMultiSelectNumber,
+])
+
+/**
+ * frontMatterスキーマ
+ */
+export const zDocFileMdFrontMatter = z.record(
   z.string(),
   z.union([
     z.string(),
@@ -128,226 +199,134 @@ export const appFileFrontMatterSchema = z.record(
     z.array(z.string()),
     z.array(z.number()),
     z.array(z.boolean()),
+    z.record(z.string(), z.unknown()),
     z.null(),
   ]),
 )
 
-export type AppFileFrontMatterType = z.infer<typeof appFileFrontMatterSchema>
-
 /**
- * アプリファイルのプロパティスキーマ
+ * スキーマ定義
+ * フィールド名とスキーマフィールドのマッピング
  */
-export const appFilePropertiesSchema = z.object({
-  frontMatter: appFileFrontMatterSchema,
-})
+export const zDocSchema = z.record(z.string(), zDocSchemaField)
 
 /**
  * index.mdファイル専用のfrontMatterスキーマ
  * iconとschemaフィールドのみを持つ
  */
-export const indexFrontMatterSchema = z.object({
-  icon: z.string().optional(),
-  schema: z.record(z.string(), z.unknown()).optional(),
+export const zDocFileIndexFrontMatter = z.object({
+  icon: z.string(),
+  schema: zDocSchema,
 })
 
 /**
- * 一般的なMarkdownファイルのfrontMatterスキーマ
- * appFileFrontMatterSchemaと同じ定義（エイリアス）
- */
-export const frontMatterSchema = appFileFrontMatterSchema
-
-/**
- * ファイルノードの型定義
- * ファイルツリー構造で使用される再帰的な型
- */
-type FileNodeType = {
-  name: string
-  path: string
-  type: "file" | "directory"
-  children?: FileNodeType[] | null
-  icon?: string | null
-}
-
-/**
- * ファイルノードのスキーマ
+ * ファイルノード
  * 再帰的なファイルツリー構造をサポート
  */
-export const fileNodeSchema: z.ZodType<FileNodeType> = z.lazy(() =>
+export const zDocFileNode: z.ZodSchema = z.lazy(() =>
   z.object({
     name: z.string(),
     path: z.string(),
     type: z.enum(["file", "directory"]),
-    children: z.array(fileNodeSchema).nullable().optional(),
-    icon: z.string().nullable().optional(),
+    children: z.array(zDocFileNode),
+    icon: z.string(),
   }),
 )
 
 /**
- * ファイルツリーのレスポンススキーマ
+ * リレーションフィールド
  */
-export const fileTreeResponseSchema = z.object({
-  files: z.array(fileNodeSchema),
+export const zDocRelationField = z.object({
+  fieldName: z.string(),
+  relationPath: z.string(),
+  isArray: z.boolean(),
 })
 
 /**
- * アプリファイルのスキーマ
+ * テーブルカラム
  */
-export const appFileSchema = z.object({
-  path: z.string(),
-  content: z.string(),
-  title: z.string().nullable(),
-  description: z.string().nullable(),
-  frontMatter: appFileFrontMatterSchema,
-  cwd: z.string(),
-})
-
-/**
- * アプリ操作結果のスキーマ
- */
-export const appResultSchema = z.object({
-  success: z.boolean(),
-  message: z.string(),
-})
-
-/**
- * テーブルカラムのスキーマ
- */
-export const tableColumnSchema = z.object({
+export const zDocTableColumn = z.object({
   key: z.string(),
   label: z.string(),
-  type: fieldTypeSchema,
-  path: z.string().nullable().optional(),
-  options: z.union([z.array(z.string()), z.array(z.number())]).optional(),
-})
-
-/**
- * index.mdファイルのスキーマ
- */
-export const indexFileSchema = z.object({
+  type: zDocSchemaFieldType,
   path: z.string(),
-  fileName: z.string(),
-  content: z.string(),
-  title: z.string().nullable(),
-  description: z.string().nullable(),
-  directoryName: z.string().optional(),
-  columns: z.array(tableColumnSchema).optional(),
-  frontMatter: indexFrontMatterSchema,
+  options: z.union([z.array(z.string()), z.array(z.number())]),
 })
 
 /**
- * 一般的なファイルのスキーマ
+ * index.mdファイル
  */
-export const fileSchema = z.object({
+export const zDocFileIndex = z.object({
   id: z.string(),
   path: z.string(),
   relativePath: z.string(),
   fileName: z.string(),
   content: z.string(),
-  title: z.string().nullable(),
-  description: z.string().nullable(),
-  frontMatter: z.record(z.string(), z.unknown()).nullable(),
+  title: z.string(),
+  description: z.string(),
+  directoryName: z.string(),
+  columns: z.array(zDocTableColumn),
+  frontMatter: zDocFileIndexFrontMatter,
 })
 
 /**
- * スキーマ定義のスキーマ
- * フィールド名とスキーマフィールドのマッピング
+ * リレーションオプション
  */
-export const schemaDefinitionSchema = z
-  .record(z.string(), schemaFieldSchema)
-  .nullable()
-
-/**
- * リレーションファイルのスキーマ
- */
-const relationFileSchema = z.object({
+export const zDocRelationFile = z.object({
   value: z.string(),
   label: z.string(),
   path: z.string(),
 })
 
 /**
- * リレーション情報のスキーマ
+ * リレーショングループ
  */
-const relationSchema = z.object({
+export const zDocRelation = z.object({
   path: z.string(),
-  files: z.array(relationFileSchema),
+  files: z.array(zDocRelationFile),
 })
 
 /**
- * アーカイブ情報のスキーマ
+ * その他のファイル（非マークダウン）
  */
-const archiveInfoSchema = z.object({
-  hasArchive: z.boolean(),
-  archiveFileCount: z.number(),
-})
-
-/**
- * その他のファイル（非マークダウン）のスキーマ
- */
-const otherFileSchema = z.object({
+export const zDocFileUnknown = z.object({
   path: z.string(),
   fileName: z.string(),
-  extension: z.string(), // json, csv, txt など
-  size: z.number().optional(),
+  extension: z.string(),
+  size: z.number(),
 })
 
 /**
- * アーカイブされたファイルのスキーマ
+ * マークダウンファイル（index.md以外）
  */
-const archivedFileSchema = z.object({
+export const zDocFileMd = z.object({
+  id: z.string(),
   path: z.string(),
+  relativePath: z.string(),
   fileName: z.string(),
-  title: z.string().nullable(),
-  description: z.string().nullable(),
+  content: z.string(),
+  title: z.string(),
+  description: z.string(),
+  frontMatter: zDocFileMdFrontMatter,
 })
 
 /**
- * ディレクトリのスキーマ
+ * ファイルのunion型（index.md、通常のmd、その他）
+ */
+export const zDocFile = z.union([zDocFileIndex, zDocFileMd, zDocFileUnknown])
+
+/**
+ * ディレクトリ
  * ディレクトリの情報とスキーマ、ファイル一覧を含む
  */
-export const docDirectorySchema = z.object({
-  indexFile: indexFileSchema,
-  files: z.array(fileSchema),
-  otherFiles: z.array(otherFileSchema),
+export const zDocDirectory = z.object({
+  indexFile: zDocFileIndex,
+  files: z.array(zDocFileMd),
+  otherFiles: z.array(zDocFileUnknown),
   markdownFilePaths: z.array(z.string()),
   cwd: z.string(),
-  relations: z.array(relationSchema),
-  archiveInfo: archiveInfoSchema.optional(),
-  archivedFiles: z.array(archivedFileSchema).optional(),
-})
-
-/**
- * Markdownファイルデータのスキーマ
- */
-export const markdownFileDataSchema = z.object({
-  filePath: z.string(),
-  frontMatter: appFileFrontMatterSchema,
-  content: z.string(),
-  title: z.string().nullable(),
-})
-
-/**
- * DocsEngineのプロパティスキーマ
- */
-export const docsEnginePropsSchema = z.object({
-  basePath: z.string(),
-  indexFileName: z.string().nullable().default("index.md"),
-  readmeFileName: z.string().nullable().default("README.md"),
-})
-
-/**
- * リレーションオプションのスキーマ
- */
-export const relationOptionSchema = z.object({
-  value: z.string(),
-  label: z.string(),
-  path: z.string(),
-})
-
-/**
- * リレーショングループのスキーマ
- */
-export const relationGroupSchema = z.object({
-  path: z.string(),
-  files: z.array(relationOptionSchema),
+  relations: z.array(zDocRelation),
+  hasArchive: z.boolean(),
+  archiveFileCount: z.number(),
+  archivedFiles: z.array(zDocFileMd),
 })

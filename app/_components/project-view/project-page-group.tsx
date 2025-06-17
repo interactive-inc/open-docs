@@ -7,26 +7,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/app/_components/ui/select"
-import type { DirectoryFile, RelationOption } from "@/lib/types"
+import type { DocFileMd, DocRelationFile } from "@/lib/types"
 import { FeatureItem } from "./feature-item"
 
 type Priority = "high" | "medium" | "low"
 
 type PageGroup = {
-  page: DirectoryFile
-  features: DirectoryFile[]
+  page: DocFileMd
+  features: DocFileMd[]
 }
 
 type Props = {
   group: PageGroup
-  milestoneOptions?: RelationOption[]
+  milestoneOptions?: DocRelationFile[]
   onMilestoneUpdate?: (featurePath: string, milestone: string) => void
   onPropertyUpdate?: (
     featurePath: string,
     field: string,
     value: unknown,
   ) => void
-  allFeatures?: DirectoryFile[]
+  allFeatures?: DocFileMd[]
   onFeatureAdd?: (pagePath: string, featurePath: string) => void
   onFeatureRemove?: (pagePath: string, featurePath: string) => void
 }

@@ -2,14 +2,14 @@
 
 import { Badge } from "@/app/_components/ui/badge"
 import { Card } from "@/app/_components/ui/card"
-import type { DirectoryFile, RelationOption } from "@/lib/types"
+import type { DocFileMd, DocRelationFile } from "@/lib/types"
 import { FeatureItem } from "./feature-item"
 
 type Priority = "high" | "medium" | "low"
 
 type Props = {
-  unlinkedFeatures: DirectoryFile[]
-  milestoneOptions?: RelationOption[]
+  unlinkedFeatures: DocFileMd[]
+  milestoneOptions?: DocRelationFile[]
   onMilestoneUpdate?: (featurePath: string, milestone: string) => void
   onPropertyUpdate?: (
     featurePath: string,

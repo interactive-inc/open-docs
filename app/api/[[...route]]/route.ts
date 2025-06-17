@@ -16,7 +16,7 @@ import { handle } from "hono/vercel"
 
 export const runtime = "nodejs"
 
-export const app = factory
+const app = factory
   .createApp()
   .basePath("/api")
   .get("/directories/:path{.+}", ...getDirectory)
@@ -44,6 +44,8 @@ app.onError((err, c) => {
     500,
   )
 })
+
+export type AppType = typeof app
 
 export const DELETE = handle(app)
 

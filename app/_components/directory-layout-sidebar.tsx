@@ -14,7 +14,7 @@ import {
   SidebarProvider,
 } from "@/app/_components/ui/sidebar"
 import { apiClient } from "@/lib/system/api-client"
-import type { FileNode } from "@/lib/types"
+import type { DocFileNode } from "@/lib/types"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
@@ -67,7 +67,7 @@ export function DirectoryLayoutSidebar(props: Props) {
   getCurrentPath(path)
 
   useEffect(() => {
-    const collectAllDirectoryPaths = (nodes: FileNode[]): string[] => {
+    const collectAllDirectoryPaths = (nodes: DocFileNode[]): string[] => {
       const paths: string[] = []
       for (const node of nodes) {
         if (node.type === "directory") {
@@ -122,7 +122,7 @@ export function DirectoryLayoutSidebar(props: Props) {
     setOpenPaths(newOpenPaths)
   }
 
-  const renderAllDirectories = (nodes: FileNode[], currentDepth = 0) => {
+  const renderAllDirectories = (nodes: DocFileNode[], currentDepth = 0) => {
     return nodes.map((node) => (
       <DirectoryFileTreeNode
         key={node.path || `file-${node.name}`}

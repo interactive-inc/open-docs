@@ -1,11 +1,11 @@
 "use client"
 import { SingleRelationSelect } from "@/app/_components/file-view/single-relation-select"
-import type { RelationOption } from "@/lib/types"
+import type { DocRelationFile } from "@/lib/types"
 
 type Props = {
   value: unknown
   onUpdate: (value: unknown) => void
-  relationOptions?: RelationOption[]
+  relationOptions?: DocRelationFile[]
 }
 
 export function RelationEditableCell(props: Props) {

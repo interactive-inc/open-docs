@@ -2,15 +2,15 @@
 
 import { SingleRelationSelect } from "@/app/_components/file-view/single-relation-select"
 import { Button } from "@/app/_components/ui/button"
-import type { DirectoryFile, RelationOption } from "@/lib/types"
+import type { DocFileMd, DocRelationFile } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { CheckCircle, X } from "lucide-react"
 
 type Priority = "high" | "medium" | "low"
 
 type Props = {
-  feature: DirectoryFile
-  milestoneOptions?: RelationOption[]
+  feature: DocFileMd
+  milestoneOptions?: DocRelationFile[]
   onMilestoneUpdate?: (featurePath: string, milestone: string) => void
   onPropertyUpdate?: (
     featurePath: string,

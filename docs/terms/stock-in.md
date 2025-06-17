@@ -1,8 +1,8 @@
 ---
 term: ""
 definition: ""
-examples: null
-relatedTerms: null
+examples: []
+relatedTerms: []
 ---
 
 # 入庫

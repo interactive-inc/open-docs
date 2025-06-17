@@ -1,6 +1,7 @@
 ---
 features:
-  - view-document-content
+  - edit-document-content
+  - delete-document
 ---
 
 # ドキュメントエディタページ

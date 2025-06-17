@@ -2,20 +2,20 @@
 icon: 💎
 schema:
   name:
-    type: string
+    type: text
     required: true
     title: 値オブジェクト名
     description: 値オブジェクトの名前
   purpose:
-    type: string
+    type: text
     title: 目的
     description: 値オブジェクトの役割と目的
   attributes:
-    type: multi-string
+    type: multi-text
     title: 属性一覧
     description: 値オブジェクトが持つ属性の一覧
   business_rules:
-    type: multi-string
+    type: multi-text
     title: ビジネスルール
     description: 値オブジェクトに適用されるビジネスルール
 ---

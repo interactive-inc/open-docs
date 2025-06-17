@@ -63,8 +63,8 @@ export const PUT = factory.createHandlers(
     }
 
     // 移動後のファイル情報を統一フォーマットで返す
-    const response = await docsEngine.readFile(destinationRelativePath)
+    const docFileEntity = await docsEngine.getFile(destinationRelativePath)
 
-    return c.json(response)
+    return c.json(docFileEntity.toJson())
   },
 )

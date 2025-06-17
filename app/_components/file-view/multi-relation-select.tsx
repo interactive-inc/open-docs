@@ -6,13 +6,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/app/_components/ui/select"
-import type { RelationOption } from "@/lib/types"
+import type { DocRelationFile } from "@/lib/types"
 import { X } from "lucide-react"
 
 type Props = {
   value: string[]
   onValueChange: (value: string[]) => void
-  relationOptions?: RelationOption[]
+  relationOptions?: DocRelationFile[]
   wrap?: boolean
 }
 

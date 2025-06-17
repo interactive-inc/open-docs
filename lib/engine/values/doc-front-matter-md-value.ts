@@ -1,45 +1,42 @@
-import { frontMatterSchema } from "@/lib/models"
+import { zDocFileMdFrontMatter } from "@/lib/models"
 import { OpenMarkdown } from "@/lib/open-markdown/open-markdown"
+import type { DocFileMdFrontMatter } from "@/lib/types"
 
 /**
- * 一般的なMarkdownファイルのFrontMatterを管理するクラス
+ * FrontMatter
  */
-export class DocFrontMatterBuilder {
-  readonly data: Record<string, unknown>
-
-  constructor(data: Record<string, unknown>) {
-    this.data = data
+export class DocFrontMatterMdValue {
+  constructor(readonly value: DocFileMdFrontMatter) {
+    zDocFileMdFrontMatter.parse(value)
+    Object.freeze(this)
   }
 
   /**
    * Markdownテキストから生成
    */
-  static from(markdownText: string): DocFrontMatterBuilder {
+  static from(markdownText: string): DocFrontMatterMdValue {
     const openMarkdown = new OpenMarkdown(markdownText)
+
     const rawData = openMarkdown.frontMatter.data || {}
 
-    // frontMatterSchemaでバリデーション
-    const validatedData = frontMatterSchema.safeParse(rawData)
-    const data = validatedData.success ? validatedData.data : rawData
+    const data = zDocFileMdFrontMatter.parse(rawData)
 
-    return new DocFrontMatterBuilder(data)
+    return new DocFrontMatterMdValue(data)
   }
 
   /**
    * 空のFrontMatterを生成
    */
-  static empty(): DocFrontMatterBuilder {
-    return new DocFrontMatterBuilder({})
+  static empty(): DocFrontMatterMdValue {
+    return new DocFrontMatterMdValue({})
   }
 
   /**
    * データから直接生成
    */
-  static fromData(data: Record<string, unknown>): DocFrontMatterBuilder {
-    const validatedData = frontMatterSchema.safeParse(data)
-    return new DocFrontMatterBuilder(
-      validatedData.success ? validatedData.data : data,
-    )
+  static fromData(data: unknown): DocFrontMatterMdValue {
+    const validatedData = zDocFileMdFrontMatter.parse(data)
+    return new DocFrontMatterMdValue(validatedData)
   }
 
   /**
@@ -49,7 +46,7 @@ export class DocFrontMatterBuilder {
     type: string
     default?: unknown
   }): unknown {
-    if (fieldDef.type === "string") {
+    if (fieldDef.type === "text") {
       return fieldDef.default ?? ""
     }
     if (fieldDef.type === "boolean") {
@@ -59,7 +56,7 @@ export class DocFrontMatterBuilder {
       return fieldDef.default ?? 0
     }
     if (
-      fieldDef.type === "multi-string" ||
+      fieldDef.type === "multi-text" ||
       fieldDef.type === "multi-number" ||
       fieldDef.type === "multi-boolean" ||
       fieldDef.type === "multi-relation"
@@ -70,5 +67,12 @@ export class DocFrontMatterBuilder {
       return fieldDef.default ?? null
     }
     return null
+  }
+
+  /**
+   * JSON形式に変換
+   */
+  toJson(): DocFileMdFrontMatter {
+    return this.value
   }
 }

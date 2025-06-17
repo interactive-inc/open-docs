@@ -3,7 +3,7 @@
 import { Button } from "@/app/_components/ui/button"
 import { useFilePropertiesMutation } from "@/app/_hooks/use-file-properties-mutation"
 import { apiClient } from "@/lib/system/api-client"
-import type { DirectoryFile, DocDirectory } from "@/lib/types"
+import type { DocDirectory, DocFileMd } from "@/lib/types"
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import { ProjectPageGroup } from "./project-page-group"
@@ -14,8 +14,8 @@ type Props = {
 }
 
 type PageGroup = {
-  page: DirectoryFile
-  features: DirectoryFile[]
+  page: DocFileMd
+  features: DocFileMd[]
 }
 
 export function ProjectView(props: Props) {
@@ -138,7 +138,7 @@ export function ProjectView(props: Props) {
   }
 
   // フィルタリング関数
-  const filterFeaturesByMilestone = (features: DirectoryFile[]) => {
+  const filterFeaturesByMilestone = (features: DocFileMd[]) => {
     if (!selectedMilestone) return features
     return features.filter((feature) => {
       const milestone = (feature.frontMatter as Record<string, unknown>)
@@ -148,11 +148,11 @@ export function ProjectView(props: Props) {
   }
 
   // ページと関連機能をグループ化
-  const pageGroups: PageGroup[] = pages.map((page: DirectoryFile) => {
+  const pageGroups: PageGroup[] = pages.map((page: DocFileMd) => {
     const pageFeatures =
       ((page.frontMatter as Record<string, unknown>)?.features as string[]) ||
       []
-    const relatedFeatures = features.filter((feature: DirectoryFile) => {
+    const relatedFeatures = features.filter((feature: DocFileMd) => {
       return pageFeatures.includes(feature.id)
     })
 
@@ -172,7 +172,7 @@ export function ProjectView(props: Props) {
 
   const unlinkedFeatures = filterFeaturesByMilestone(
     features.filter(
-      (feature: DirectoryFile) => !allLinkedFeatures.includes(feature.id),
+      (feature: DocFileMd) => !allLinkedFeatures.includes(feature.id),
     ),
   )
 

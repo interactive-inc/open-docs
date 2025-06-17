@@ -12,18 +12,18 @@ import {
   TableRow,
 } from "@/app/_components/ui/table"
 import { apiClient } from "@/lib/system/api-client"
-import type { DirectoryFile, RelationGroup, TableColumn } from "@/lib/types"
+import type { DocFileMd, DocRelation, DocTableColumn } from "@/lib/types"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Archive, Plus, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 
 type Props = {
-  files: DirectoryFile[]
-  columns: TableColumn[]
+  files: DocFileMd[]
+  columns: DocTableColumn[]
   directoryPath: string
   onDataChanged?: () => void
-  relations?: RelationGroup[]
+  relations?: DocRelation[]
 }
 
 export function DirectoryTableView(props: Props) {
@@ -105,10 +105,13 @@ export function DirectoryTableView(props: Props) {
 
   const deleteFileMutation = useMutation({
     async mutationFn(filePath: string) {
-      // ファイル名をエンコード
-      const encodedPath = encodeURIComponent(filePath)
-      const resp = await fetch(`/api/files/${encodedPath}`, {
-        method: "DELETE",
+      // パスを正規化（docs/プレフィックスを削除）
+      const normalizedPath = formatPath(filePath)
+      
+      // apiClientを使用して削除
+      const endpoint = apiClient.api.files[":path{.+}"]
+      const resp = await endpoint.$delete({
+        param: { path: normalizedPath },
       })
 
       if (!resp.ok) {
@@ -129,9 +132,12 @@ export function DirectoryTableView(props: Props) {
 
   const archiveFileMutation = useMutation({
     async mutationFn(filePath: string) {
+      // パスを正規化（docs/プレフィックスを削除）
+      const normalizedPath = formatPath(filePath)
+      
       const endpoint = apiClient.api.files[":path{.+}"]
       const resp = await endpoint.$put({
-        param: { path: filePath },
+        param: { path: normalizedPath },
         json: {
           properties: null,
           body: null,

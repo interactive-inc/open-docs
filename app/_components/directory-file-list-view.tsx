@@ -1,11 +1,11 @@
 "use client"
 
 import { Card } from "@/app/_components/ui/card"
-import type { OtherFile } from "@/lib/types"
+import type { DocFileUnknown } from "@/lib/types"
 import { FileCard } from "./file-card"
 
 type Props = {
-  files: OtherFile[]
+  files: DocFileUnknown[]
   onDataChanged?: () => void
 }
 

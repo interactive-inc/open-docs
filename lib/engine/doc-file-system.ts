@@ -142,4 +142,22 @@ export class DocFileSystem {
     const fullPath = path.join(this.basePath, relativePath)
     await fs.mkdir(fullPath, { recursive: true })
   }
+
+  /**
+   * ファイルのサイズを取得（バイト単位）
+   */
+  async getFileSize(relativePath: string): Promise<number> {
+    const fullPath = path.join(this.basePath, relativePath)
+    const stats = await fs.stat(fullPath)
+    return stats.size
+  }
+
+  /**
+   * ディレクトリが存在しない場合は作成する
+   */
+  async ensureDirectoryExists(relativePath: string): Promise<void> {
+    if (!(await this.exists(relativePath))) {
+      await this.createDirectory(relativePath)
+    }
+  }
 }

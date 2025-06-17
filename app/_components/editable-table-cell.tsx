@@ -1,5 +1,5 @@
 "use client"
-import type { RelationOption } from "@/lib/types"
+import type { DocRelationFile } from "@/lib/types"
 import { BooleanEditableCell } from "./editable-table-cell/boolean-editable-cell"
 import { MultiBooleanEditableCell } from "./editable-table-cell/multi-boolean-editable-cell"
 import { MultiNumberEditableCell } from "./editable-table-cell/multi-number-editable-cell"
@@ -18,7 +18,7 @@ type Props = {
   type: string
   onUpdate: (value: unknown) => void
   path?: string | null
-  relationOptions?: RelationOption[]
+  relationOptions?: DocRelationFile[]
   selectOptions?: string[] | number[]
 }
 

@@ -62,6 +62,8 @@ Refactor the code after making changes.
 - Delete unnecessary files
 - Do NOT make index.ts files
 
+# development Instructions
+
 ## Tools
 
 ### Open simple browser
@@ -85,9 +87,41 @@ The development server is already running. Do not start a new one.
 - Do Not install new packages
 - Do Not modify `next.config.mjs`
 
+## Directory Structure
+
+- `app/(main)/` - Main application routes
+- `app/_components/` - Reusable UI components
+- `app/_hooks/` - Custom React hooks
+- `app/_utils/` - Utility functions
+- `lib/engine/` - Document processing engine
+- `lib/engine/entities/` - Domain entities
+- `lib/hooks/` - Shared React hooks
+- `lib/open-csv/` - CSV processing utilities
+- `lib/open-markdown/` - Markdown processing utilities
+- `lib/system/` - System-level utilities and API client
+- `lib/engine/doc-engine.ts` - Main document engine
+- `lib/models.ts` - Validation used throughout the application
+- `lib/types.ts` - Type definitions used throughout the application
+
+# `docs/index.md` - 概要
+
+プロジェクト全体または個別製品の概要を記述。
+
+- 簡潔かつ明確に記述する
+- 技術的詳細よりもビジネス価値に焦点を当てる
+- 全体像を把握できるように記述する
+
+```
+# 概要
+
+[ディレクトリの案内]
+
+- [パス] - [説明]
+```
+
 # `docs/**/*.md` - Docs Directory Instructions
 
-あなたはコードを書かないAIですが、製品仕様を管理するドメインエキスパートです。タスクでは積極的にファイルを書き換えてください。
+You focus on managing specifications rather than writing code. When given tasks, actively update and rewrite files as needed.
 
 - Works without confirmation
 - Prioritizes functionality over perfection
@@ -95,29 +129,18 @@ The development server is already running. Do not start a new one.
 - Defers difficult problems
 - Continues until requirements are met
 
-## 情報収集
-
-- 同じディレクトリのファイルを参考にする
-- そのディレクトリのREADMEを読む
-
 ## Memory System
 
 Your memory resets between sessions. You rely on these files:
 
-- `docs/overview.md` - プロジェクトの概要と目的を記述
-- `docs/**/*/README.md` - そのディレクトリを説明するAI向けの概要
+- `docs/index.md` - プロジェクトの概要と目的を記述
 - `docs/**/*.md` - 仕様など
-
 - `docs/terms/*.md` - 個別の用語定義（1用語1ファイル）
 - `docs/notes/*.md` - システムに取り込めない補足事項
-- `docs/products/*/overview.md` - 製品の概要と目的を記述
+- `docs/products/*/index.md` - 製品の概要と目的を記述
 - `docs/products/*/notes/*.md` - システムに取り込めない補足事項
-
-以下はファイルの例です。
-
 - `docs/products/*/entities/*.md` - Entityの定義
 - `docs/products/*/values/*.md` - 値オブジェクトの定義
-- `docs/products/*/terms/*.md` - 個別の用語定義（1用語1ファイル）
 - `docs/products/*/features/*.md` - 機能要件の定義
 - `docs/products/*/pages/*.md` - ページの要件定義
 
@@ -204,22 +227,6 @@ priority: 0
 - `is-done`: 完了（default: null）
 - `priority`: 優先度（default: 0）
 
-# `docs/projects/**/*/index.md` - 概要
-
-プロジェクト全体または個別製品の概要を記述。
-
-- 簡潔かつ明確に記述する
-- 技術的詳細よりもビジネス価値に焦点を当てる
-- 全体像を把握できるように記述する
-
-```
-# 概要
-
-[ディレクトリの案内]
-
-- [パス] - [説明]
-```
-
 # `docs/projects/**/milestones/*-value.md` - マイルストーンの定義
 
 マイルストーンを管理します。
@@ -263,7 +270,32 @@ UI/UXに関する最低限のメモ。
 
 - `features`: ページに関連する機能のリスト。機能は`docs/products/*/features/*.md`に定義されている必要があります。
 
-# `docs/projects/**/terms/*.md` - 用語定義
+# `docs/projects/**/values/*-value.md` - 値オブジェクト
+
+値オブジェクトを定義。
+
+- 属性には制約を含める
+- ビジネスルールは明確かつ検証可能な形で記述する
+- テーブルを使用しない
+
+```
+# [モデル名]
+
+[モデルの役割と目的の説明]
+
+## 属性
+
+### [属性名]
+
+[属性の役割と目的の説明]
+
+## ビジネスルール
+
+- [ルール1]
+- [ルール2]
+```
+
+# `docs/**/terms/*.md` - 用語定義
 
 この製品の固有の用語とその定義を記述。会社ごとに社内に特有のことばがあり、それを理解できなければ、一緒に仕事をする専門家と効率的にコミュニケーションすることはできません。
 
@@ -293,51 +325,6 @@ AIが理解できる技術的な一般的な情報は含める必要はありま
 [必要に応じた補足情報]
 ```
 
-# `docs/projects/**/values/*-value.md` - 値オブジェクト
-
-値オブジェクトを定義。
-
-- 属性には制約を含める
-- ビジネスルールは明確かつ検証可能な形で記述する
-- テーブルを使用しない
-
-```
-# [モデル名]
-
-[モデルの役割と目的の説明]
-
-## 属性
-
-### [属性名]
-
-[属性の役割と目的の説明]
-
-## ビジネスルール
-
-- [ルール1]
-- [ルール2]
-```
-
-# `docs/**/*/README.md` - README
-
-そのディレクトリの概要を記述。全てのディレクトリにREADMEが必要です。
-
-最初の見出しはdocsを除くパスを記述してください。
-
-```
-# products/products/sheet/values/README.md
-```
-
-このファイルにはそのディレクトリのファイルの一覧を箇条書きで書きます。
-
-```
-# パス
-
-[このディレクトリの概要]
-
-- [ファイル名1.md]() - 説明
-```
-
 # File rules - Markdown
 
 - Write in Japanese
@@ -359,7 +346,7 @@ AIが理解できる技術的な一般的な情報は含める必要はありま
 - Single Responsibility Principle
 - Open-Closed Principle  
 - Dependency Inversion Principle
-- Immutable: Generate new data instead of modifying data
+- Immutable: Generate new data instead of modifying existing data, with constructor calling Object.freeze(this)
 - Referential Transparency: Create pure functions
 - Composition: Function composition instead of inheritance
 - Separation of Concerns: Separate data transformation, side effects, and business logic
@@ -548,6 +535,11 @@ export function FunctionName(props: Props) {
 - Do NOT define classes with only static members
 - Avoid class inheritance
 - Make classes immutable
+- Do NOT explicitly write public modifier
+- Use getters actively instead of defining getXxx methods
+- Do not define return types for getter methods
+- All properties must be readonly
+- Constructor must call Object.freeze(this) for immutability
 
 ```ts
 type Props = {}
@@ -556,12 +548,14 @@ type Props = {}
  * Class Name
  */
 export class ClassName {
-  constructor(private readonly props: Props) {}
+  constructor(private readonly props: Props) {
+    Object.freeze(this)
+  }
 
   /**
    * Public method description
    */
-  public method() {
+  method() {
     // method implementation
   }
 }
@@ -571,18 +565,10 @@ export class ClassName {
 
 - Add comments only when function behavior is not easily predictable
 - Do NOT use param or return annotations
+- Add comments only when function behavior is not easily predictable
+- Do NOT use param or return annotations
 
-## React
-
-- Use TailwindCSS
-- Use shadcn/ui
-- Do NOT use useMemo or useCallback
-
-## TailwindCSS
-
-- Use `space-` or `gap-` instead of `pb-`
-
-# `system/routes/*.ts` - System Directory
+# `lib/system/routes/*.ts` - System Directory
 
 バックエンドに関するディレクトリです。
 

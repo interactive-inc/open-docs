@@ -1,15 +1,15 @@
 import { Card } from "@/app/_components/ui/card"
-import type { appFileFrontMatterSchema } from "@/lib/models"
-import type { RelationGroup, SchemaDefinition } from "@/lib/types"
+import type { zDocFileMdFrontMatter } from "@/lib/models"
+import type { DocRelation, DocSchemaRecord } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import type { z } from "zod"
 import { FrontMatterInputField } from "./front-matter-input-field"
 
 type Props = {
-  frontMatter: z.infer<typeof appFileFrontMatterSchema> | null
+  frontMatter: z.infer<typeof zDocFileMdFrontMatter> | null
   onUpdate?: (key: string, value: unknown) => void
-  schema?: SchemaDefinition
-  relations?: RelationGroup[]
+  schema?: DocSchemaRecord
+  relations?: DocRelation[]
 }
 
 /**

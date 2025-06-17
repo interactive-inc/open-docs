@@ -56,7 +56,7 @@ export const PUT = factory.createHandlers(
 
     // FrontMatterを更新
     let updatedFrontMatter: Record<string, unknown> = {
-      ...docFile.frontMatter.data,
+      ...docFile.frontMatter.value,
     }
 
     if ("field" in body && "value" in body) {
@@ -84,7 +84,7 @@ export const PUT = factory.createHandlers(
     await docsEngine.writeFileContent(filePath, updatedContent)
 
     // 更新後のファイル情報を統一フォーマットで返す
-    const response = await docsEngine.readFile(filePath)
-    return c.json(response)
+    const docFileEntity = await docsEngine.getFile(filePath)
+    return c.json(docFileEntity.toJson())
   },
 )

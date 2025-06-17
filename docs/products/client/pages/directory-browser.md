@@ -2,7 +2,6 @@
 features:
   - view-document-list
   - delete-document
-  - edit-document-metadata
 ---
 
 # ディレクトリブラウザページ

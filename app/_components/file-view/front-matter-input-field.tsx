@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/app/_components/ui/select"
-import type { RelationOption, SchemaField } from "@/lib/types"
+import type { DocRelationFile, DocSchemaField } from "@/lib/types"
 import { useEffect, useState } from "react"
 import { MultiRelationSelect } from "./multi-relation-select"
 import { SingleRelationSelect } from "./single-relation-select"
@@ -17,8 +17,8 @@ type Props = {
   originalValue: unknown
   onValueChange: (key: string, value: string) => void
   onBlur: (key: string, value: string) => void
-  schemaField?: SchemaField
-  relationOptions?: RelationOption[]
+  schemaField?: DocSchemaField
+  relationOptions?: DocRelationFile[]
 }
 
 /**

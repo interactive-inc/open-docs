@@ -1,7 +1,7 @@
 ---
 milestone: draft-00
 is-done: false
-priority: 2
+priority: 1
 ---
 
 # ドキュメントを削除する

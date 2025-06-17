@@ -1,27 +1,39 @@
 import type { z } from "zod"
 import type {
-  appFileFrontMatterSchema,
-  appFileSchema,
-  appResultSchema,
-  docDirectorySchema,
-  docsEnginePropsSchema,
-  fileNodeSchema,
-  fileSchema,
-  fileTreeResponseSchema,
-  indexFrontMatterSchema,
-  markdownFileDataSchema,
-  relationGroupSchema,
-  relationOptionSchema,
-  schemaDefinitionSchema,
-  schemaFieldSchema,
-  tableColumnSchema,
+  zDocDirectory,
+  zDocFile,
+  zDocFileIndex,
+  zDocFileIndexFrontMatter,
+  zDocFileMd,
+  zDocFileMdFrontMatter,
+  zDocFileNode,
+  zDocFileUnknown,
+  zDocRelation,
+  zDocRelationField,
+  zDocRelationFile,
+  zDocSchema,
+  zDocSchemaField,
+  zDocSchemaFieldBoolean,
+  zDocSchemaFieldMultiBoolean,
+  zDocSchemaFieldMultiNumber,
+  zDocSchemaFieldMultiRelation,
+  zDocSchemaFieldMultiSelectNumber,
+  zDocSchemaFieldMultiSelectText,
+  zDocSchemaFieldMultiText,
+  zDocSchemaFieldNumber,
+  zDocSchemaFieldRelation,
+  zDocSchemaFieldSelectNumber,
+  zDocSchemaFieldSelectText,
+  zDocSchemaFieldText,
+  zDocSchemaFieldType,
+  zDocTableColumn,
 } from "./models"
 
 /**
  * スキーマフィールドで使用可能な型
  */
 export type FieldType =
-  | "string"
+  | "text"
   | "number"
   | "boolean"
   | "multi-text"
@@ -35,102 +47,144 @@ export type FieldType =
   | "multi-select-number"
 
 /**
+ * 文字列フィールドの型
+ */
+export type DocSchemaFieldText = z.infer<typeof zDocSchemaFieldText>
+
+/**
+ * 数値フィールドの型
+ */
+export type DocSchemaFieldNumber = z.infer<typeof zDocSchemaFieldNumber>
+
+/**
+ * ブールフィールドの型
+ */
+export type DocSchemaFieldBoolean = z.infer<typeof zDocSchemaFieldBoolean>
+
+/**
+ * マルチテキストフィールドの型
+ */
+export type DocFieldMultiText = z.infer<typeof zDocSchemaFieldMultiText>
+
+/**
+ * マルチ数値フィールドの型
+ */
+export type DocFieldMultiNumber = z.infer<typeof zDocSchemaFieldMultiNumber>
+
+/**
+ * マルチブールフィールドの型
+ */
+export type DocFieldMultiBoolean = z.infer<typeof zDocSchemaFieldMultiBoolean>
+
+/**
+ * リレーションフィールドの型
+ */
+export type DocSchemaFieldRelation = z.infer<typeof zDocSchemaFieldRelation>
+
+/**
+ * マルチリレーションフィールドの型
+ */
+export type DocFieldMultiRelation = z.infer<typeof zDocSchemaFieldMultiRelation>
+
+/**
+ * 選択テキストフィールドの型
+ */
+export type DocSchemaFieldSelectText = z.infer<typeof zDocSchemaFieldSelectText>
+
+/**
+ * 選択数値フィールドの型
+ */
+export type DocSchemaFieldSelectNumber = z.infer<
+  typeof zDocSchemaFieldSelectNumber
+>
+
+/**
+ * マルチ選択テキストフィールドの型
+ */
+export type DocSchemaFieldMultiSelectText = z.infer<
+  typeof zDocSchemaFieldMultiSelectText
+>
+
+/**
+ * マルチ選択数値フィールドの型
+ */
+export type DocSchemaFieldMultiSelectNumber = z.infer<
+  typeof zDocSchemaFieldMultiSelectNumber
+>
+
+export type DocFileMdFrontMatter = z.infer<typeof zDocFileMdFrontMatter>
+
+/**
+ * スキーマフィールドタイプの型
+ */
+export type DocSchemaFieldType = z.infer<typeof zDocSchemaFieldType>
+
+/**
  * スキーマフィールドの型
  */
-export type SchemaField = z.infer<typeof schemaFieldSchema>
+export type DocSchemaField = z.infer<typeof zDocSchemaField>
 
 /**
  * スキーマ定義の型
  */
-export type Schema = Record<string, SchemaField>
+export type DocSchemaRecord = z.infer<typeof zDocSchema>
 
 /**
- * スキーマ定義（null許可）の型
+ * リレーション型フィールドのUnion型
  */
-export type SchemaDefinition = z.infer<typeof schemaDefinitionSchema>
+export type RelationFieldTypes = DocSchemaFieldRelation | DocFieldMultiRelation
 
 /**
  * テーブルカラムの型
  */
-export type TableColumn = z.infer<typeof tableColumnSchema>
+export type DocTableColumn = z.infer<typeof zDocTableColumn>
 
 /**
  * ファイルノードの型（ファイルツリー用）
  */
-export type FileNode = z.infer<typeof fileNodeSchema>
-
-/**
- * ファイルツリーレスポンスの型
- */
-export type FileTreeResponse = z.infer<typeof fileTreeResponseSchema>
+export type DocFileNode = z.infer<typeof zDocFileNode>
 
 /**
  * ディレクトリレスポンスの型
  */
-export type DocDirectory = z.infer<typeof docDirectorySchema>
+export type DocDirectory = z.infer<typeof zDocDirectory>
 
 /**
- * アプリファイルの型
+ * インデックスファイルの型
  */
-export type AppFile = z.infer<typeof appFileSchema>
+export type DocFileIndex = z.infer<typeof zDocFileIndex>
 
 /**
- * アプリ結果の型
+ * マークダウンファイル（index.md以外）の型
  */
-export type AppResult = z.infer<typeof appResultSchema>
-
-/**
- * アプリファイルのfrontMatterの型
- */
-export type AppFileFrontMatter = z.infer<typeof appFileFrontMatterSchema>
-
-/**
- * ディレクトリファイルの型
- */
-export type DirectoryFile = z.infer<typeof fileSchema>
+export type DocFileMd = z.infer<typeof zDocFileMd>
 
 /**
  * その他のファイル（非マークダウン）の型
  */
-export type OtherFile = {
-  path: string
-  fileName: string
-  extension: string
-  size?: number
-}
+export type DocFileUnknown = z.infer<typeof zDocFileUnknown>
 
 /**
- * アーカイブされたファイルの型
+ * ファイルのunion型（index.md、通常のmd、その他）
  */
-export type ArchivedFile = {
-  path: string
-  relativePath: string
-  fileName: string
-  title: string | null
-  description: string | null
-}
+export type DocFile = z.infer<typeof zDocFile>
 
 /**
  * ディレクトリFrontMatterの型
  */
-export type DirectoryFrontMatter = z.infer<typeof indexFrontMatterSchema>
-
-/**
- * Markdownファイルデータの型
- */
-export type MarkdownFileData = z.infer<typeof markdownFileDataSchema>
-
-/**
- * DocsEngineのプロパティの型
- */
-export type DocsEngineProps = z.infer<typeof docsEnginePropsSchema>
+export type DocFileIndexFrontMatter = z.infer<typeof zDocFileIndexFrontMatter>
 
 /**
  * リレーションオプションの型
  */
-export type RelationOption = z.infer<typeof relationOptionSchema>
+export type DocRelationFile = z.infer<typeof zDocRelationFile>
 
 /**
  * リレーション情報の型
  */
-export type RelationGroup = z.infer<typeof relationGroupSchema>
+export type DocRelation = z.infer<typeof zDocRelation>
+
+/**
+ * リレーションフィールドの型
+ */
+export type DocRelationField = z.infer<typeof zDocRelationField>

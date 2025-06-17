@@ -1,8 +1,8 @@
 ---
 name: ""
 purpose: ""
-attributes: []
 business_rules: []
+attributes: []
 ---
 
 # FieldType

@@ -3,13 +3,13 @@
 import { Button } from "@/app/_components/ui/button"
 import { Card } from "@/app/_components/ui/card"
 import { apiClient } from "@/lib/system/api-client"
-import type { ArchivedFile } from "@/lib/types"
+import type { DocFileMd } from "@/lib/types"
 import { useMutation } from "@tanstack/react-query"
 import Link from "next/link"
 import { useState } from "react"
 
 type Props = {
-  files: ArchivedFile[]
+  files: DocFileMd[]
   directoryPath: string
   refetch: () => void
 }
@@ -67,7 +67,7 @@ export function ArchivedFileListView(props: Props) {
                 <div className="flex-1">
                   <div className="font-medium text-sm">
                     <Link
-                      href={`/${file.path.replace(/^docs\//, "")}`}
+                      href={`/${file.path}`}
                       className="text-blue-600 hover:underline"
                     >
                       {file.title || file.fileName}

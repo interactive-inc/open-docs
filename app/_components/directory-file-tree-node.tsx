@@ -4,12 +4,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/app/_components/ui/sidebar"
-import type { FileNode } from "@/lib/types"
+import type { DocFileNode } from "@/lib/types"
 import Link from "next/link"
 import { FileTreeIcon } from "./file-tree-icon"
 
 type Props = {
-  node: FileNode
+  node: DocFileNode
   depth?: number
   currentPath?: string
   onSelectDirectory?: (path: string) => void
@@ -55,8 +55,8 @@ export function DirectoryFileTreeNode(props: Props) {
         {isOpen &&
           props.node.children &&
           props.node.children
-            .filter((child: FileNode) => child.type === "directory")
-            .map((child: FileNode) => (
+            .filter((child: DocFileNode) => child.type === "directory")
+            .map((child: DocFileNode) => (
               <DirectoryFileTreeNode
                 key={child.path}
                 node={child}

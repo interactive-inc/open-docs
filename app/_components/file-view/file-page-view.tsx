@@ -21,11 +21,12 @@ export function FilePageView(props: Props) {
 
   const fileData = fileQuery.data
 
-  const directorySchema = directoryQuery.data.indexFile.frontMatter.schema || {}
+  const directorySchema =
+    directoryQuery.data?.indexFile?.frontMatter?.schema || {}
 
-  const relations = directoryQuery.data.relations || []
+  const relations = directoryQuery.data?.relations || []
 
-  const [currentContent, setCurrentContent] = useState(fileData.content)
+  const [currentContent, setCurrentContent] = useState(fileData?.content || "")
 
   const updateProperties = useFilePropertiesMutation()
 
@@ -65,16 +66,53 @@ export function FilePageView(props: Props) {
     handleReload()
   }
 
-  if (fileData.path.endsWith(".md")) {
+  if (!fileData) {
+    return <div>ファイルが見つかりません</div>
+  }
+
+  if (fileData.path?.endsWith(".md")) {
     return (
       <main className="p-2">
         <MarkdownFileView
           filePath={props.filePath}
-          fileData={fileData}
+          fileData={{ path: fileData.path, title: fileData.title }}
           cwd={directoryQuery.data.cwd}
           content={currentContent}
           onChange={onChange}
-          frontMatter={fileData.frontMatter}
+          frontMatter={(() => {
+            const fm = fileData.frontMatter || {}
+            // スキーマやアイコンなどの複雑なオブジェクトを除外し、プリミティブ値のみを返す
+            const filtered: Record<
+              string,
+              string | number | boolean | string[] | number[] | boolean[] | null
+            > = {}
+            for (const [key, value] of Object.entries(fm)) {
+              if (key === "schema" || key === "icon") continue
+              if (
+                typeof value === "string" ||
+                typeof value === "number" ||
+                typeof value === "boolean" ||
+                value === null ||
+                (Array.isArray(value) &&
+                  value.every(
+                    (v) =>
+                      typeof v === "string" ||
+                      typeof v === "number" ||
+                      typeof v === "boolean",
+                  ))
+              ) {
+                filtered[key] = value as
+                  | string
+                  | number
+                  | boolean
+                  | string[]
+                  | number[]
+                  | boolean[]
+                  | null
+              }
+            }
+            return filtered
+          })()}
           onFrontMatterUpdate={handleFrontMatterUpdate}
           onReload={handleReload}
           isLoading={fileQuery.isLoading}
@@ -90,7 +128,7 @@ export function FilePageView(props: Props) {
       <main className="p-2">
         <CsvFileView
           filePath={props.filePath}
-          fileData={fileData}
+          fileData={{ path: fileData.path, title: fileData.title }}
           cwd={directoryQuery.data.cwd}
           content={currentContent}
           onChange={onChange}
