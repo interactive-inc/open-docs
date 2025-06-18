@@ -13,7 +13,7 @@ bun run start
 
 ```
 bun i
-bun run app.dev
+bun run dev
 ```
 
 => [http://localhost:4242/](http://localhost:4242/)
