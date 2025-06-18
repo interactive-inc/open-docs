@@ -1,4 +1,3 @@
-"use client"
 import { MultiRelationSelect } from "@/components/file-view/multi-relation-select"
 import type { DocRelationFile } from "@/lib/types"
 

@@ -1,4 +1,3 @@
-"use client"
 import { useState } from "react"
 import { ArchivedFileListView } from "@/components/archived-file-list-view"
 import { DirectoryFileListView } from "@/components/directory-file-list-view"

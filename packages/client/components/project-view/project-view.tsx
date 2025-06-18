@@ -17,21 +17,21 @@ type PageGroup = {
 }
 
 export function ProjectView(props: Props) {
-  const pagesQuery = useSuspenseQuery<DocDirectory>({
-    queryKey: ["directories", `products/${props.project}/pages`],
+  const pagesQuery = useSuspenseQuery({
+    queryKey: ["apps/client", props.project],
     queryFn: async () => {
       const response = await apiClient.api.directories[":path{.+}"].$get({
-        param: { path: `products/${props.project}/pages` },
+        param: { path: `${props.project}/pages` },
       })
       return response.json()
     },
   })
 
-  const featuresQuery = useSuspenseQuery<DocDirectory>({
-    queryKey: ["directories", `products/${props.project}/features`],
+  const featuresQuery = useSuspenseQuery({
+    queryKey: ["apps/client",`products/${props.project}/features`],
     queryFn: async () => {
       const response = await apiClient.api.directories[":path{.+}"].$get({
-        param: { path: `products/${props.project}/features` },
+        param: { path: `${props.project}/features` },
       })
       return response.json()
     },
@@ -42,7 +42,7 @@ export function ProjectView(props: Props) {
   const features = featuresQuery.data.files || []
 
   const milestoneRelation = featuresQuery.data.relations?.find(
-    (rel) => rel.path === `products/${props.project}/milestones`,
+    (rel) => {return rel.path === `${props.project}/milestones`},
   )
 
   const milestoneOptions = milestoneRelation?.files || []

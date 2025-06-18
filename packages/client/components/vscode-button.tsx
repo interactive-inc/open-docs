@@ -1,4 +1,3 @@
-"use client"
 import { ExternalLink } from "lucide-react"
 import { useClientLoading } from "@/hooks/use-client-loading"
 import { getVSCodeFileLink } from "@/lib/get-vscode-link"

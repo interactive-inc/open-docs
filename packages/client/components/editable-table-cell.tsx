@@ -1,4 +1,3 @@
-"use client"
 import type { DocRelationFile } from "@/lib/types"
 import { BooleanEditableCell } from "./editable-table-cell/boolean-editable-cell"
 import { MultiBooleanEditableCell } from "./editable-table-cell/multi-boolean-editable-cell"

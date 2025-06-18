@@ -1,4 +1,3 @@
-"use client"
 import { SingleRelationSelect } from "@/components/file-view/single-relation-select"
 import type { DocRelationFile } from "@/lib/types"
 

@@ -17,6 +17,7 @@
     ".clinerules": true,
     "**/.tanstack": true,
     "**/node_modules": true,
+    "**/route-tree.gen.ts": true,
     "bun.lock": true,
     "CLAUDE.md": true,
     "next-env.d.ts": true,

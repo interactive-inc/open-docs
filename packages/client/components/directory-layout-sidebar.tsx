@@ -147,36 +147,6 @@ export function DirectoryLayoutSidebar(props: Props) {
       <Sidebar collapsible={"offcanvas"} variant={"inset"}>
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <div className="flex gap-2">
-                  <SidebarMenuItem>
-                    <Link href="/">
-                      <Button
-                        className="w-full justify-start"
-                        variant={"secondary"}
-                        size={"sm"}
-                      >
-                        {"ホーム"}
-                      </Button>
-                    </Link>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <Link href="/app/client">
-                      <Button
-                        className="w-full justify-start"
-                        variant={"secondary"}
-                        size={"sm"}
-                      >
-                        {"実験"}
-                      </Button>
-                    </Link>
-                  </SidebarMenuItem>
-                </div>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-          <SidebarGroup>
             <SidebarGroupLabel>{"ファイル"}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>{renderAllDirectories(files)}</SidebarMenu>

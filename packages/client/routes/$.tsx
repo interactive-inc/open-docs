@@ -6,8 +6,6 @@ export const Route = createFileRoute("/$")({
 })
 
 function Component() {
-  const _pathname = useLocation({ select: (location) => location.pathname })
-
   return (
     <Suspense
       fallback={

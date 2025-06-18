@@ -77,8 +77,6 @@ export function DirectoryFileTreeNode(props: Props) {
     return null
   }
 
-  console.log("formatPath(props.node.path", formatPath(props.node.path))
-
   return (
     <Link href={`/${formatPath(props.node.path)}`}>
       <SidebarMenuItem>
