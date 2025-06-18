@@ -15,20 +15,16 @@
   },
   "files.exclude": {
     ".clinerules": true,
-    ".next": true,
-    ".obsidian": true,
-    "*.db-*": true,
-    "*.db": true,
+    "**/.tanstack": true,
+    "**/node_modules": true,
     "bun.lock": true,
     "CLAUDE.md": true,
     "next-env.d.ts": true,
-    "**/node_modules": true,
     "tsconfig.tsbuildinfo": true
   },
-  "github.copilot.chat.agent.thinkingTool": true,
-  "github.copilot.chat.codesearch.enabled": true,
   "github.copilot.nextEditSuggestions.enabled": true,
   "search.exclude": {
+    "app": true,
     "bun.lock": true
   },
   "typescript.preferences.importModuleSpecifier": "non-relative",

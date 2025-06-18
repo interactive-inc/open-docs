@@ -2,12 +2,12 @@ import fs from "node:fs/promises"
 import { serve } from "@hono/node-server"
 import { serveStatic } from "@hono/node-server/serve-static"
 
-import { app } from "./dist"
+import { app } from "./app"
 
-app.use("*", serveStatic({ root: "./dist/client" }))
+app.use("*", serveStatic({ root: "./app/client" }))
 
 app.use("*", async (c) => {
-  const text = await fs.readFile("./dist/client/index.html", "utf-8")
+  const text = await fs.readFile("./app/client/index.html", "utf-8")
   return c.html(text)
 })
 
