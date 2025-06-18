@@ -1,3 +1,7 @@
+# Tanstack Router
+.tanstack
+**/route-tree.gen.ts
+
 # Next.js
 .next
 
