@@ -23,21 +23,22 @@ The development server is already running. Do not start a new one.
 ## Restrictions
 
 - Do not modify the following files:
-  - client/app/components/ui
 - Do Not install new packages
-- Do Not modify `next.config.mjs`
 
 ## Directory Structure
 
-- `client.app/routes/` - Main application routes
-- `client.app/components/` - Reusable UI components
-- `client.app/hooks/` - Custom React hooks
-- `client/lib/open-csv/` - CSV processing utilities
-- `server/lib/engine/` - Document processing engine
-- `server/lib/engine/entities/` - Domain entities
-- `server/lib/hooks/` - Shared React hooks
-- `server/lib/open-markdown/` - Markdown processing utilities
-- `server/lib/system/` - System-level utilities and API client
-- `server/lib/engine/doc-engine.ts` - Main document engine
-- `server/lib/models.ts` - Validation used throughout the application
-- `server/lib/types.ts` - Type definitions used throughout the application
+- `packages/client/components/` - React components
+- `packages/client/components/ui` - shadcn/ui components (do not modify)
+- `packages/client/hooks/` - Custom React hooks
+- `packages/client/routes/` - Main application routes
+- `packages/client/types.ts` - Type definitions used throughout the application
+- `packages/client/lib/open-csv/` - CSV processing utilities
+- `packages/server/lib/engine/` - Document processing engine
+- `packages/server/lib/engine/entities/` - Domain entities
+- `packages/server/lib/engine/values/` - Value objects
+- `packages/server/lib/engine/cwd.ts` - Current working directory utilities
+- `packages/server/lib/engine/doc-engine.ts` - Main document engine
+- `packages/server/lib/open-markdown/` - Markdown processing utilities
+- `packages/server/lib/models.ts` - Validation used throughout the application
+- `packages/server/lib/types.ts` - Type definitions used throughout the application
+- `packages/server/routes` - API routes (hono)

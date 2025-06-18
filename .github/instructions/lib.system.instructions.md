@@ -1,8 +1,8 @@
 ---
-applyTo: "**/lib/system/routes/*.ts"
+applyTo: "**/packages/server/routes/*.ts"
 ---
 
-# `lib/system/routes/*.ts` - System Directory
+# `packages/server/routes/*.ts` - Routes Directory
 
 バックエンドに関するディレクトリです。
 
