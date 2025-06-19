@@ -2,6 +2,7 @@ import fs from "node:fs/promises"
 import { serve } from "@hono/node-server"
 import { serveStatic } from "@hono/node-server/serve-static"
 
+// @ts-ignore
 import { app } from "./app"
 
 app.use("*", serveStatic({ root: "./app/client" }))

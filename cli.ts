@@ -1,6 +1,6 @@
 import path from "node:path"
 import { parseArgs } from "node:util"
-import { DocEngine } from "@/lib/engine/doc-engine"
+import { DocEngine } from "./packages/server/lib/engine/doc-engine"
 
 class Command {
   async formatDocs(): Promise<void> {
