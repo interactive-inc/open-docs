@@ -1,5 +1,5 @@
 ---
-icon: ⚡
+icon: 📄
 schema:
   milestone:
     type: relation
@@ -7,6 +7,7 @@ schema:
     title: マイルストーン
     description: 開発のマイルストーン
     path: products/client/milestones
+    default: ""
   is-done:
     type: boolean
     required: false
@@ -21,7 +22,7 @@ schema:
     default: 0
 ---
 
-# Features
+# 機能
 
 Open Docs クライアントアプリケーションの機能要件を定義するディレクトリです。
 

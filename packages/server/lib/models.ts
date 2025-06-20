@@ -230,6 +230,7 @@ export const zDocFileNode: z.ZodSchema = z.lazy(() =>
     type: z.enum(["file", "directory"]),
     children: z.array(zDocFileNode),
     icon: z.string(),
+    title: z.string(),
   }),
 )
 

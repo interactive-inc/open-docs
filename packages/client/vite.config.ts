@@ -22,7 +22,7 @@ export default defineConfig({
   },
   server: { port: 4242 },
   build: {
-    outDir: "../../dist/client",
+    outDir: "../../app/client",
     rollupOptions: {
       output: {
         entryFileNames: "assets/[name].js",

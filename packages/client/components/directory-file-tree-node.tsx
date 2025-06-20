@@ -44,7 +44,7 @@ export function DirectoryFileTreeNode(props: Props) {
             {props.node.icon && (
               <span className="text-base">{props.node.icon}</span>
             )}
-            <span>{props.node.name}</span>
+            <span>{props.node.title}</span>
           </SidebarMenuButton>
         </SidebarMenuItem>
         {isOpen &&
@@ -78,11 +78,11 @@ export function DirectoryFileTreeNode(props: Props) {
   }
 
   return (
-    <Link href={`/${formatPath(props.node.path)}`}>
+    <Link to="/$" params={{ _splat: formatPath(props.node.path) }}>
       <SidebarMenuItem>
         <SidebarMenuButton style={{ paddingLeft: 8 + depth * 8 }}>
           <FileTreeIcon fileName={props.node.name} />
-          {props.node.name}
+          {props.node.title !== props.node.name ? `${props.node.title} | ${props.node.name}` : props.node.name}
         </SidebarMenuButton>
       </SidebarMenuItem>
     </Link>

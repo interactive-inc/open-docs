@@ -1,5 +1,6 @@
 ---
-icon: 📱
+icon: 📄
+schema: {}
 ---
 
 # Client

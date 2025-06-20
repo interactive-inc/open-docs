@@ -1,10 +1,10 @@
 {
-  "name": "system",
+  "name": "@interactive-inc/server",
   "type": "module",
   "private": true,
   "scripts": {
     "dev": "NODE_ENV=development bun index.ts --watch",
-    "build": "bun esbuild index.ts --platform=node --bundle --outfile=../../dist/index.js --format=esm --packages=external --minify"
+    "build": "bun esbuild index.ts --platform=node --bundle --outfile=../../app/index.js --format=esm --packages=external --minify"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.7.0",

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { ArchivedFileListView } from "@/components/archived-file-list-view"
 import { DirectoryFileListView } from "@/components/directory-file-list-view"
 import { DirectoryTableView } from "@/components/directory-table-view"
@@ -19,14 +19,14 @@ export function DirectoryPageView(props: Props) {
 
   const directoryData = query.data
 
-  const [title, setTitle] = useState(directoryData.indexFile?.title || "")
+  const [title, setTitle] = useState(directoryData?.indexFile?.title || "")
 
   const [description, setDescription] = useState(
-    directoryData.indexFile?.description || "",
+    directoryData?.indexFile?.description || "",
   )
 
   const [icon, setIcon] = useState(
-    (directoryData.indexFile?.frontMatter?.icon as string) || "📁",
+    directoryData?.indexFile?.frontMatter?.icon || "📁",
   )
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,7 +36,7 @@ export function DirectoryPageView(props: Props) {
   const handleTitleBlur = async () => {
     await apiClient.api.directories[":path{.+}"].$put({
       param: {
-        path: props.currentPath,
+        path: props.currentPath.startsWith("/") ? props.currentPath.substring(1) : props.currentPath,
       },
       json: {
         properties: null,
@@ -55,7 +55,7 @@ export function DirectoryPageView(props: Props) {
   const handleDescriptionBlur = async () => {
     await apiClient.api.directories[":path{.+}"].$put({
       param: {
-        path: props.currentPath,
+        path: props.currentPath.startsWith("/") ? props.currentPath.substring(1) : props.currentPath,
       },
       json: {
         properties: null,
@@ -66,19 +66,27 @@ export function DirectoryPageView(props: Props) {
   }
 
   const handleIconSelect = async (newIcon: string) => {
+    console.log("Selected icon:", newIcon)
+    console.log("Current path:", props.currentPath)
     setIcon(newIcon)
-    await apiClient.api.directories[":path{.+}"].$put({
-      param: {
-        path: props.currentPath,
-      },
-      json: {
-        properties: { icon: newIcon },
-        title: null,
-        description: null,
-      },
-    })
-    // キャッシュを更新して最新データを取得
-    query.refetch()
+    try {
+      const response = await apiClient.api.directories[":path{.+}"].$put({
+        param: {
+          path: props.currentPath.startsWith("/") ? props.currentPath.substring(1) : props.currentPath,
+        },
+        json: {
+          properties: { icon: newIcon },
+          title: null,
+          description: null,
+        },
+      })
+      const result = await response.json()
+      console.log("API response:", result)
+      // キャッシュを更新して最新データを取得
+      await query.refetch()
+    } catch (error) {
+      console.error("Error updating icon:", error)
+    }
   }
 
   return (

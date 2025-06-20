@@ -5,8 +5,6 @@ import { z } from "zod"
 import { cwd } from "@/lib/cwd"
 import { DocEngine } from "@/lib/engine/doc-engine"
 import { factory } from "@/lib/factory"
-import { zDocFileMdFrontMatter } from "@/lib/models"
-import { OpenMarkdown } from "@/lib/open-markdown/open-markdown"
 
 /**
  * GET /api/directories/:path - ディレクトリデータ取得（ディレクトリ専用）
@@ -65,64 +63,15 @@ export const PUT = factory.createHandlers(
       })
     }
 
-    const indexPath = path.join(directoryPath, "index.md")
+    // エンジンのupdateIndexFileメソッドを使用
+    await docsEngine.updateIndexFile(directoryPath, {
+      title: body.title,
+      description: body.description,
+      properties: body.properties,
+    })
 
-    const indexExists = await docsEngine.exists(indexPath)
+    const updatedDirectory = await docsEngine.readDirectory(directoryPath)
 
-    if (!indexExists) {
-      throw new HTTPException(404, {
-        message: `index.mdが見つかりません: ${indexPath}`,
-      })
-    }
-
-    const markdownContent = await docsEngine.readFileContent(indexPath)
-
-    const docFile = await docsEngine.getFile(indexPath)
-
-    let updatedContent = markdownContent
-    let updatedFrontMatter = { ...docFile.frontMatter.value } as Record<
-      string,
-      unknown
-    >
-
-    // titleが指定されている場合はH1を更新
-    if (body.title !== null) {
-      const openMd = new OpenMarkdown(updatedContent)
-      const updatedMd = openMd.withTitle(body.title)
-      updatedContent = updatedMd.text
-    }
-
-    // descriptionが指定されている場合はH1の次の段落を更新
-    if (body.description !== null) {
-      const openMd = new OpenMarkdown(updatedContent)
-      // H1がない場合のデフォルトタイトルを取得（ディレクトリ名から）
-      const dirName = path.basename(directoryPath)
-      const defaultTitle = dirName === "index" ? "概要" : dirName
-      const updatedMd = openMd.withDescription(body.description, defaultTitle)
-      updatedContent = updatedMd.text
-    }
-
-    if (body.properties) {
-      const validatedProperties = zDocFileMdFrontMatter.parse(body.properties)
-      updatedFrontMatter = {
-        ...updatedFrontMatter,
-        ...validatedProperties,
-      }
-
-      // undefinedの値を削除
-      for (const key of Object.keys(updatedFrontMatter)) {
-        if (updatedFrontMatter[key] !== undefined) continue
-        delete updatedFrontMatter[key]
-      }
-
-      const openMd = new OpenMarkdown(updatedContent)
-      updatedContent = openMd.withFrontMatter(updatedFrontMatter).text
-    }
-
-    await docsEngine.writeFileContent(indexPath, updatedContent)
-
-    const directory = await docsEngine.readDirectory(directoryPath)
-
-    return c.json(directory.toJson())
+    return c.json(updatedDirectory.toJson())
   },
 )

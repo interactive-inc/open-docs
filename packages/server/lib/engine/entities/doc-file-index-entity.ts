@@ -155,6 +155,10 @@ export class DocFileIndexEntity {
     return {
       ...this.value,
       columns: this.getTableColumns(),
+      frontMatter: {
+        ...this.value.frontMatter,
+        icon: this.value.frontMatter?.icon || "📁",
+      },
     }
   }
 

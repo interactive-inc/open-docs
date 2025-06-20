@@ -1,5 +1,5 @@
 {
-  "name": "client",
+  "name": "@interactive-inc/client",
   "type": "module",
   "private": true,
   "scripts": {
