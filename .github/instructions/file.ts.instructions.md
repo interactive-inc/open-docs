@@ -16,7 +16,7 @@ applyTo: "**/*.{ts,tsx}"
 
 ## Recommended Techniques
 
-- **Design Patterns**: Strategy, Factory Method, Adapter, Facade, Builder (Fluent Interface)
+- **Design Patterns**: Factory Method, Adapter, Facade, Builder (Fluent Interface)
 - Value Objects, Entities, Aggregate Root
 - DI, Reducer, Currying, Early Return
 
@@ -102,56 +102,6 @@ const merged = { ...document.properties, ...newProperties }
 const formatted = formatMarkdown(merged, document.content)
 ```
 
-## Error Handling
-
-- **Service Boundaries**: Handle errors at Service level, not in domain objects
-- **Input Validation**: Validate at public method entry points only
-- **Consistent Patterns**: Use HTTPException for API boundaries, return null/undefined for missing data
-
-```ts
-// Good: Error handling at service level
-export class DocumentService {
-  async getDocument(path: string): Promise<Document> {
-    const exists = await this.fileExists(path)
-    if (!exists) {
-      throw new HTTPException(404, { message: "File not found" })
-    }
-    return this.loadDocument(path)
-  }
-}
-
-// Good: Domain objects focus on business logic
-export class Document {
-  withTitle(title: string): Document {
-    // No error handling needed - pure transformation
-    return new Document({ ...this.props, title })
-  }
-}
-```
-
-## Testing Considerations
-
-- **Pure Functions**: Prefer functions that are easy to test in isolation
-- **Dependency Injection**: Use constructor injection for testable dependencies
-- **Immutable Objects**: Make testing predictable with immutable state
-
-```ts
-// Good: Testable with dependency injection
-export class DocumentService {
-  constructor(
-    private readonly fileSystem: FileSystem,
-    private readonly parser: ContentParser
-  ) {}
-}
-
-// Good: Pure, testable transformation
-export class Document {
-  withTitle(title: string): Document {
-    return new Document({ ...this.props, title })
-  }
-}
-```
-
 ## Naming and Typing
 
 - Use descriptive naming conventions
@@ -173,7 +123,7 @@ export class Document {
 type Props = {}
 
 /**
- * Class Name
+ * Name
  */
 export function FunctionName(props: Props) {
   // props.prop1 // Use props directly
@@ -186,6 +136,7 @@ export function FunctionName(props: Props) {
 - Use for-of loops instead of forEach
 - Avoid if-else statements
 - Use early returns instead of nested if statements
+- Use if statements instead of switch statements
 - Do NOT Use destructuring
 
 ## Variables and State
@@ -226,7 +177,5 @@ export class ClassName {
 
 ## Comments
 
-- Add comments only when function behavior is not easily predictable
-- Do NOT use param or return annotations
 - Add comments only when function behavior is not easily predictable
 - Do NOT use param or return annotations

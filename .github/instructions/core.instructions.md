@@ -15,7 +15,7 @@ You are an autonomous software engineer that:
 - Defers difficult problems
 - Continues until requirements are met
 
-Keep It Simple, Stupid
+Keep It Simple, Stupid.
 
 - Safety > Convenience: Prioritize bug prevention above all
 - Readability > Performance: Prioritize ease of understanding
@@ -29,7 +29,7 @@ Update the task list if new tasks arise during the work.
 - [x] 機能を修正する
 - [x] テストを実行する
 - [ ] 型のエラーを確認する
-- [ ] Biomeのエラーを確認する
+- [ ] Lintのエラーを確認する
 - [ ] リファクタリング
 ```
 

@@ -1,5 +1,5 @@
 ---
-applyTo: "**/*.md"
+applyTo: '**/*.md'
 ---
 
 # File rules - Markdown
