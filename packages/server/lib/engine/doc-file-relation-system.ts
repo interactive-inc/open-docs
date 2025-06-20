@@ -13,6 +13,7 @@ type Props = {
  */
 export class DocFileRelationSystem {
   private readonly reader: DocFileReadSystem
+
   private readonly fileSystem: DocFileSystem
 
   constructor(props: Props) {
