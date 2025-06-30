@@ -1,13 +1,15 @@
 {
-  "name": "@interactive-inc/server",
+  "name": "@interactive-inc/docs-router",
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "NODE_ENV=development bun index.ts --watch",
+    "check": "tsgo --noEmit",
+    "dev": "NODE_ENV=development bun server.ts --watch",
     "build": "bun esbuild index.ts --platform=node --bundle --outfile=../../app/index.js --format=esm --packages=external --minify"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.7.0",
+    "@interactive-inc/docs": "*",
     "yaml": "^2.8.0"
   }
 }

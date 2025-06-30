@@ -1,35 +1,30 @@
-import { cors } from "hono/cors"
 import { HTTPException } from "hono/http-exception"
-import { factory } from "@/lib/factory"
+import { factory } from "./lib/factory"
 import {
   GET as getDirectory,
   PUT as updateDirectory,
-} from "@/routes/directories.path"
-import { POST as createFile } from "@/routes/files"
-import { PUT as moveFile } from "@/routes/files.move"
+} from "./routes/directories.$path"
+import { GET as getFileTree } from "./routes/directories.tree"
+import { POST as createFile } from "./routes/files"
 import {
   DELETE as deleteFile,
   GET as getFile,
   PUT as updateFile,
-} from "@/routes/files.path"
-import { GET as getFileTree } from "@/routes/files.tree"
+} from "./routes/files.$path"
 
-export const routes = factory
+export const docsApp = factory
   .createApp()
   .get("/directories", ...getDirectory)
   .put("/directories", ...updateDirectory)
+  .get("/directories/tree", ...getFileTree)
   .get("/directories/:path{.+}", ...getDirectory)
   .put("/directories/:path{.+}", ...updateDirectory)
-  .get("/files/tree", ...getFileTree)
   .post("/files", ...createFile)
-  .put("/files/move", ...moveFile)
   .put("/files/:path{.+}", ...updateFile)
   .get("/files/:path{.+}", ...getFile)
   .delete("/files/:path{.+}", ...deleteFile)
 
-export const app = factory.createApp().use(cors()).route("/api", routes)
-
-app.onError((err, c) => {
+docsApp.onError((err, c) => {
   console.error("API Error:", err)
 
   if (err instanceof HTTPException) {
@@ -45,12 +40,3 @@ app.onError((err, c) => {
     500,
   )
 })
-
-const port = process.env.PORT || 4244
-
-console.log(`🚀 Server starting on http://localhost:${port}`)
-
-export default {
-  port,
-  fetch: app.fetch,
-}

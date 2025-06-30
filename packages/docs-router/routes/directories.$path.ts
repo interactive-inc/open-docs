@@ -1,0 +1,137 @@
+import { zValidator } from "@hono/zod-validator"
+import { HTTPException } from "hono/http-exception"
+import { z } from "zod/v4"
+import { cwd } from "../lib/cwd"
+import { docClient } from "../lib/doc-client"
+import { factory } from "../lib/factory"
+import { zDirectoryJson } from "../models"
+
+/**
+ * GET /api/directories/:path - ディレクトリデータ取得（ディレクトリ専用）
+ */
+export const GET = factory.createHandlers(async (c) => {
+  const rawPath = c.req.param("path")
+
+  const currentPath = rawPath && typeof rawPath === "string" ? rawPath : ""
+
+  if (currentPath === "/") {
+    throw new HTTPException(400, { message: "パスが無効です。" })
+  }
+
+  const engine = docClient()
+
+  const directory = engine.directory(currentPath)
+
+  const files = await directory.readFiles()
+
+  const indexFile = await directory.indexFile().read()
+
+  const relations = await directory.indexFile().readRelations()
+
+  const json = zDirectoryJson.parse({
+    cwd: cwd(),
+    files: files.map((file) => {
+      return file.toJson()
+    }),
+    indexFile: indexFile.toJson(),
+    relations: relations.map((relation) => {
+      return relation.toJson()
+    }),
+  } satisfies z.infer<typeof zDirectoryJson>)
+
+  return c.json(json)
+})
+
+/**
+ * ディレクトリのプロパティ（index.mdのフロントマター）を更新する
+ */
+export const PUT = factory.createHandlers(
+  zValidator(
+    "json",
+    z.object({
+      title: z.string().nullable(),
+      description: z.string().nullable(),
+      icon: z.string().nullable(),
+      schema: z.record(z.string(), z.unknown()).nullable(),
+    }),
+  ),
+  async (c) => {
+    const body = c.req.valid("json")
+
+    const rawPath = c.req.param("path")
+    // pathパラメータが文字列であることを確認、デフォルトは空文字列
+    let directoryPath = rawPath && typeof rawPath === "string" ? rawPath : ""
+
+    // "/" を空文字列に正規化（ルートディレクトリの場合）
+    if (directoryPath === "/") {
+      directoryPath = ""
+    }
+
+    const client = docClient()
+
+    const directoryRef = client.directory(directoryPath)
+
+    const indexFileRef = directoryRef.indexFile()
+
+    const exists = await indexFileRef.exists()
+
+    if (!exists) {
+      throw new HTTPException(404, {
+        message: `ディレクトリのindex.mdが見つかりません: ${directoryPath}/index.md`,
+      })
+    }
+
+    let indexFile = await indexFileRef.read()
+
+    if (indexFile instanceof Error) {
+      throw new HTTPException(500, {
+        message: indexFile.message,
+      })
+    }
+
+    let content = indexFile.content
+
+    if (body.icon !== null || body.schema !== null) {
+      let frontMatter = content.frontMatter
+
+      if (body.icon !== null) {
+        frontMatter = frontMatter.withIcon(body.icon)
+      }
+
+      if (body.schema !== null) {
+        frontMatter = frontMatter.withSchema(body.schema)
+      }
+
+      content = content.withFrontMatter(frontMatter)
+    }
+
+    if (body.title !== null) {
+      content = content.withTitle(body.title)
+    }
+
+    if (body.description !== null) {
+      content = content.withDescription(body.description)
+    }
+
+    indexFile = indexFile.withContent(content)
+
+    await indexFileRef.write(indexFile)
+
+    const files = await directoryRef.readFiles()
+
+    const relations = await indexFileRef.readRelations()
+
+    const json = zDirectoryJson.parse({
+      cwd: cwd(),
+      files: files.map((file) => {
+        return file.toJson()
+      }),
+      indexFile: indexFile.toJson(),
+      relations: relations.map((relation) => {
+        return relation.toJson()
+      }),
+    } satisfies z.infer<typeof zDirectoryJson>)
+
+    return c.json(json)
+  },
+)

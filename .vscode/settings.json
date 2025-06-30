@@ -7,9 +7,7 @@
     "editor.defaultFormatter": "biomejs.biome",
     "editor.formatOnSave": true
   },
-  "chat.agent.enabled": true,
-  "chat.agent.maxRequests": 128,
-  "chat.edits2.enabled": true,
+  "chat.agent.maxRequests": 512,
   "files.associations": {
     "*.json": "json"
   },
@@ -20,11 +18,10 @@
     "**/route-tree.gen.ts": true,
     "bun.lock": true,
     "CLAUDE.md": true,
-    "next-env.d.ts": true,
     "tsconfig.tsbuildinfo": true
   },
-  "github.copilot.nextEditSuggestions.enabled": true,
   "search.exclude": {
+    "**/build": true,
     "app": true,
     "bun.lock": true
   },

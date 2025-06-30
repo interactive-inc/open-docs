@@ -3,7 +3,7 @@ import concurrently from "concurrently"
 const concurrentlyResult = concurrently(
   [
     {
-      command: "bun run --cwd packages/server dev",
+      command: "bun run --cwd packages/docs-router dev",
       name: "🐤",
       prefixColor: "yellow",
     },
