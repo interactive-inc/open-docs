@@ -13,7 +13,8 @@
   },
   "workspaces": [
     "packages/client",
-    "packages/server"
+    "packages/server",
+    "packages/docs"
   ],
   "dependencies": {
     "@hono/node-server": "^1.14.4",
