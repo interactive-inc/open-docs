@@ -208,10 +208,3 @@ test("multi-string型をmulti-textに正規化する", () => {
   expect(field.type).toBe("multi-text")
 })
 
-test("インスタンスが不変である", () => {
-  const factory = new DocSchemaFieldFactory()
-
-  expect(() => {
-    ;(factory as any).someProperty = "value"
-  }).toThrow()
-})

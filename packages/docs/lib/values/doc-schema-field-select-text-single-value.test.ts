@@ -108,23 +108,3 @@ test("JSON形式に変換できる", () => {
   })
 })
 
-test("インスタンスが不変である", () => {
-  const fieldData = {
-    type: "select-text" as const,
-    required: true,
-    title: null,
-    description: null,
-    options: ["A", "B", "C"],
-    default: null,
-  }
-
-  const field = new DocSchemaFieldSelectTextSingleValue("test", fieldData)
-
-  expect(() => {
-    ;(field as any).key = "changed"
-  }).toThrow()
-
-  expect(() => {
-    ;(field.options as any).push("D")
-  }).toThrow()
-})

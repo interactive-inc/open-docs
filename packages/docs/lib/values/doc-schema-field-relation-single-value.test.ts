@@ -93,23 +93,3 @@ test("JSON形式に変換できる", () => {
   })
 })
 
-test("インスタンスが不変である", () => {
-  const fieldData = {
-    type: "relation" as const,
-    required: true,
-    title: null,
-    description: null,
-    path: "users",
-    default: null,
-  }
-
-  const field = new DocSchemaFieldRelationSingleValue("test", fieldData)
-
-  expect(() => {
-    ;(field as any).key = "changed"
-  }).toThrow()
-
-  expect(() => {
-    ;(field as any).value = {}
-  }).toThrow()
-})

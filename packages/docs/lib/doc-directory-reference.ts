@@ -224,6 +224,64 @@ export class DocDirectoryReference {
     return entities
   }
 
+  /**
+   * サブディレクトリ名の一覧を取得
+   */
+  async directoryNames(): Promise<string[]> {
+    const allFileNames = await this.fileSystem.readDirectoryFileNames(
+      this.relativePath,
+    )
+    const directoryNames: string[] = []
+
+    for (const fileName of allFileNames) {
+      // アーカイブディレクトリは除外
+      if (fileName.startsWith(this.archiveDirectoryName)) continue
+
+      const filePath = this.pathSystem.join(this.relativePath, fileName)
+      const isDirectory = await this.fileSystem.isDirectory(filePath)
+
+      if (isDirectory) {
+        directoryNames.push(fileName)
+      }
+    }
+
+    return directoryNames
+  }
+
+  /**
+   * サブディレクトリの参照を取得
+   */
+  async directories(): Promise<DocDirectoryReference[]> {
+    const directoryNames = await this.directoryNames()
+
+    return directoryNames.map((dirName) => {
+      const dirPath = this.pathSystem.join(this.relativePath, dirName)
+
+      return new DocDirectoryReference({
+        path: dirPath,
+        indexFileName: this.indexFileName,
+        archiveDirectoryName: this.archiveDirectoryName,
+        fileSystem: this.fileSystem,
+        pathSystem: this.pathSystem,
+      })
+    })
+  }
+
+  /**
+   * 単一のサブディレクトリ参照を取得
+   */
+  directory(directoryName: string): DocDirectoryReference {
+    const dirPath = this.pathSystem.join(this.relativePath, directoryName)
+
+    return new DocDirectoryReference({
+      path: dirPath,
+      indexFileName: this.indexFileName,
+      archiveDirectoryName: this.archiveDirectoryName,
+      fileSystem: this.fileSystem,
+      pathSystem: this.pathSystem,
+    })
+  }
+
   indexFile(): DocFileIndexReference {
     return new DocFileIndexReference({
       path: this.pathSystem.join(this.relativePath, this.indexFileName),

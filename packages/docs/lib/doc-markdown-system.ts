@@ -123,7 +123,11 @@ export class DocMarkdownSystem {
       // タイトルの後の説明を更新
       const descIndex = this.skipEmptyLines(lines, titleIndex + 1)
 
-      if (descIndex < lines.length && lines[descIndex] && !lines[descIndex].startsWith("#")) {
+      if (
+        descIndex < lines.length &&
+        lines[descIndex] &&
+        !lines[descIndex].startsWith("#")
+      ) {
         // 既存の説明を置き換え
         lines[descIndex] = newDescription
       } else {

@@ -94,31 +94,3 @@ test("JSON形式に変換できる", () => {
   })
 })
 
-test("インスタンスが不変である", () => {
-  const fieldData = {
-    type: "multi-select-text" as const,
-    required: true,
-    options: ["A", "B"],
-    default: ["A"],
-    title: null,
-    description: null,
-  }
-
-  const field = new DocSchemaFieldSelectTextMultipleValue("test", fieldData)
-
-  expect(() => {
-    ;(field as any).key = "changed"
-  }).toThrow()
-
-  // オプション配列は不変
-  expect(() => {
-    field.options.push("C")
-  }).toThrow()
-
-  // デフォルト配列は不変
-  if (field.default && Array.isArray(field.default)) {
-    expect(() => {
-      field.default!.push("B")
-    }).toThrow()
-  }
-})

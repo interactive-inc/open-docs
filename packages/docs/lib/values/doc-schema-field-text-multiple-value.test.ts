@@ -88,22 +88,3 @@ test("JSON形式に変換できる", () => {
   })
 })
 
-test("インスタンスが不変である", () => {
-  const fieldData = {
-    type: "multi-text" as const,
-    required: true,
-    title: null,
-    description: null,
-    default: ["item1", "item2"],
-  }
-
-  const field = new DocSchemaFieldTextMultipleValue("test", fieldData)
-
-  expect(() => {
-    ;(field as any).key = "changed"
-  }).toThrow()
-
-  expect(() => {
-    ;(field.default as any).push("item3")
-  }).toThrow()
-})

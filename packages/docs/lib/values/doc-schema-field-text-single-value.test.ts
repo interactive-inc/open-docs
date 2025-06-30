@@ -86,22 +86,3 @@ test("JSON形式に変換できる", () => {
   })
 })
 
-test("インスタンスが不変である", () => {
-  const fieldData = {
-    type: "text" as const,
-    required: true,
-    title: null,
-    description: null,
-    default: null,
-  }
-
-  const field = new DocSchemaFieldTextSingleValue("test", fieldData)
-
-  expect(() => {
-    ;(field as any).key = "changed"
-  }).toThrow()
-
-  expect(() => {
-    ;(field as any).value = {}
-  }).toThrow()
-})

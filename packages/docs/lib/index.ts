@@ -8,6 +8,7 @@ export { DocFileMdReference } from "./doc-file-md-reference"
 export { DocFileRelationReference } from "./doc-file-relation-reference"
 // System exports
 export { DocFileSystem } from "./doc-file-system"
+export { DocFileTreeSystem as FileTreeSystem } from "./doc-file-tree-system"
 export { DocFileUnknownReference } from "./doc-file-unknown-reference"
 export { DocMarkdownSystem } from "./doc-markdown-system"
 export { DocPathSystem } from "./doc-path-system"

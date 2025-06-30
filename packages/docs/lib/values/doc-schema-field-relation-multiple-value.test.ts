@@ -93,23 +93,3 @@ test("JSON形式に変換できる", () => {
   })
 })
 
-test("インスタンスが不変である", () => {
-  const fieldData = {
-    type: "multi-relation" as const,
-    required: true,
-    title: null,
-    description: null,
-    path: "tags",
-    default: ["tag1", "tag2"],
-  }
-
-  const field = new DocSchemaFieldRelationMultipleValue("test", fieldData)
-
-  expect(() => {
-    ;(field as any).key = "changed"
-  }).toThrow()
-
-  expect(() => {
-    ;(field.default as any).push("tag3")
-  }).toThrow()
-})

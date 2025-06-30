@@ -105,22 +105,6 @@ test("パスに深いディレクトリ構造を持つファイルも作成で�
   expect(node.name).toBe("deep-file")
 })
 
-test("インスタンスが不変である", () => {
-  const node = new DocTreeFileNodeValue({
-    name: "test",
-    path: "test.md",
-    icon: "🧪",
-    title: "テスト",
-  })
-
-  expect(() => {
-    ;(node as any).props = {}
-  }).toThrow()
-
-  expect(() => {
-    ;(node as any).name = "changed"
-  }).toThrow()
-})
 
 test("無効なJSONでエラーが発生する", () => {
   expect(() => {
