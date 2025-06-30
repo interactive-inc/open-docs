@@ -6,13 +6,13 @@
     "format": "biome check . --fix --unsafe",
     "claude": "claude --continue --dangerously-skip-permissions --mcp-config .mcp.json",
     "start": "bun run index",
-    "build": "bun run --cwd packages/docs-router build && bun run --cwd packages/client build",
-    "dev:client": "bun run --cwd packages/client dev",
+    "build": "bun run --cwd packages/docs-router build && bun run --cwd packages/docs-client build",
+    "dev:client": "bun run --cwd packages/docs-client dev",
     "dev:server": "bun run --cwd packages/docs-router dev",
     "dev": "bun run index.dev"
   },
   "workspaces": [
-    "packages/client",
+    "packages/docs-client",
     "packages/docs-router",
     "packages/docs"
   ],
