@@ -92,4 +92,3 @@ test("JSON形式に変換できる", () => {
     default: null,
   })
 })
-

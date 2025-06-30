@@ -207,4 +207,3 @@ test("multi-string型をmulti-textに正規化する", () => {
   expect(field).toBeInstanceOf(DocSchemaFieldTextMultipleValue)
   expect(field.type).toBe("multi-text")
 })
-

@@ -333,4 +333,3 @@ test("JSON形式に変換できる", () => {
 
   expect(json).toEqual(schemaData)
 })
-

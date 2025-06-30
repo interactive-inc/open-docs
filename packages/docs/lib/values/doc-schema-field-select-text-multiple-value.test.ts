@@ -93,4 +93,3 @@ test("JSON形式に変換できる", () => {
     options: ["read", "write", "delete"],
   })
 })
-

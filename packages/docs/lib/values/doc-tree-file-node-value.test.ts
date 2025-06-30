@@ -105,7 +105,6 @@ test("パスに深いディレクトリ構造を持つファイルも作成で�
   expect(node.name).toBe("deep-file")
 })
 
-
 test("無効なJSONでエラーが発生する", () => {
   expect(() => {
     DocTreeFileNodeValue.fromJson({

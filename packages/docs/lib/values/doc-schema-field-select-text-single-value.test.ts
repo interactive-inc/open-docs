@@ -107,4 +107,3 @@ test("JSON形式に変換できる", () => {
     options: ["admin", "user", "guest"],
   })
 })
-
