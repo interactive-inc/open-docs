@@ -22,6 +22,9 @@ test("配列判定メソッドが正しく動作する", () => {
   const field = new DocSchemaFieldBooleanSingleValue("active", {
     type: "boolean",
     required: false,
+    title: null,
+    description: null,
+    default: null,
   })
 
   expect(field.isArray).toBe(false)
@@ -33,17 +36,23 @@ test("オプショナルなプロパティがundefinedでも動作する", () =>
   const field = new DocSchemaFieldBooleanSingleValue("flag", {
     type: "boolean",
     required: true,
+    title: null,
+    description: null,
+    default: null,
   })
 
-  expect(field.title).toBeUndefined()
-  expect(field.description).toBeUndefined()
-  expect(field.default).toBeUndefined()
+  expect(field.title).toBe("")
+  expect(field.description).toBe("")
+  expect(field.default).toBe(null)
 })
 
 test("値の検証メソッドが正しく動作する", () => {
   const field = new DocSchemaFieldBooleanSingleValue("enabled", {
     type: "boolean",
     required: true,
+    title: null,
+    description: null,
+    default: null,
   })
 
   expect(field.validate(true)).toBe(true)
@@ -59,6 +68,7 @@ test("JSON形式に変換できる", () => {
     type: "boolean",
     required: false,
     title: "注目記事",
+    description: null,
     default: false,
   })
 
@@ -67,6 +77,7 @@ test("JSON形式に変換できる", () => {
     type: "boolean",
     required: false,
     title: "注目記事",
+    description: null,
     default: false,
   })
 })
@@ -75,6 +86,9 @@ test("インスタンスが不変である", () => {
   const fieldData = {
     type: "boolean" as const,
     required: true,
+    title: null,
+    description: null,
+    default: null,
   }
 
   const field = new DocSchemaFieldBooleanSingleValue("test", fieldData)

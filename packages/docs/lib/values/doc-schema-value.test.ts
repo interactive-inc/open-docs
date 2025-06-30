@@ -6,8 +6,8 @@ import { DocSchemaValue } from "./doc-schema-value"
 
 test("スキーマの基本プロパティを取得できる", () => {
   const schema = new DocSchemaValue({
-    title: { type: "text", required: true },
-    author: { type: "relation", required: false, path: "users/authors" },
+    title: { type: "text", required: true, title: null, description: null, default: null },
+    author: { type: "relation", required: false, path: "users/authors", title: null, description: null, default: null },
   })
 
   expect(schema.fieldNames).toEqual(["title", "author"])
@@ -15,7 +15,7 @@ test("スキーマの基本プロパティを取得できる", () => {
 
 test("フィールドを名前で取得できる", () => {
   const schema = new DocSchemaValue({
-    title: { type: "text", required: true, title: "タイトル" },
+    title: { type: "text", required: true, title: "タイトル", description: null, default: null },
   })
 
   const field = schema.field("title")
@@ -31,9 +31,9 @@ test("存在しないフィールドの場合nullを返す", () => {
 
 test("全フィールドを取得できる", () => {
   const schema = new DocSchemaValue({
-    title: { type: "text", required: true },
-    price: { type: "number", required: false },
-    published: { type: "boolean", required: true },
+    title: { type: "text", required: true, title: null, description: null, default: null },
+    price: { type: "number", required: false, title: null, description: null, default: null },
+    published: { type: "boolean", required: true, title: null, description: null, default: null },
   })
 
   const fields = schema.fields
@@ -45,10 +45,10 @@ test("全フィールドを取得できる", () => {
 
 test("リレーションフィールドのみを取得できる", () => {
   const schema = new DocSchemaValue({
-    title: { type: "text", required: true },
-    author: { type: "relation", required: false, path: "users/authors" },
-    tags: { type: "multi-relation", required: false, path: "metadata/tags" },
-    description: { type: "text", required: false },
+    title: { type: "text", required: true, title: null, description: null, default: null },
+    author: { type: "relation", required: false, path: "users/authors", title: null, description: null, default: null },
+    tags: { type: "multi-relation", required: false, path: "metadata/tags", title: null, description: null, default: null },
+    description: { type: "text", required: false, title: null, description: null, default: null },
   })
 
   const relationFields = schema.relationFields
@@ -65,10 +65,10 @@ test("空のスキーマを作成できる", () => {
 
 test("リレーションパスを抽出できる", () => {
   const schema = new DocSchemaValue({
-    author: { type: "relation", required: false, path: "users/authors" },
-    category: { type: "relation", required: false, path: "categories" },
-    tags: { type: "multi-relation", required: false, path: "metadata/tags" },
-    title: { type: "text", required: true },
+    author: { type: "relation", required: false, path: "users/authors", title: null, description: null, default: null },
+    category: { type: "relation", required: false, path: "categories", title: null, description: null, default: null },
+    tags: { type: "multi-relation", required: false, path: "metadata/tags", title: null, description: null, default: null },
+    title: { type: "text", required: true, title: null, description: null, default: null },
   })
 
   const paths = schema.extractRelationPaths()
@@ -149,9 +149,9 @@ test("値を指定された型に変換できる", () => {
 
 test("スキーマベースでFrontMatterを補完できる", () => {
   const schema = new DocSchemaValue({
-    title: { type: "text", required: true, default: "無題" },
-    published: { type: "boolean", required: false, default: false },
-    tags: { type: "multi-text", required: false, default: [] },
+    title: { type: "text", required: true, default: "無題", title: null, description: null },
+    published: { type: "boolean", required: false, default: false, title: null, description: null },
+    tags: { type: "multi-text", required: false, default: [], title: null, description: null },
   })
 
   const result = schema.getCompleteFrontMatter({
@@ -167,9 +167,9 @@ test("スキーマベースでFrontMatterを補完できる", () => {
 
 test("既存の値を保持しながらデフォルト値を補完する", () => {
   const schema = new DocSchemaValue({
-    title: { type: "text", required: true, default: "無題" },
-    author: { type: "text", required: false, default: "匿名" },
-    published: { type: "boolean", required: false, default: false },
+    title: { type: "text", required: true, default: "無題", title: null, description: null },
+    author: { type: "text", required: false, default: "匿名", title: null, description: null },
+    published: { type: "boolean", required: false, default: false, title: null, description: null },
   })
 
   const result = schema.getCompleteFrontMatter({
@@ -186,11 +186,11 @@ test("既存の値を保持しながらデフォルト値を補完する", () =>
 
 test("JSON形式に変換できる", () => {
   const schemaData = {
-    field1: { type: "text", required: true },
-    field2: { type: "number", required: false },
+    field1: { type: "text" as const, required: true, title: null, description: null, default: null },
+    field2: { type: "number" as const, required: false, title: null, description: null, default: null },
   }
 
-  const schema = new DocSchemaValue(schemaData as any)
+  const schema = new DocSchemaValue(schemaData)
   const json = schema.toJson()
 
   expect(json).toEqual(schemaData)
@@ -198,7 +198,7 @@ test("JSON形式に変換できる", () => {
 
 test("インスタンスが不変である", () => {
   const schema = new DocSchemaValue({
-    title: { type: "text", required: true },
+    title: { type: "text", required: true, title: null, description: null, default: null },
   })
 
   expect(() => {

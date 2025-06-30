@@ -22,6 +22,9 @@ test("型判定メソッドが正しく動作する", () => {
   const field = new DocSchemaFieldTextSingleValue("name", {
     type: "text",
     required: false,
+    title: null,
+    description: null,
+    default: null,
   })
 
   expect(field.isArray).toBe(false)
@@ -33,6 +36,9 @@ test("値の検証メソッドが正しく動作する", () => {
   const field = new DocSchemaFieldTextSingleValue("description", {
     type: "text",
     required: true,
+    title: null,
+    description: null,
+    default: null,
   })
 
   expect(field.validate("テキスト")).toBe(true)
@@ -51,11 +57,14 @@ test("オプショナルなプロパティがundefinedでも動作する", () =>
   const field = new DocSchemaFieldTextSingleValue("note", {
     type: "text",
     required: true,
+    title: null,
+    description: null,
+    default: null,
   })
 
-  expect(field.title).toBeUndefined()
-  expect(field.description).toBeUndefined()
-  expect(field.default).toBeUndefined()
+  expect(field.title).toBe("")
+  expect(field.description).toBe("")
+  expect(field.default).toBe(null)
 })
 
 test("JSON形式に変換できる", () => {
@@ -63,6 +72,7 @@ test("JSON形式に変換できる", () => {
     type: "text",
     required: false,
     title: "著者名",
+    description: null,
     default: "匿名",
   })
 
@@ -71,6 +81,7 @@ test("JSON形式に変換できる", () => {
     type: "text",
     required: false,
     title: "著者名",
+    description: null,
     default: "匿名",
   })
 })
@@ -79,6 +90,9 @@ test("インスタンスが不変である", () => {
   const fieldData = {
     type: "text" as const,
     required: true,
+    title: null,
+    description: null,
+    default: null,
   }
 
   const field = new DocSchemaFieldTextSingleValue("test", fieldData)

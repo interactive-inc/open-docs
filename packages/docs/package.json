@@ -1,17 +1,14 @@
 {
   "name": "@interactive-inc/docs",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "type": "module",
   "scripts": {
     "check": "tsgo --noEmit",
-    "build": "tsgo --declaration --outDir build"
+    "build": "tsc"
   },
   "dependencies": {
     "yaml": "^2.8.0",
     "zod": "^3.25.67"
-  },
-  "devDependencies": {
-    "@types/bun": "^1.2.17"
   },
   "publishConfig": {
     "access": "public"

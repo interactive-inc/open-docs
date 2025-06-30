@@ -24,7 +24,10 @@ test("型判定メソッドが正しく動作する", () => {
   const field = new DocSchemaFieldSelectTextMultipleValue("categories", {
     type: "multi-select-text",
     required: false,
+    title: null,
+    description: null,
     options: ["A", "B", "C"],
+    default: null,
   })
 
   expect(field.isArray).toBe(true)
@@ -37,7 +40,10 @@ test("値の検証メソッドが正しく動作する", () => {
   const field = new DocSchemaFieldSelectTextMultipleValue("skills", {
     type: "multi-select-text",
     required: true,
+    title: null,
+    description: null,
     options: ["JavaScript", "TypeScript", "React"],
+    default: null,
   })
 
   expect(field.validate(["JavaScript", "React"])).toBe(true)
@@ -57,11 +63,14 @@ test("オプショナルなプロパティがundefinedでも動作する", () =>
     type: "multi-select-text",
     required: true,
     options: ["X", "Y", "Z"],
+    title: null,
+    description: null,
+    default: null,
   })
 
-  expect(field.title).toBeUndefined()
-  expect(field.description).toBeUndefined()
-  expect(field.default).toBeUndefined()
+  expect(field.title).toBe("")
+  expect(field.description).toBe("")
+  expect(field.default).toBeNull()
 })
 
 test("JSON形式に変換できる", () => {
@@ -69,6 +78,7 @@ test("JSON形式に変換できる", () => {
     type: "multi-select-text",
     required: false,
     title: "権限",
+    description: null,
     default: ["read"],
     options: ["read", "write", "delete"],
   })
@@ -78,6 +88,7 @@ test("JSON形式に変換できる", () => {
     type: "multi-select-text",
     required: false,
     title: "権限",
+    description: null,
     default: ["read"],
     options: ["read", "write", "delete"],
   })
@@ -89,6 +100,8 @@ test("インスタンスが不変である", () => {
     required: true,
     options: ["A", "B"],
     default: ["A"],
+    title: null,
+    description: null,
   }
 
   const field = new DocSchemaFieldSelectTextMultipleValue("test", fieldData)
@@ -103,7 +116,9 @@ test("インスタンスが不変である", () => {
   }).toThrow()
 
   // デフォルト配列は不変
-  expect(() => {
-    field.default.push("B")
-  }).toThrow()
+  if (field.default && Array.isArray(field.default)) {
+    expect(() => {
+      field.default!.push("B")
+    }).toThrow()
+  }
 })

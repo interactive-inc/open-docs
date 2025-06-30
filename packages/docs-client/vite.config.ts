@@ -9,22 +9,23 @@ export default defineConfig({
     tanstackRouter({
       target: "react",
       autoCodeSplitting: true,
-      routesDirectory: "routes",
-      generatedRouteTree: "lib/route-tree.gen.ts",
+      routesDirectory: "app/routes",
+      generatedRouteTree: "app/lib/route-tree.gen.ts",
     }),
     react(),
     tailwindcss(),
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./"),
+      "@": path.resolve(__dirname, "app"),
     },
   },
   server: { port: 4242 },
   build: {
-    outDir: "../../app/client",
+    outDir: "build",
     rollupOptions: {
       output: {
+        inlineDynamicImports: true,
         entryFileNames: "assets/[name].js",
         chunkFileNames: "assets/[name].js",
         assetFileNames: "assets/[name].[ext]",

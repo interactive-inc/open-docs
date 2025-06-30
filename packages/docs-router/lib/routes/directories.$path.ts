@@ -1,10 +1,10 @@
 import { zValidator } from "@hono/zod-validator"
 import { HTTPException } from "hono/http-exception"
 import { z } from "zod/v4"
-import { cwd } from "../lib/cwd"
-import { docClient } from "../lib/doc-client"
-import { factory } from "../lib/factory"
 import { zDirectoryJson } from "../models"
+import { cwd } from "../utils/cwd"
+import { docClient } from "../utils/doc-client"
+import { factory } from "../utils/factory"
 
 /**
  * GET /api/directories/:path - ディレクトリデータ取得（ディレクトリ専用）

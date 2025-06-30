@@ -22,6 +22,9 @@ test("配列判定メソッドが正しく動作する", () => {
   const field = new DocSchemaFieldBooleanMultipleValue("flags", {
     type: "multi-boolean",
     required: false,
+    title: null,
+    description: null,
+    default: null,
   })
 
   expect(field.isArray).toBe(true)
@@ -33,6 +36,9 @@ test("値の検証メソッドが正しく動作する", () => {
   const field = new DocSchemaFieldBooleanMultipleValue("options", {
     type: "multi-boolean",
     required: true,
+    title: null,
+    description: null,
+    default: null,
   })
 
   expect(field.validate([true, false, true])).toBe(true)
@@ -51,11 +57,14 @@ test("オプショナルなプロパティがundefinedでも動作する", () =>
   const field = new DocSchemaFieldBooleanMultipleValue("settings", {
     type: "multi-boolean",
     required: true,
+    title: null,
+    description: null,
+    default: null,
   })
 
-  expect(field.title).toBeUndefined()
-  expect(field.description).toBeUndefined()
-  expect(field.default).toBeUndefined()
+  expect(field.title).toBe("")
+  expect(field.description).toBe("")
+  expect(field.default).toBe(null)
 })
 
 test("JSON形式に変換できる", () => {
@@ -63,6 +72,7 @@ test("JSON形式に変換できる", () => {
     type: "multi-boolean",
     required: false,
     title: "権限設定",
+    description: null,
     default: [false, false],
   })
 
@@ -71,6 +81,7 @@ test("JSON形式に変換できる", () => {
     type: "multi-boolean",
     required: false,
     title: "権限設定",
+    description: null,
     default: [false, false],
   })
 })
@@ -79,6 +90,8 @@ test("インスタンスが不変である", () => {
   const fieldData = {
     type: "multi-boolean" as const,
     required: true,
+    title: null,
+    description: null,
     default: [true, false],
   }
 

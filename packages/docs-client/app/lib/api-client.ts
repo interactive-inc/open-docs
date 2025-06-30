@@ -1,9 +1,9 @@
 import { hc } from "hono/client"
-import type { docsApp } from "../../docs-router"
+import type { app } from "@/lib/api-route"
 
 const baseUrl = "http://localhost:4244"
 
-export const apiClient = hc<typeof docsApp>(baseUrl, {
+export const apiClient = hc<typeof app>(baseUrl, {
   async fetch(input: RequestInfo | URL, requestInit?: RequestInit) {
     const resp = await fetch(input, {
       ...requestInit,

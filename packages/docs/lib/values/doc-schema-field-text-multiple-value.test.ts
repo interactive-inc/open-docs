@@ -22,6 +22,9 @@ test("型判定メソッドが正しく動作する", () => {
   const field = new DocSchemaFieldTextMultipleValue("keywords", {
     type: "multi-text",
     required: false,
+    title: null,
+    description: null,
+    default: null,
   })
 
   expect(field.isArray).toBe(true)
@@ -33,6 +36,9 @@ test("値の検証メソッドが正しく動作する", () => {
   const field = new DocSchemaFieldTextMultipleValue("categories", {
     type: "multi-text",
     required: true,
+    title: null,
+    description: null,
+    default: null,
   })
 
   expect(field.validate(["テキスト1", "テキスト2"])).toBe(true)
@@ -53,11 +59,14 @@ test("オプショナルなプロパティがundefinedでも動作する", () =>
   const field = new DocSchemaFieldTextMultipleValue("items", {
     type: "multi-text",
     required: true,
+    title: null,
+    description: null,
+    default: null,
   })
 
-  expect(field.title).toBeUndefined()
-  expect(field.description).toBeUndefined()
-  expect(field.default).toBeUndefined()
+  expect(field.title).toBe("")
+  expect(field.description).toBe("")
+  expect(field.default).toBe(null)
 })
 
 test("JSON形式に変換できる", () => {
@@ -65,6 +74,7 @@ test("JSON形式に変換できる", () => {
     type: "multi-text",
     required: false,
     title: "著者リスト",
+    description: null,
     default: ["田中", "鈴木"],
   })
 
@@ -73,6 +83,7 @@ test("JSON形式に変換できる", () => {
     type: "multi-text",
     required: false,
     title: "著者リスト",
+    description: null,
     default: ["田中", "鈴木"],
   })
 })
@@ -81,6 +92,8 @@ test("インスタンスが不変である", () => {
   const fieldData = {
     type: "multi-text" as const,
     required: true,
+    title: null,
+    description: null,
     default: ["item1", "item2"],
   }
 

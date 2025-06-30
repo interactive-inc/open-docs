@@ -14,6 +14,8 @@ test("テキスト型フィールドを生成できる", () => {
     type: "text",
     required: true,
     title: "タイトル",
+    description: null,
+    default: null,
   })
 
   expect(field).toBeInstanceOf(DocSchemaFieldTextSingleValue)
@@ -26,6 +28,8 @@ test("数値型フィールドを生成できる", () => {
   const field = factory.fromSchemaEntry("price", {
     type: "number",
     required: false,
+    title: null,
+    description: null,
     default: 1000,
   })
 
@@ -39,6 +43,8 @@ test("ブール型フィールドを生成できる", () => {
   const field = factory.fromSchemaEntry("published", {
     type: "boolean",
     required: true,
+    title: null,
+    description: null,
     default: false,
   })
 
@@ -51,6 +57,9 @@ test("リレーション型フィールドを生成できる", () => {
   const field = factory.fromSchemaEntry("author", {
     type: "relation",
     required: true,
+    title: null,
+    description: null,
+    default: null,
     path: "users/authors",
   })
 
@@ -66,6 +75,9 @@ test("選択型フィールドを生成できる", () => {
   const field = factory.fromSchemaEntry("status", {
     type: "select-text",
     required: false,
+    title: null,
+    description: null,
+    default: null,
     options: ["draft", "published"],
   })
 
@@ -81,6 +93,8 @@ test("複数型フィールドを生成できる", () => {
   const field = factory.fromSchemaEntry("tags", {
     type: "multi-text",
     required: false,
+    title: null,
+    description: null,
     default: ["tech", "news"],
   })
 
@@ -94,6 +108,9 @@ test("複数リレーション型フィールドを生成できる", () => {
   const field = factory.fromSchemaEntry("categories", {
     type: "multi-relation",
     required: false,
+    title: null,
+    description: null,
+    default: null,
     path: "metadata/categories",
   })
 
@@ -110,6 +127,9 @@ test("不明な型でエラーが発生する", () => {
     factory.fromSchemaEntry("unknown", {
       type: "invalid-type" as any,
       required: false,
+      title: null,
+      description: null,
+      default: null,
     })
   }).toThrow()
 })
@@ -121,6 +141,9 @@ test("fromUnknownメソッドで未検証データから生成できる", () => 
   const field1 = factory.fromUnknown("field1", {
     type: "text",
     required: true,
+    title: null,
+    description: null,
+    default: null,
   })
   expect(field1).toBeInstanceOf(DocSchemaFieldTextSingleValue)
 
@@ -128,6 +151,9 @@ test("fromUnknownメソッドで未検証データから生成できる", () => 
   const field2 = factory.fromUnknown("field2", {
     type: "string",
     required: false,
+    title: null,
+    description: null,
+    default: null,
   })
   expect(field2).toBeInstanceOf(DocSchemaFieldTextSingleValue)
   expect(field2.type).toBe("text")
@@ -151,6 +177,9 @@ test("型固有のデフォルト値が設定される", () => {
   const relation = factory.fromUnknown("rel", {
     type: "relation",
     required: true,
+    title: null,
+    description: null,
+    default: null,
   })
   expect((relation as DocSchemaFieldRelationSingleValue).path).toBe("")
 
@@ -158,6 +187,9 @@ test("型固有のデフォルト値が設定される", () => {
   const select = factory.fromUnknown("sel", {
     type: "select-text",
     required: false,
+    title: null,
+    description: null,
+    default: null,
   })
   expect((select as DocSchemaFieldSelectTextSingleValue).options).toEqual([])
 })
@@ -167,6 +199,9 @@ test("multi-string型をmulti-textに正規化する", () => {
   const field = factory.fromUnknown("field", {
     type: "multi-string",
     required: false,
+    title: null,
+    description: null,
+    default: null,
   })
 
   expect(field).toBeInstanceOf(DocSchemaFieldTextMultipleValue)

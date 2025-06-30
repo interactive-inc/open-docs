@@ -24,7 +24,10 @@ test("型判定メソッドが正しく動作する", () => {
   const field = new DocSchemaFieldRelationSingleValue("category", {
     type: "relation",
     required: false,
+    title: null,
+    description: null,
     path: "categories",
+    default: null,
   })
 
   expect(field.isArray).toBe(false)
@@ -36,7 +39,10 @@ test("値の検証メソッドが正しく動作する", () => {
   const field = new DocSchemaFieldRelationSingleValue("milestone", {
     type: "relation",
     required: true,
+    title: null,
+    description: null,
     path: "milestones",
+    default: null,
   })
 
   expect(field.validate("2024-01")).toBe(true)
@@ -56,11 +62,14 @@ test("オプショナルなプロパティがundefinedでも動作する", () =>
     type: "relation",
     required: true,
     path: "references",
+    title: null,
+    description: null,
+    default: null,
   })
 
-  expect(field.title).toBeUndefined()
-  expect(field.description).toBeUndefined()
-  expect(field.default).toBeUndefined()
+  expect(field.title).toBe("")
+  expect(field.description).toBe("")
+  expect(field.default).toBeNull()
 })
 
 test("JSON形式に変換できる", () => {
@@ -68,7 +77,9 @@ test("JSON形式に変換できる", () => {
     type: "relation",
     required: false,
     title: "親カテゴリ",
+    description: null,
     path: "categories/parent",
+    default: null,
   })
 
   const json = field.toJson()
@@ -76,7 +87,9 @@ test("JSON形式に変換できる", () => {
     type: "relation",
     required: false,
     title: "親カテゴリ",
+    description: null,
     path: "categories/parent",
+    default: null,
   })
 })
 
@@ -84,7 +97,10 @@ test("インスタンスが不変である", () => {
   const fieldData = {
     type: "relation" as const,
     required: true,
+    title: null,
+    description: null,
     path: "users",
+    default: null,
   }
 
   const field = new DocSchemaFieldRelationSingleValue("test", fieldData)

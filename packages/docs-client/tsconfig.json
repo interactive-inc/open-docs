@@ -17,13 +17,12 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
-    "plugins": [{ "name": "next" }],
-    "paths": { "@/*": ["./*"] },
+    "paths": { "@/*": ["./app/*"] },
     "incremental": true,
     "esModuleInterop": true,
     "resolveJsonModule": true
   },
-  "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["app/**/*.ts", "app/**/*.tsx"],
   "exclude": ["node_modules", "docs"],
   "references": [{ "path": "../docs" }, { "path": "../docs-router" }]
 }

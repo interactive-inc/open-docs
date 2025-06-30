@@ -22,6 +22,9 @@ test("型判定メソッドが正しく動作する", () => {
   const field = new DocSchemaFieldNumberSingleValue("count", {
     type: "number",
     required: false,
+    title: null,
+    description: null,
+    default: null,
   })
 
   expect(field.isArray).toBe(false)
@@ -33,6 +36,9 @@ test("値の検証メソッドが正しく動作する", () => {
   const field = new DocSchemaFieldNumberSingleValue("score", {
     type: "number",
     required: true,
+    title: null,
+    description: null,
+    default: null,
   })
 
   expect(field.validate(123)).toBe(true)
@@ -52,11 +58,14 @@ test("オプショナルなプロパティがundefinedでも動作する", () =>
   const field = new DocSchemaFieldNumberSingleValue("value", {
     type: "number",
     required: true,
+    title: null,
+    description: null,
+    default: null,
   })
 
-  expect(field.title).toBeUndefined()
-  expect(field.description).toBeUndefined()
-  expect(field.default).toBeUndefined()
+  expect(field.title).toBe("")
+  expect(field.description).toBe("")
+  expect(field.default).toBe(null)
 })
 
 test("JSON形式に変換できる", () => {
@@ -64,6 +73,7 @@ test("JSON形式に変換できる", () => {
     type: "number",
     required: false,
     title: "数量",
+    description: null,
     default: 1,
   })
 
@@ -72,6 +82,7 @@ test("JSON形式に変換できる", () => {
     type: "number",
     required: false,
     title: "数量",
+    description: null,
     default: 1,
   })
 })
@@ -80,6 +91,9 @@ test("インスタンスが不変である", () => {
   const fieldData = {
     type: "number" as const,
     required: true,
+    title: null,
+    description: null,
+    default: null,
   }
 
   const field = new DocSchemaFieldNumberSingleValue("test", fieldData)

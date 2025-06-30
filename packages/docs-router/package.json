@@ -1,15 +1,27 @@
 {
   "name": "@interactive-inc/docs-router",
+  "version": "0.0.1",
   "type": "module",
-  "private": true,
   "scripts": {
     "check": "tsgo --noEmit",
-    "dev": "NODE_ENV=development bun server.ts --watch",
-    "build": "bun esbuild index.ts --platform=node --bundle --outfile=../../app/index.js --format=esm --packages=external --minify"
+    "build": "tsgo",
+    "dev": "NODE_ENV=development bun run server.ts --watch"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.7.0",
-    "@interactive-inc/docs": "*",
-    "yaml": "^2.8.0"
+    "@interactive-inc/docs": "workspace:*",
+    "hono": "^4.8.3",
+    "yaml": "^2.8.0",
+    "zod": "^3.25.67"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "module": "build/index.js",
+  "exports": {
+    ".": "./build/index.js",
+    "./*": "./build/*.js"
   }
 }

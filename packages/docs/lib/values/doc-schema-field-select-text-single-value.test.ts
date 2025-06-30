@@ -24,7 +24,10 @@ test("型判定メソッドが正しく動作する", () => {
   const field = new DocSchemaFieldSelectTextSingleValue("category", {
     type: "select-text",
     required: false,
+    title: null,
+    description: null,
     options: ["tech", "business", "lifestyle"],
+    default: null,
   })
 
   expect(field.isArray).toBe(false)
@@ -37,7 +40,10 @@ test("値の検証メソッドが正しく動作する", () => {
   const field = new DocSchemaFieldSelectTextSingleValue("priority", {
     type: "select-text",
     required: true,
+    title: null,
+    description: null,
     options: ["low", "medium", "high"],
+    default: null,
   })
 
   expect(field.validate("low")).toBe(true)
@@ -58,18 +64,24 @@ test("オプショナルなプロパティがundefinedでも動作する", () =>
     type: "select-text",
     required: true,
     options: ["A", "B", "C"],
+    title: null,
+    description: null,
+    default: null,
   })
 
-  expect(field.title).toBeUndefined()
-  expect(field.description).toBeUndefined()
-  expect(field.default).toBeUndefined()
+  expect(field.title).toBe("")
+  expect(field.description).toBe("")
+  expect(field.default).toBeNull()
 })
 
 test("空のオプション配列でも動作する", () => {
   const field = new DocSchemaFieldSelectTextSingleValue("empty", {
     type: "select-text",
     required: false,
+    title: null,
+    description: null,
     options: [],
+    default: null,
   })
 
   expect(field.options).toEqual([])
@@ -80,6 +92,7 @@ test("JSON形式に変換できる", () => {
     type: "select-text",
     required: false,
     title: "役割",
+    description: null,
     default: "user",
     options: ["admin", "user", "guest"],
   })
@@ -89,6 +102,7 @@ test("JSON形式に変換できる", () => {
     type: "select-text",
     required: false,
     title: "役割",
+    description: null,
     default: "user",
     options: ["admin", "user", "guest"],
   })
@@ -98,7 +112,10 @@ test("インスタンスが不変である", () => {
   const fieldData = {
     type: "select-text" as const,
     required: true,
+    title: null,
+    description: null,
     options: ["A", "B", "C"],
+    default: null,
   }
 
   const field = new DocSchemaFieldSelectTextSingleValue("test", fieldData)

@@ -24,7 +24,10 @@ test("型判定メソッドが正しく動作する", () => {
   const field = new DocSchemaFieldRelationMultipleValue("authors", {
     type: "multi-relation",
     required: false,
+    title: null,
+    description: null,
     path: "users/authors",
+    default: null,
   })
 
   expect(field.isArray).toBe(true)
@@ -36,7 +39,10 @@ test("値の検証メソッドが正しく動作する", () => {
   const field = new DocSchemaFieldRelationMultipleValue("members", {
     type: "multi-relation",
     required: true,
+    title: null,
+    description: null,
     path: "users/members",
+    default: null,
   })
 
   expect(field.validate(["user1", "user2"])).toBe(true)
@@ -56,11 +62,14 @@ test("オプショナルなプロパティがundefinedでも動作する", () =>
     type: "multi-relation",
     required: true,
     path: "related",
+    title: null,
+    description: null,
+    default: null,
   })
 
-  expect(field.title).toBeUndefined()
-  expect(field.description).toBeUndefined()
-  expect(field.default).toBeUndefined()
+  expect(field.title).toBe("")
+  expect(field.description).toBe("")
+  expect(field.default).toBeNull()
 })
 
 test("JSON形式に変換できる", () => {
@@ -68,6 +77,7 @@ test("JSON形式に変換できる", () => {
     type: "multi-relation",
     required: false,
     title: "カテゴリ",
+    description: null,
     default: ["tech"],
     path: "metadata/categories",
   })
@@ -77,6 +87,7 @@ test("JSON形式に変換できる", () => {
     type: "multi-relation",
     required: false,
     title: "カテゴリ",
+    description: null,
     default: ["tech"],
     path: "metadata/categories",
   })
@@ -86,6 +97,8 @@ test("インスタンスが不変である", () => {
   const fieldData = {
     type: "multi-relation" as const,
     required: true,
+    title: null,
+    description: null,
     path: "tags",
     default: ["tag1", "tag2"],
   }

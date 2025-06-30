@@ -24,7 +24,10 @@ test("型判定メソッドが正しく動作する", () => {
   const field = new DocSchemaFieldSelectNumberSingleValue("rating", {
     type: "select-number",
     required: false,
+    title: null,
+    description: null,
     options: [0, 25, 50, 75, 100],
+    default: null,
   })
 
   expect(field.isArray).toBe(false)
@@ -37,7 +40,10 @@ test("値の検証メソッドが正しく動作する", () => {
   const field = new DocSchemaFieldSelectNumberSingleValue("score", {
     type: "select-number",
     required: true,
+    title: null,
+    description: null,
     options: [10, 20, 30],
+    default: null,
   })
 
   expect(field.validate(10)).toBe(true)
@@ -58,18 +64,24 @@ test("オプショナルなプロパティがundefinedでも動作する", () =>
     type: "select-number",
     required: true,
     options: [1, 2, 3],
+    title: null,
+    description: null,
+    default: null,
   })
 
-  expect(field.title).toBeUndefined()
-  expect(field.description).toBeUndefined()
-  expect(field.default).toBeUndefined()
+  expect(field.title).toBe("")
+  expect(field.description).toBe("")
+  expect(field.default).toBeNull()
 })
 
 test("空のオプション配列でも動作する", () => {
   const field = new DocSchemaFieldSelectNumberSingleValue("empty", {
     type: "select-number",
     required: false,
+    title: null,
+    description: null,
     options: [],
+    default: null,
   })
 
   expect(field.options).toEqual([])
@@ -80,6 +92,7 @@ test("JSON形式に変換できる", () => {
     type: "select-number",
     required: false,
     title: "月",
+    description: null,
     default: 1,
     options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
   })
@@ -89,6 +102,7 @@ test("JSON形式に変換できる", () => {
     type: "select-number",
     required: false,
     title: "月",
+    description: null,
     default: 1,
     options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
   })
@@ -98,7 +112,10 @@ test("インスタンスが不変である", () => {
   const fieldData = {
     type: "select-number" as const,
     required: true,
+    title: null,
+    description: null,
     options: [1, 2, 3],
+    default: null,
   }
 
   const field = new DocSchemaFieldSelectNumberSingleValue("test", fieldData)

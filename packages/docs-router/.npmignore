@@ -1,6 +1,7 @@
+.gitignore
 .npmignore
-build/**/*/*.test.ts
-debug
+app
+build/*.test.ts
 lib
 node_modules
 README.md

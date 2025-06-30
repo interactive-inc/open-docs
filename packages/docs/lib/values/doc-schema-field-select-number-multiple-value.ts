@@ -14,6 +14,9 @@ export class DocSchemaFieldSelectNumberMultipleValue {
     Object.freeze(this)
     Object.freeze(this.value)
     Object.freeze(this.value.options)
+    if (this.value.default && Array.isArray(this.value.default)) {
+      Object.freeze(this.value.default)
+    }
   }
 
   get type() {

@@ -30,4 +30,4 @@ export type {
   DocTreeNode,
   FieldType,
   RelationFieldTypes,
-} from "../../docs/lib/types"
+} from "@interactive-inc/docs/types"

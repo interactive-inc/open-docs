@@ -1,4 +1,3 @@
-import { z } from "zod/v4"
 import {
   zDocFile,
   zDocFileIndex,
@@ -27,7 +26,8 @@ import {
   zDocTreeDirectoryNode,
   zDocTreeFileNode,
   zDocTreeNode,
-} from "../docs/lib/models"
+} from "@interactive-inc/docs/models"
+import { z } from "zod/v4"
 
 // 再エクスポート
 export {

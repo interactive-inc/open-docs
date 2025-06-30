@@ -1,6 +1,6 @@
-import type { DocTreeDirectoryNode } from "../../docs/lib"
-import { docClient } from "../lib/doc-client"
-import { factory } from "../lib/factory"
+import type { DocTreeDirectoryNode } from "@interactive-inc/docs"
+import { docClient } from "../utils/doc-client"
+import { factory } from "../utils/factory"
 
 /**
  * ファイルツリーを取得する

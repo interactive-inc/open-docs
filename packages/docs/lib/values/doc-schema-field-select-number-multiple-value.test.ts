@@ -24,7 +24,10 @@ test("型判定メソッドが正しく動作する", () => {
   const field = new DocSchemaFieldSelectNumberMultipleValue("years", {
     type: "multi-select-number",
     required: false,
+    title: null,
+    description: null,
     options: [2020, 2021, 2022, 2023],
+    default: null,
   })
 
   expect(field.isArray).toBe(true)
@@ -37,7 +40,10 @@ test("値の検証メソッドが正しく動作する", () => {
   const field = new DocSchemaFieldSelectNumberMultipleValue("scores", {
     type: "multi-select-number",
     required: true,
+    title: null,
+    description: null,
     options: [0, 50, 100],
+    default: null,
   })
 
   expect(field.validate([0, 50, 100])).toBe(true)
@@ -57,11 +63,14 @@ test("オプショナルなプロパティがundefinedでも動作する", () =>
     type: "multi-select-number",
     required: true,
     options: [10, 20, 30],
+    title: null,
+    description: null,
+    default: null,
   })
 
-  expect(field.title).toBeUndefined()
-  expect(field.description).toBeUndefined()
-  expect(field.default).toBeUndefined()
+  expect(field.title).toBe("")
+  expect(field.description).toBe("")
+  expect(field.default).toBeNull()
 })
 
 test("JSON形式に変換できる", () => {
@@ -69,6 +78,7 @@ test("JSON形式に変換できる", () => {
     type: "multi-select-number",
     required: false,
     title: "割合",
+    description: null,
     default: [25, 75],
     options: [0, 25, 50, 75, 100],
   })
@@ -78,6 +88,7 @@ test("JSON形式に変換できる", () => {
     type: "multi-select-number",
     required: false,
     title: "割合",
+    description: null,
     default: [25, 75],
     options: [0, 25, 50, 75, 100],
   })
@@ -89,6 +100,8 @@ test("インスタンスが不変である", () => {
     required: true,
     options: [1, 2],
     default: [1],
+    title: null,
+    description: null,
   }
 
   const field = new DocSchemaFieldSelectNumberMultipleValue("test", fieldData)
@@ -103,7 +116,9 @@ test("インスタンスが不変である", () => {
   }).toThrow()
 
   // デフォルト配列は不変
-  expect(() => {
-    field.default.push(2)
-  }).toThrow()
+  if (field.default && Array.isArray(field.default)) {
+    expect(() => {
+      field.default!.push(2)
+    }).toThrow()
+  }
 })

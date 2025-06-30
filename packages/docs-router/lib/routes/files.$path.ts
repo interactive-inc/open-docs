@@ -1,8 +1,8 @@
 import { zValidator } from "@hono/zod-validator"
 import { HTTPException } from "hono/http-exception"
 import { z } from "zod/v4"
-import { docClient } from "../lib/doc-client"
-import { factory } from "../lib/factory"
+import { docClient } from "../utils/doc-client"
+import { factory } from "../utils/factory"
 
 /**
  * ファイルコンテンツを取得する

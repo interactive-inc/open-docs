@@ -1,5 +1,5 @@
 import path from "node:path"
-import { DocClient, DocFileSystem, DocPathSystem } from "../../docs/lib"
+import { DocClient, DocFileSystem, DocPathSystem } from "@interactive-inc/docs"
 import { cwd } from "./cwd"
 
 export function docClient(docsPath = "docs"): DocClient {

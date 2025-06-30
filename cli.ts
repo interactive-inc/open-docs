@@ -1,36 +1,16 @@
 import path from "node:path"
+import { cwd } from "node:process"
 import { parseArgs } from "node:util"
-import { DocEngine } from "./packages/server/lib/engine/doc-engine"
+import { DocClient, DocFileSystem, DocPathSystem } from "@interactive-inc/docs"
+
+const docClient = new DocClient({
+  fileSystem: new DocFileSystem({
+    basePath: path.join(cwd(), "docs"),
+    pathSystem: new DocPathSystem(),
+  }),
+})
 
 class Command {
-  async formatDocs(): Promise<void> {
-    const docsEngine = new DocEngine({
-      basePath: path.join(process.cwd(), "docs"),
-      indexFileName: null,
-      readmeFileName: null,
-    })
-
-    let filesUpdated = 0
-    let indexFilesUpdated = 0
-
-    console.log("\nProcessing files...")
-
-    for await (const result of docsEngine.normalizeFileTree()) {
-      console.log(`  ✓ ${result.path}`)
-      if (result.isUpdated) {
-        if (result.type === "index") {
-          indexFilesUpdated++
-        } else {
-          filesUpdated++
-        }
-      }
-    }
-
-    console.log("\nResult:")
-    console.log(`  - Files updated: ${filesUpdated}`)
-    console.log(`  - Index files updated: ${indexFilesUpdated}`)
-  }
-
   async execute(positionals: string[]): Promise<void> {
     if (positionals.length === 0) {
       console.error("No command specified")
@@ -40,9 +20,10 @@ class Command {
 
     const command = positionals[0]
 
-    if (command === "format") {
-      await this.formatDocs()
-      return
+    if (command === "tree") {
+      const directoryTree = await docClient.directoryTree()
+
+      return console.log(JSON.stringify(directoryTree, null, 2))
     }
 
     console.error(`Unknown command: ${command}`)
@@ -63,10 +44,6 @@ const args = parseArgs({
   allowPositionals: true,
 })
 
-try {
-  const command = new Command()
-  await command.execute(args.positionals)
-} catch (error) {
-  console.error("Command execution failed:", error)
-  process.exit(1)
-}
+const command = new Command()
+
+await command.execute(args.positionals)

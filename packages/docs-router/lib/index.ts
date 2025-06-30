@@ -1,5 +1,4 @@
 import { HTTPException } from "hono/http-exception"
-import { factory } from "./lib/factory"
 import {
   GET as getDirectory,
   PUT as updateDirectory,
@@ -11,8 +10,12 @@ import {
   GET as getFile,
   PUT as updateFile,
 } from "./routes/files.$path"
+import { factory } from "./utils/factory"
 
-export const docsApp = factory
+/**
+ * Docs API router application
+ */
+export const routes = factory
   .createApp()
   .get("/directories", ...getDirectory)
   .put("/directories", ...updateDirectory)
@@ -24,7 +27,7 @@ export const docsApp = factory
   .get("/files/:path{.+}", ...getFile)
   .delete("/files/:path{.+}", ...deleteFile)
 
-docsApp.onError((err, c) => {
+routes.onError((err, c) => {
   console.error("API Error:", err)
 
   if (err instanceof HTTPException) {

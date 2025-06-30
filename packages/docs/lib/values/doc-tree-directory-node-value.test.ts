@@ -167,10 +167,19 @@ test("深くネストされた構造も処理できる", () => {
     children: [level2],
   })
 
-  expect(level1.children[0].children[0].children[0].name).toBe("deep-file")
-  expect(level1.children[0].children[0].children[0]).toBeInstanceOf(
-    DocTreeFileNodeValue,
-  )
+  const level1Child = level1.children[0]
+  expect(level1Child).toBeInstanceOf(DocTreeDirectoryNodeValue)
+  
+  if (level1Child instanceof DocTreeDirectoryNodeValue) {
+    const level2Child = level1Child.children[0]
+    expect(level2Child).toBeInstanceOf(DocTreeDirectoryNodeValue)
+    
+    if (level2Child instanceof DocTreeDirectoryNodeValue) {
+      const level3Child = level2Child.children[0]
+      expect(level3Child).toBeInstanceOf(DocTreeFileNodeValue)
+      expect(level3Child.name).toBe("deep-file")
+    }
+  }
 })
 
 test("インスタンスが不変である", () => {

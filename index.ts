@@ -1,15 +1,14 @@
-import fs from "node:fs/promises"
-import { serve } from "@hono/node-server"
-import { serveStatic } from "@hono/node-server/serve-static"
+import { handlers } from "@interactive-inc/docs-client"
+import { routes } from "@interactive-inc/docs-router"
+import { Hono } from "hono"
+import { cors } from "hono/cors"
 
-// @ts-ignore
-import { app } from "./app"
+export const app = new Hono()
 
-app.use("*", serveStatic({ root: "./app/client" }))
+app.use(cors())
 
-app.use("*", async (c) => {
-  const text = await fs.readFile("./app/client/index.html", "utf-8")
-  return c.html(text)
-})
+app.route("/api", routes)
 
-serve({ fetch: app.fetch, port: 4244 })
+app.get("*", ...handlers)
+
+export default { fetch: app.fetch, port: 4244 }

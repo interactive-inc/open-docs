@@ -22,6 +22,7 @@ test("DocFileIndexEntity - 基本的な作成とプロパティアクセス", ()
       fullPath: "/Users/test/docs/index.md",
       nameWithExtension: "index.md",
     },
+    isArchived: false,
   })
 
   expect(entity.value.type).toBe("index")
@@ -47,6 +48,7 @@ test("DocFileIndexEntity - content getterが値オブジェクトを返す", () 
       fullPath: "/Users/test/docs/index.md",
       nameWithExtension: "index.md",
     },
+    isArchived: false,
   })
 
   const content = entity.content
@@ -75,6 +77,7 @@ test("DocFileIndexEntity - path getterがオブジェクトを返す", () => {
       fullPath: "/Users/test/docs/index.md",
       nameWithExtension: "index.md",
     },
+    isArchived: false,
   })
 
   const path = entity.path
@@ -104,6 +107,7 @@ test("DocFileIndexEntity - withContentで新しいインスタンスを作成", 
       fullPath: "/Users/test/docs/index.md",
       nameWithExtension: "index.md",
     },
+    isArchived: false,
   })
 
   const newContent = entity.content.withTitle("新しいタイトル")
@@ -134,6 +138,7 @@ test("DocFileIndexEntity - withPathで新しいインスタンスを作成", () 
       fullPath: "/Users/test/docs/index.md",
       nameWithExtension: "index.md",
     },
+    isArchived: false,
   })
 
   const newPath = {
@@ -169,6 +174,7 @@ test("DocFileIndexEntity - toJsonで元のデータ構造を返す", () => {
       fullPath: "/Users/test/docs/index.md",
       nameWithExtension: "index.md",
     },
+    isArchived: false,
   }
 
   const entity = new DocFileIndexEntity(data)
@@ -195,6 +201,7 @@ test("DocFileIndexEntity - 不変性の確認", () => {
       fullPath: "/Users/test/docs/index.md",
       nameWithExtension: "index.md",
     },
+    isArchived: false,
   })
 
   expect(() => {
