@@ -1,4 +1,4 @@
-import type { DocSchemaField } from "../types"
+import type { DocFieldMultiText, DocSchemaField } from "../types"
 
 /**
  * テキスト複数型スキーマフィールド
@@ -6,7 +6,7 @@ import type { DocSchemaField } from "../types"
 export class DocSchemaFieldTextMultipleValue {
   constructor(
     readonly key: string,
-    readonly value: DocSchemaField & { type: "multi-text" },
+    readonly value: DocFieldMultiText,
   ) {
     Object.freeze(this)
     Object.freeze(this.value)
@@ -35,17 +35,11 @@ export class DocSchemaFieldTextMultipleValue {
     return this.value.default
   }
 
-  get isArray() {
-    return true
-  }
+  readonly isArray = true
 
-  get isSingle() {
-    return false
-  }
+  readonly isSingle = false
 
-  get isText() {
-    return true
-  }
+  readonly isText = true
 
   toJson(): DocSchemaField {
     return { ...this.value }

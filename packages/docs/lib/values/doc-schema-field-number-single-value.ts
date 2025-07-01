@@ -1,4 +1,4 @@
-import type { DocSchemaField } from "../types"
+import type { DocSchemaField, DocSchemaFieldNumber } from "../types"
 
 /**
  * 単一数値型スキーマフィールド
@@ -6,7 +6,7 @@ import type { DocSchemaField } from "../types"
 export class DocSchemaFieldNumberSingleValue {
   constructor(
     readonly key: string,
-    readonly value: DocSchemaField & { type: "number" },
+    readonly value: DocSchemaFieldNumber,
   ) {
     Object.freeze(this)
   }
@@ -31,17 +31,11 @@ export class DocSchemaFieldNumberSingleValue {
     return this.value.default
   }
 
-  get isArray() {
-    return false
-  }
+  readonly isArray = false
 
-  get isSingle() {
-    return true
-  }
+  readonly isSingle = true
 
-  get isNumber() {
-    return true
-  }
+  readonly isNumber = true
 
   toJson(): DocSchemaField {
     return { ...this.value }

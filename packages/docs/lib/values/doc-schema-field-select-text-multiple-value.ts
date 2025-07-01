@@ -1,4 +1,4 @@
-import type { DocSchemaField } from "../types"
+import type { DocSchemaField, DocSchemaFieldMultiSelectText } from "../types"
 
 /**
  * テキスト選択複数型スキーマフィールド
@@ -6,10 +6,7 @@ import type { DocSchemaField } from "../types"
 export class DocSchemaFieldSelectTextMultipleValue {
   constructor(
     readonly key: string,
-    readonly value: DocSchemaField & {
-      type: "multi-select-text"
-      options: string[]
-    },
+    readonly value: DocSchemaFieldMultiSelectText,
   ) {
     Object.freeze(this)
     Object.freeze(this.value)
@@ -43,21 +40,13 @@ export class DocSchemaFieldSelectTextMultipleValue {
     return this.value.options
   }
 
-  get isArray() {
-    return true
-  }
+  readonly isArray = true
 
-  get isSingle() {
-    return false
-  }
+  readonly isSingle = false
 
-  get isSelect() {
-    return true
-  }
+  readonly isSelect = true
 
-  get isTextSelect() {
-    return true
-  }
+  readonly isTextSelect = true
 
   /**
    * 値を検証する

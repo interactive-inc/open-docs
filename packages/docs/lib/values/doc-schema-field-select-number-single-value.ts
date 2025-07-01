@@ -1,4 +1,4 @@
-import type { DocSchemaField } from "../types"
+import type { DocSchemaField, DocSchemaFieldSelectNumber } from "../types"
 
 /**
  * 単一選択数値型スキーマフィールド
@@ -6,10 +6,7 @@ import type { DocSchemaField } from "../types"
 export class DocSchemaFieldSelectNumberSingleValue {
   constructor(
     readonly key: string,
-    readonly value: DocSchemaField & {
-      type: "select-number"
-      options: number[]
-    },
+    readonly value: DocSchemaFieldSelectNumber,
   ) {
     Object.freeze(this)
     Object.freeze(this.value)
@@ -40,21 +37,13 @@ export class DocSchemaFieldSelectNumberSingleValue {
     return this.value.options
   }
 
-  get isArray() {
-    return false
-  }
+  readonly isArray = false
 
-  get isSingle() {
-    return true
-  }
+  readonly isSingle = true
 
-  get isSelect() {
-    return true
-  }
+  readonly isSelect = true
 
-  get isNumberSelect() {
-    return true
-  }
+  readonly isNumberSelect = true
 
   /**
    * 値を検証する

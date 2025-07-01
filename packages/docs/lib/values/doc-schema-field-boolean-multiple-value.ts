@@ -1,4 +1,4 @@
-import type { DocSchemaField } from "../types"
+import type { DocFieldMultiBoolean, DocSchemaField } from "../types"
 
 /**
  * ブール複数型スキーマフィールド
@@ -6,7 +6,7 @@ import type { DocSchemaField } from "../types"
 export class DocSchemaFieldBooleanMultipleValue {
   constructor(
     readonly key: string,
-    readonly value: DocSchemaField & { type: "multi-boolean" },
+    readonly value: DocFieldMultiBoolean,
   ) {
     Object.freeze(this)
     Object.freeze(this.value)
@@ -35,17 +35,11 @@ export class DocSchemaFieldBooleanMultipleValue {
     return this.value.default
   }
 
-  get isArray() {
-    return true
-  }
+  readonly isArray = true
 
-  get isSingle() {
-    return false
-  }
+  readonly isSingle = false
 
-  get isBoolean() {
-    return true
-  }
+  readonly isBoolean = true
 
   /**
    * 値を検証する

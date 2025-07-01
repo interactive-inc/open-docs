@@ -1,8 +1,22 @@
 import { stringify } from "yaml"
 import { zDocFileMdFrontMatter } from "../models"
-import type { DocFileMdFrontMatter } from "../types"
+import type {
+  DocFieldMultiBoolean,
+  DocFieldMultiNumber,
+  DocFieldMultiText,
+  DocFileMdFrontMatter,
+  DocSchemaFieldBoolean,
+  DocSchemaFieldNumber,
+  DocSchemaFieldText,
+} from "../types"
 import { DocContentMdValue } from "./doc-content-md-value"
+import { DocSchemaFieldBooleanMultipleValue } from "./doc-schema-field-boolean-multiple-value"
+import { DocSchemaFieldBooleanSingleValue } from "./doc-schema-field-boolean-single-value"
 import { DocSchemaFieldFactory } from "./doc-schema-field-factory"
+import { DocSchemaFieldNumberMultipleValue } from "./doc-schema-field-number-multiple-value"
+import { DocSchemaFieldNumberSingleValue } from "./doc-schema-field-number-single-value"
+import { DocSchemaFieldTextMultipleValue } from "./doc-schema-field-text-multiple-value"
+import { DocSchemaFieldTextSingleValue } from "./doc-schema-field-text-single-value"
 import type { DocSchemaFieldValue } from "./doc-schema-field-value"
 import type { DocSchemaValue } from "./doc-schema-value"
 
@@ -150,5 +164,150 @@ export class DocFrontMatterMdValue {
     } catch {
       return false
     }
+  }
+
+  /**
+   * テキスト型のプロパティを取得
+   */
+  text(key: string): string | null {
+    const value = this.value[key]
+    const validator = new DocSchemaFieldTextSingleValue(key, {
+      type: "text",
+      required: false,
+      title: null,
+      description: null,
+      default: null,
+    } satisfies DocSchemaFieldText)
+    return validator.validate(value) && typeof value === "string" ? value : null
+  }
+
+  /**
+   * 数値型のプロパティを取得
+   */
+  number(key: string): number | null {
+    const value = this.value[key]
+    const validator = new DocSchemaFieldNumberSingleValue(key, {
+      type: "number",
+      required: false,
+      title: null,
+      description: null,
+      default: null,
+    } satisfies DocSchemaFieldNumber)
+    return validator.validate(value) && typeof value === "number" ? value : null
+  }
+
+  /**
+   * 真偽値型のプロパティを取得
+   */
+  boolean(key: string): boolean | null {
+    const value = this.value[key]
+    const validator = new DocSchemaFieldBooleanSingleValue(key, {
+      type: "boolean",
+      required: false,
+      title: null,
+      description: null,
+      default: null,
+    } satisfies DocSchemaFieldBoolean)
+    return validator.validate(value) && typeof value === "boolean"
+      ? value
+      : null
+  }
+
+  /**
+   * 単一リレーション型のプロパティを取得
+   */
+  relation(key: string): string | null {
+    const value = this.value[key]
+    // リレーションもテキスト型と同じバリデーション
+    const validator = new DocSchemaFieldTextSingleValue(key, {
+      type: "text",
+      required: false,
+      title: null,
+      description: null,
+      default: null,
+    } satisfies DocSchemaFieldText)
+    return validator.validate(value) && typeof value === "string" ? value : null
+  }
+
+  /**
+   * 複数リレーション型のプロパティを取得
+   */
+  multiRelation(key: string): string[] {
+    const value = this.value[key]
+    const validator = new DocSchemaFieldTextMultipleValue(key, {
+      type: "multi-text",
+      required: false,
+      title: null,
+      description: null,
+      default: null,
+    } satisfies DocFieldMultiText)
+    return validator.validate(value) && Array.isArray(value)
+      ? (value as string[])
+      : []
+  }
+
+  /**
+   * 複数テキスト型のプロパティを取得
+   */
+  multiText(key: string): string[] {
+    const value = this.value[key]
+    const validator = new DocSchemaFieldTextMultipleValue(key, {
+      type: "multi-text",
+      required: false,
+      title: null,
+      description: null,
+      default: null,
+    } satisfies DocFieldMultiText)
+    return validator.validate(value) && Array.isArray(value)
+      ? (value as string[])
+      : []
+  }
+
+  /**
+   * 複数数値型のプロパティを取得
+   */
+  multiNumber(key: string): number[] {
+    const value = this.value[key]
+    const validator = new DocSchemaFieldNumberMultipleValue(key, {
+      type: "multi-number",
+      required: false,
+      title: null,
+      description: null,
+      default: null,
+    } satisfies DocFieldMultiNumber)
+    return validator.validate(value) && Array.isArray(value)
+      ? (value as number[])
+      : []
+  }
+
+  /**
+   * 複数真偽値型のプロパティを取得
+   */
+  multiBoolean(key: string): boolean[] {
+    const value = this.value[key]
+    const validator = new DocSchemaFieldBooleanMultipleValue(key, {
+      type: "multi-boolean",
+      required: false,
+      title: null,
+      description: null,
+      default: null,
+    } satisfies DocFieldMultiBoolean)
+    return validator.validate(value) && Array.isArray(value)
+      ? (value as boolean[])
+      : []
+  }
+
+  /**
+   * プロパティが存在するかチェック
+   */
+  has(key: string): boolean {
+    return key in this.value && this.value[key] !== undefined
+  }
+
+  /**
+   * すべてのキーを取得
+   */
+  get keys(): string[] {
+    return Object.keys(this.value)
   }
 }

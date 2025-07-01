@@ -1,4 +1,4 @@
-import type { DocSchemaField } from "../types"
+import type { DocSchemaField, DocSchemaFieldRelation } from "../types"
 
 /**
  * 単一リレーション型スキーマフィールド
@@ -6,10 +6,7 @@ import type { DocSchemaField } from "../types"
 export class DocSchemaFieldRelationSingleValue {
   constructor(
     readonly key: string,
-    readonly value: DocSchemaField & {
-      type: "relation"
-      path: string
-    },
+    readonly value: DocSchemaFieldRelation,
   ) {
     Object.freeze(this)
   }
@@ -38,17 +35,11 @@ export class DocSchemaFieldRelationSingleValue {
     return this.value.path
   }
 
-  get isArray() {
-    return false
-  }
+  readonly isArray = false
 
-  get isSingle() {
-    return true
-  }
+  readonly isSingle = true
 
-  get isRelation() {
-    return true
-  }
+  readonly isRelation = true
 
   toJson(): DocSchemaField {
     return { ...this.value }

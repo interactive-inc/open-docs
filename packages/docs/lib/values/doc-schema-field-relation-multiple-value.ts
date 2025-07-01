@@ -1,4 +1,4 @@
-import type { DocSchemaField } from "../types"
+import type { DocFieldMultiRelation, DocSchemaField } from "../types"
 
 /**
  * リレーション複数型スキーマフィールド
@@ -6,10 +6,7 @@ import type { DocSchemaField } from "../types"
 export class DocSchemaFieldRelationMultipleValue {
   constructor(
     readonly key: string,
-    readonly value: DocSchemaField & {
-      type: "multi-relation"
-      path: string
-    },
+    readonly value: DocFieldMultiRelation,
   ) {
     Object.freeze(this.value)
     if (this.value.default && Array.isArray(this.value.default)) {
@@ -42,17 +39,11 @@ export class DocSchemaFieldRelationMultipleValue {
     return this.value.path
   }
 
-  get isArray() {
-    return true
-  }
+  readonly isArray = true
 
-  get isSingle() {
-    return false
-  }
+  readonly isSingle = false
 
-  get isRelation() {
-    return true
-  }
+  readonly isRelation = true
 
   /**
    * 値を検証する

@@ -1,4 +1,4 @@
-import type { DocSchemaField } from "../types"
+import type { DocSchemaField, DocSchemaFieldSelectText } from "../types"
 
 /**
  * 単一選択テキスト型スキーマフィールド
@@ -6,10 +6,7 @@ import type { DocSchemaField } from "../types"
 export class DocSchemaFieldSelectTextSingleValue {
   constructor(
     readonly key: string,
-    readonly value: DocSchemaField & {
-      type: "select-text"
-      options: string[]
-    },
+    readonly value: DocSchemaFieldSelectText,
   ) {
     if (this.value.options) {
       Object.freeze(this.value.options)
@@ -42,21 +39,13 @@ export class DocSchemaFieldSelectTextSingleValue {
     return this.value.options
   }
 
-  get isArray() {
-    return false
-  }
+  readonly isArray = false
 
-  get isSingle() {
-    return true
-  }
+  readonly isSingle = true
 
-  get isSelect() {
-    return true
-  }
+  readonly isSelect = true
 
-  get isTextSelect() {
-    return true
-  }
+  readonly isTextSelect = true
 
   toJson(): DocSchemaField {
     return { ...this.value }

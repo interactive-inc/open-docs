@@ -1,4 +1,4 @@
-import type { DocSchemaField } from "../types"
+import type { DocSchemaField, DocSchemaFieldBoolean } from "../types"
 
 /**
  * 単一ブール型スキーマフィールド
@@ -6,7 +6,7 @@ import type { DocSchemaField } from "../types"
 export class DocSchemaFieldBooleanSingleValue {
   constructor(
     readonly key: string,
-    readonly value: DocSchemaField & { type: "boolean" },
+    readonly value: DocSchemaFieldBoolean,
   ) {
     Object.freeze(this)
   }
@@ -31,17 +31,11 @@ export class DocSchemaFieldBooleanSingleValue {
     return this.value.default
   }
 
-  get isArray() {
-    return false
-  }
+  readonly isArray = false
 
-  get isSingle() {
-    return true
-  }
+  readonly isSingle = true
 
-  get isBoolean() {
-    return true
-  }
+  readonly isBoolean = true
 
   toJson(): DocSchemaField {
     return { ...this.value }
