@@ -2,8 +2,10 @@ import { DocDirectoryReference } from "./doc-directory-reference"
 import type { DocFileSystem } from "./doc-file-system"
 import type { DocPathSystem } from "./doc-path-system"
 import { DocFileMdEntity } from "./entities/doc-file-md-entity"
+import type { DocSchemaRecord } from "./types"
 import { DocFileContentMdValue } from "./values/doc-file-content-md-value"
 import { DocFilePathValue } from "./values/doc-file-path-value"
+import { DocSchemaValue } from "./values/doc-schema-value"
 
 type Props = {
   path: string
@@ -258,6 +260,123 @@ export class DocFileMdReference {
       path: restorePath,
       fileSystem: this.fileSystem,
       pathSystem: this.pathSystem,
+    })
+  }
+
+  /**
+   * スキーマに基づいてリレーションを取得する
+   */
+  async relation(key: string): Promise<DocFileMdReference | Error | null> {
+    const file = await this.read()
+    if (file instanceof Error) {
+      return file
+    }
+
+    // FrontMatterからリレーション値を取得
+    const relationValue = file.content.frontMatter.relation(key)
+    if (relationValue === null) {
+      return null
+    }
+
+    // 同じディレクトリのindex.mdを取得
+    const indexFile = await this.getDirectoryIndex()
+    if (!indexFile) {
+      return null
+    }
+
+    const schemaData = indexFile.content.frontMatter.value.schema
+    if (
+      !schemaData ||
+      typeof schemaData !== "object" ||
+      Array.isArray(schemaData)
+    ) {
+      return null
+    }
+
+    const schema = new DocSchemaValue(schemaData as DocSchemaRecord)
+    const field = schema.field(key)
+
+    // リレーションフィールドでない場合はnull
+    if (!field || !("path" in field) || !field.path) {
+      return null
+    }
+
+    // スキーマで定義されたパスとリレーション値を組み合わせる
+    const fullPath = this.pathSystem.join(field.path, `${relationValue}.md`)
+
+    return new DocFileMdReference({
+      path: fullPath,
+      fileSystem: this.fileSystem,
+      pathSystem: this.pathSystem,
+    })
+  }
+
+  /**
+   * 同じディレクトリのindex.mdを取得する
+   */
+  async getDirectoryIndex(): Promise<DocFileMdEntity | null> {
+    const indexPath = this.pathSystem.join(this.directoryPath, "index.md")
+    const indexRef = new DocFileMdReference({
+      path: indexPath,
+      fileSystem: this.fileSystem,
+      pathSystem: this.pathSystem,
+    })
+
+    const indexFile = await indexRef.read()
+    if (indexFile instanceof Error) {
+      return null
+    }
+
+    return indexFile
+  }
+
+  /**
+   * スキーマに基づいて複数のリレーションを取得する
+   */
+  async multiRelation(key: string): Promise<DocFileMdReference[]> {
+    const file = await this.read()
+    if (file instanceof Error) {
+      return []
+    }
+
+    // FrontMatterから複数リレーション値を取得
+    const relationValues = file.content.frontMatter.multiRelation(key)
+    if (relationValues.length === 0) {
+      return []
+    }
+
+    // 同じディレクトリのindex.mdを取得
+    const indexFile = await this.getDirectoryIndex()
+    if (!indexFile) {
+      return []
+    }
+
+    const schemaData = indexFile.content.frontMatter.value.schema
+    if (
+      !schemaData ||
+      typeof schemaData !== "object" ||
+      Array.isArray(schemaData)
+    ) {
+      return []
+    }
+
+    const schema = new DocSchemaValue(schemaData as DocSchemaRecord)
+    const field = schema.field(key)
+
+    // リレーションフィールドでない場合は空配列
+    if (!field || !("path" in field) || !field.path) {
+      return []
+    }
+
+    // 各リレーション値に対してDocFileMdReferenceを作成
+    return relationValues.map((relationValue) => {
+      const fullPath = this.pathSystem.join(field.path, `${relationValue}.md`)
+
+      return new DocFileMdReference({
+        path: fullPath,
+        fileSystem: this.fileSystem,
+        pathSystem: this.pathSystem,
+      })
     })
   }
 }

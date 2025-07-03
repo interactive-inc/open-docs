@@ -13,5 +13,5 @@
     "strict": true,
     "target": "esnext"
   },
-  "include": ["lib/**/*.ts"]
+  "include": ["lib/**/*.ts", "debug/**/*.ts"],
 }

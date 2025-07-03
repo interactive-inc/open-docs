@@ -3,6 +3,8 @@ import { DocFileMdReference } from "./doc-file-md-reference"
 import { DocFileSystemDebug } from "./doc-file-system-debug"
 import { DocFileMdEntity } from "./entities/doc-file-md-entity"
 import { DocFilePathValue } from "./values/doc-file-path-value"
+import type { DocFileSystem } from "./doc-file-system"
+import { DocPathSystem } from "./doc-path-system"
 
 test("DocFileMdReference - writeメソッドがフロントマターを含む完全なテキストを書き込む", async () => {
   const fileSystem = DocFileSystemDebug.createWithFiles({
@@ -151,4 +153,408 @@ test("DocFileMdReference - 新規ファイルの作成", async () => {
   expect(writtenContent).toContain("- currency")
   expect(writtenContent).toContain("# 価格")
   expect(writtenContent).toContain("商品の価格を表す値オブジェクト")
+})
+
+// リレーション関連のテスト
+
+test("getDirectoryIndex メソッドはディレクトリのindex.mdを返す", async () => {
+  const files: Record<string, string> = {
+    "products/doc-browser/pages/index.md": `---
+schema:
+  features:
+    type: multi-relation
+    path: docs/products/doc-browser/features
+    required: false
+    title: Features
+    description: List of features
+    default: []
+---
+# Pages`,
+    "products/doc-browser/pages/home.md": `---
+features:
+  - list-documents
+  - create-document
+---
+# Home Page`,
+  }
+
+  const pathSystem = new DocPathSystem()
+  const mockFileSystem = {
+    getBasePath: () => "",
+    readFile: async (path: string) => {
+      // アーカイブチェックも含む
+      if (files[path]) return files[path]
+
+      // アーカイブパスをチェック
+      const dirPath = pathSystem.dirname(path)
+      const fileName = pathSystem.basename(path)
+      const archivePath = pathSystem.join(dirPath, "_", fileName)
+
+      return files[archivePath] || null
+    },
+    exists: async (path: string) => path in files,
+    pathSystem,
+  } as unknown as DocFileSystem
+
+  const fileSystem = mockFileSystem
+
+  const fileRef = new DocFileMdReference({
+    path: "products/doc-browser/pages/home.md",
+    fileSystem: fileSystem,
+    pathSystem: pathSystem,
+  })
+
+  const indexFile = await fileRef.getDirectoryIndex()
+  expect(indexFile).not.toBeNull()
+  expect(indexFile?.content.frontMatter.value.schema).toBeDefined()
+})
+
+test("getDirectoryIndex メソッドはindex.mdがない場合nullを返す", async () => {
+  const files: Record<string, string> = {
+    "products/doc-browser/pages/home.md": `# Home Page`,
+  }
+
+  const pathSystem = new DocPathSystem()
+  const mockFileSystem = {
+    getBasePath: () => "",
+    readFile: async (path: string) => {
+      // アーカイブチェックも含む
+      if (files[path]) return files[path]
+
+      // アーカイブパスをチェック
+      const dirPath = pathSystem.dirname(path)
+      const fileName = pathSystem.basename(path)
+      const archivePath = pathSystem.join(dirPath, "_", fileName)
+
+      return files[archivePath] || null
+    },
+    exists: async (path: string) => path in files,
+    pathSystem,
+  } as unknown as DocFileSystem
+
+  const fileSystem = mockFileSystem
+
+  const fileRef = new DocFileMdReference({
+    path: "products/doc-browser/pages/home.md",
+    fileSystem: fileSystem,
+    pathSystem: pathSystem,
+  })
+
+  const indexFile = await fileRef.getDirectoryIndex()
+  expect(indexFile).toBeNull()
+})
+
+test("relation メソッドはスキーマに基づいてリレーションを解決する", async () => {
+  const files: Record<string, string> = {
+    "products/doc-browser/pages/index.md": `---
+schema:
+  author:
+    type: relation
+    path: users
+    required: false
+    title: Author
+    description: Document author
+    default: null
+---
+# Pages`,
+    "products/doc-browser/pages/home.md": `---
+author: john-doe
+---
+# Home Page`,
+    "users/john-doe.md": `# John Doe`,
+  }
+
+  const pathSystem = new DocPathSystem()
+  const mockFileSystem = {
+    getBasePath: () => "",
+    readFile: async (path: string) => {
+      // アーカイブチェックも含む
+      if (files[path]) return files[path]
+
+      // アーカイブパスをチェック
+      const dirPath = pathSystem.dirname(path)
+      const fileName = pathSystem.basename(path)
+      const archivePath = pathSystem.join(dirPath, "_", fileName)
+
+      return files[archivePath] || null
+    },
+    exists: async (path: string) => path in files,
+    pathSystem,
+  } as unknown as DocFileSystem
+
+  const fileSystem = mockFileSystem
+
+  const fileRef = new DocFileMdReference({
+    path: "products/doc-browser/pages/home.md",
+    fileSystem: fileSystem,
+    pathSystem: pathSystem,
+  })
+
+  const relationRef = await fileRef.relation("author")
+  expect(relationRef).not.toBeNull()
+  expect(relationRef).not.toBeInstanceOf(Error)
+
+  if (relationRef && !(relationRef instanceof Error)) {
+    expect(relationRef.path).toBe("users/john-doe.md")
+
+    const relationFile = await relationRef.read()
+    expect(relationFile).not.toBeInstanceOf(Error)
+
+    if (!(relationFile instanceof Error)) {
+      expect(relationFile.content.title).toBe("John Doe")
+    }
+  }
+})
+
+test("relation メソッドはスキーマがない場合nullを返す", async () => {
+  const files: Record<string, string> = {
+    "products/doc-browser/pages/home.md": `---
+author: users/john-doe
+---
+# Home Page`,
+    "users/john-doe.md": `# John Doe`,
+  }
+
+  const pathSystem = new DocPathSystem()
+  const mockFileSystem = {
+    getBasePath: () => "",
+    readFile: async (path: string) => {
+      // アーカイブチェックも含む
+      if (files[path]) return files[path]
+
+      // アーカイブパスをチェック
+      const dirPath = pathSystem.dirname(path)
+      const fileName = pathSystem.basename(path)
+      const archivePath = pathSystem.join(dirPath, "_", fileName)
+
+      return files[archivePath] || null
+    },
+    exists: async (path: string) => path in files,
+    pathSystem,
+  } as unknown as DocFileSystem
+
+  const fileSystem = mockFileSystem
+
+  const fileRef = new DocFileMdReference({
+    path: "products/doc-browser/pages/home.md",
+    fileSystem: fileSystem,
+    pathSystem: pathSystem,
+  })
+
+  const relationRef = await fileRef.relation("author")
+  expect(relationRef).toBeNull()
+})
+
+test("multiRelation メソッドは複数のリレーションを解決する", async () => {
+  const files: Record<string, string> = {
+    "products/doc-browser/pages/index.md": `---
+schema:
+  features:
+    type: multi-relation
+    path: docs/products/doc-browser/features
+    required: false
+    title: Features
+    description: List of features
+    default: []
+---
+# Pages`,
+    "products/doc-browser/pages/home.md": `---
+features:
+  - list-documents
+  - create-document
+  - delete-document
+---
+# Home Page`,
+    "docs/products/doc-browser/features/list-documents.md": `# List Documents`,
+    "docs/products/doc-browser/features/create-document.md": `# Create Document`,
+    "docs/products/doc-browser/features/delete-document.md": `# Delete Document`,
+  }
+
+  const pathSystem = new DocPathSystem()
+  const mockFileSystem = {
+    getBasePath: () => "",
+    readFile: async (path: string) => {
+      // アーカイブチェックも含む
+      if (files[path]) return files[path]
+
+      // アーカイブパスをチェック
+      const dirPath = pathSystem.dirname(path)
+      const fileName = pathSystem.basename(path)
+      const archivePath = pathSystem.join(dirPath, "_", fileName)
+
+      return files[archivePath] || null
+    },
+    exists: async (path: string) => path in files,
+    pathSystem,
+  } as unknown as DocFileSystem
+
+  const fileSystem = mockFileSystem
+
+  const fileRef = new DocFileMdReference({
+    path: "products/doc-browser/pages/home.md",
+    fileSystem: fileSystem,
+    pathSystem: pathSystem,
+  })
+
+  const relationRefs = await fileRef.multiRelation("features")
+  expect(relationRefs).toHaveLength(3)
+
+  expect(relationRefs[0].path).toBe(
+    "docs/products/doc-browser/features/list-documents.md",
+  )
+  expect(relationRefs[1].path).toBe(
+    "docs/products/doc-browser/features/create-document.md",
+  )
+  expect(relationRefs[2].path).toBe(
+    "docs/products/doc-browser/features/delete-document.md",
+  )
+})
+
+test("multiRelation メソッドは空のリレーションで空配列を返す", async () => {
+  const files: Record<string, string> = {
+    "products/doc-browser/pages/index.md": `---
+schema:
+  features:
+    type: multi-relation
+    path: docs/products/doc-browser/features
+    required: false
+    title: Features
+    description: List of features
+    default: []
+---
+# Pages`,
+    "products/doc-browser/pages/home.md": `---
+features: []
+---
+# Home Page`,
+  }
+
+  const pathSystem = new DocPathSystem()
+  const mockFileSystem = {
+    getBasePath: () => "",
+    readFile: async (path: string) => {
+      // アーカイブチェックも含む
+      if (files[path]) return files[path]
+
+      // アーカイブパスをチェック
+      const dirPath = pathSystem.dirname(path)
+      const fileName = pathSystem.basename(path)
+      const archivePath = pathSystem.join(dirPath, "_", fileName)
+
+      return files[archivePath] || null
+    },
+    exists: async (path: string) => path in files,
+    pathSystem,
+  } as unknown as DocFileSystem
+
+  const fileSystem = mockFileSystem
+
+  const fileRef = new DocFileMdReference({
+    path: "products/doc-browser/pages/home.md",
+    fileSystem: fileSystem,
+    pathSystem: pathSystem,
+  })
+
+  const relationRefs = await fileRef.multiRelation("features")
+  expect(relationRefs).toEqual([])
+})
+
+test("relation メソッドはリレーションフィールドでない場合nullを返す", async () => {
+  const files: Record<string, string> = {
+    "products/doc-browser/pages/index.md": `---
+schema:
+  title:
+    type: text
+    required: true
+    title: Title
+    description: Page title
+    default: ""
+---
+# Pages`,
+    "products/doc-browser/pages/home.md": `---
+title: ホームページ
+---
+# Home Page`,
+  }
+
+  const pathSystem = new DocPathSystem()
+  const mockFileSystem = {
+    getBasePath: () => "",
+    readFile: async (path: string) => {
+      // アーカイブチェックも含む
+      if (files[path]) return files[path]
+
+      // アーカイブパスをチェック
+      const dirPath = pathSystem.dirname(path)
+      const fileName = pathSystem.basename(path)
+      const archivePath = pathSystem.join(dirPath, "_", fileName)
+
+      return files[archivePath] || null
+    },
+    exists: async (path: string) => path in files,
+    pathSystem,
+  } as unknown as DocFileSystem
+
+  const fileSystem = mockFileSystem
+
+  const fileRef = new DocFileMdReference({
+    path: "products/doc-browser/pages/home.md",
+    fileSystem: fileSystem,
+    pathSystem: pathSystem,
+  })
+
+  const relationRef = await fileRef.relation("title")
+  expect(relationRef).toBeNull()
+})
+
+test("index.mdがアーカイブにある場合も取得できる", async () => {
+  const files: Record<string, string> = {
+    "products/doc-browser/pages/_/index.md": `---
+schema:
+  features:
+    type: multi-relation
+    path: docs/products/doc-browser/features
+    required: false
+    title: Features
+    description: List of features
+    default: []
+---
+# Pages (Archived)`,
+    "products/doc-browser/pages/home.md": `---
+features:
+  - list-documents
+---
+# Home Page`,
+  }
+
+  const pathSystem = new DocPathSystem()
+  const mockFileSystem = {
+    getBasePath: () => "",
+    readFile: async (path: string) => {
+      // アーカイブチェックも含む
+      if (files[path]) return files[path]
+
+      // アーカイブパスをチェック
+      const dirPath = pathSystem.dirname(path)
+      const fileName = pathSystem.basename(path)
+      const archivePath = pathSystem.join(dirPath, "_", fileName)
+
+      return files[archivePath] || null
+    },
+    exists: async (path: string) => path in files,
+    pathSystem,
+  } as unknown as DocFileSystem
+
+  const fileSystem = mockFileSystem
+
+  const fileRef = new DocFileMdReference({
+    path: "products/doc-browser/pages/home.md",
+    fileSystem: fileSystem,
+    pathSystem: pathSystem,
+  })
+
+  const indexFile = await fileRef.getDirectoryIndex()
+  expect(indexFile).not.toBeNull()
+  // アーカイブのindex.mdが取得できることを確認
+  expect(indexFile?.content.frontMatter.value.schema).toBeDefined()
 })

@@ -1,5 +1,5 @@
 import { zDocTreeDirectoryNode, zDocTreeNode } from "../models"
-import type { DocTreeDirectoryNode } from "../types"
+import type { DocTreeDirectoryNode, DocTreeNode } from "../types"
 import { DocTreeFileNodeValue } from "./doc-tree-file-node-value"
 
 type Props = {
@@ -78,13 +78,12 @@ export class DocTreeDirectoryNodeValue {
       title: parsed.title,
       children: parsed.children.map((child: unknown) => {
         // childの型を検証
-        const parsedChild = zDocTreeNode.parse(child)
+        const parsedChild = zDocTreeNode.parse(child) as DocTreeNode
 
-        if ((parsedChild as any).type === "file") {
+        if (parsedChild.type === "file") {
           return DocTreeFileNodeValue.fromJson(parsedChild)
-        } else {
-          return DocTreeDirectoryNodeValue.fromJson(parsedChild)
         }
+        return DocTreeDirectoryNodeValue.fromJson(parsedChild)
       }),
     })
   }

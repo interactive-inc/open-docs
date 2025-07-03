@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "format": "biome check . --fix --unsafe",
-    "claude": "claude --continue --dangerously-skip-permissions --mcp-config .mcp.json",
+    "claude": "claude --continue --dangerously-skip-permissions",
     "start": "bun run index",
     "build": "bun run --cwd packages/docs build && bun run --cwd packages/docs-router build && bun run --cwd packages/docs-client build",
     "dev:client": "bun run --cwd packages/docs-client dev",
