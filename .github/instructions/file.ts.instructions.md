@@ -108,8 +108,13 @@ const formatted = formatMarkdown(merged, document.content)
 - Do NOT abbreviate variable names
 - Avoid any type
 - Use "type" instead of "interface"
-- No type assertion using "as"
+- No type assertion
 - Do NOT use enum
+
+```ts
+const user = {} as User // Do NOT use type assertion
+const foo = {} as any // Do NOT use any type
+```
 
 ## Functions
 
