@@ -26,27 +26,27 @@ export class DocDirectoryReference {
     Object.freeze(this)
   }
 
-  get fileSystem() {
+  get fileSystem(): DocFileSystem {
     return this.props.fileSystem
   }
 
-  get basePath() {
+  get basePath(): string {
     return this.fileSystem.getBasePath()
   }
 
-  get relativePath() {
+  get relativePath(): string {
     return this.props.path
   }
 
-  get absolutePath() {
+  get absolutePath(): string {
     return this.pathSystem.join(this.basePath, this.relativePath)
   }
 
-  get indexFileName() {
+  get indexFileName(): string {
     return this.props.indexFileName
   }
 
-  get indexFilePath() {
+  get indexFilePath(): string {
     return this.pathSystem.join(
       this.basePath,
       this.relativePath,
@@ -54,11 +54,11 @@ export class DocDirectoryReference {
     )
   }
 
-  get archiveDirectoryName() {
+  get archiveDirectoryName(): string {
     return this.props.archiveDirectoryName
   }
 
-  async fileNames() {
+  async fileNames(): Promise<string[]> {
     const filePaths = await this.fileSystem.readDirectoryFilePaths(
       this.relativePath,
     )
@@ -67,7 +67,7 @@ export class DocDirectoryReference {
       .filter((name) => name.includes("."))
   }
 
-  async archivedFileNames() {
+  async archivedFileNames(): Promise<string[]> {
     const archivePath = this.pathSystem.join(
       this.relativePath,
       this.archiveDirectoryName,
@@ -80,7 +80,11 @@ export class DocDirectoryReference {
       .filter((name) => name.includes("."))
   }
 
-  async *filesGenerator() {
+  async *filesGenerator(): AsyncGenerator<
+    DocFileMdReference | DocFileUnknownReference,
+    void,
+    unknown
+  > {
     const fileNames = await this.fileNames()
 
     // 通常のファイルを処理
@@ -129,7 +133,7 @@ export class DocDirectoryReference {
     }
   }
 
-  async *mdFilesGenerator() {
+  async *mdFilesGenerator(): AsyncGenerator<DocFileMdReference, void, unknown> {
     const files = this.filesGenerator()
 
     for await (const file of files) {
@@ -139,7 +143,7 @@ export class DocDirectoryReference {
     }
   }
 
-  async files() {
+  async files(): Promise<(DocFileMdReference | DocFileUnknownReference)[]> {
     const files: (DocFileMdReference | DocFileUnknownReference)[] = []
 
     for await (const file of this.filesGenerator()) {
@@ -149,7 +153,7 @@ export class DocDirectoryReference {
     return files
   }
 
-  async mdFiles() {
+  async mdFiles(): Promise<DocFileMdReference[]> {
     const files: DocFileMdReference[] = []
 
     for await (const file of this.filesGenerator()) {
@@ -298,7 +302,7 @@ export class DocDirectoryReference {
 
   async writeFile(
     entity: DocFileIndexEntity | DocFileUnknownEntity | DocFileMdEntity,
-  ) {
+  ): Promise<Error | null> {
     const filePath = this.pathSystem.join(
       this.relativePath,
       entity.value.path.nameWithExtension,
@@ -319,7 +323,8 @@ export class DocDirectoryReference {
       return new Error("Entity content is undefined")
     }
 
-    return await this.fileSystem.writeFile(filePath, content)
+    await this.fileSystem.writeFile(filePath, content)
+    return null
   }
 
   async exists(): Promise<boolean> {

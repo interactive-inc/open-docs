@@ -1,5 +1,3 @@
-// テスト用のインメモリファイルシステム実装
-
 import { DocFileSystem } from "./doc-file-system"
 import { DocPathSystem } from "./doc-path-system"
 
@@ -329,10 +327,6 @@ export class DocFileSystemDebug extends DocFileSystem {
   override async ensureDirectoryExists(_relativePath: string): Promise<void> {
     // インメモリファイルシステムではディレクトリの作成は不要
   }
-
-  /**
-   * テスト用のヘルパーメソッド
-   */
 
   /**
    * すべてのファイルをクリア

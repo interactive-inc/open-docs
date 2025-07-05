@@ -16,19 +16,19 @@ export class DocTreeFileNodeValue {
     Object.freeze(this)
   }
 
-  get name() {
+  get name(): string {
     return this.props.name
   }
 
-  get path() {
+  get path(): string {
     return this.props.path
   }
 
-  get icon() {
+  get icon(): string {
     return this.props.icon
   }
 
-  get title() {
+  get title(): string {
     return this.props.title
   }
 

@@ -1,27 +1,17 @@
-// 製品レベルのエクスポート
-
 export { DocClient } from "./doc-client"
-// Reference exports
 export { DocDirectoryReference } from "./doc-directory-reference"
 export { DocFileIndexReference } from "./doc-file-index-reference"
 export { DocFileMdReference } from "./doc-file-md-reference"
 export { DocFileRelationReference } from "./doc-file-relation-reference"
-// System exports
 export { DocFileSystem } from "./doc-file-system"
 export { DocFileTreeSystem as FileTreeSystem } from "./doc-file-tree-system"
 export { DocFileUnknownReference } from "./doc-file-unknown-reference"
 export { DocMarkdownSystem } from "./doc-markdown-system"
 export { DocPathSystem } from "./doc-path-system"
-
-// Entity exports
 export { DocFileIndexEntity } from "./entities/doc-file-index-entity"
 export { DocFileMdEntity } from "./entities/doc-file-md-entity"
 export { DocFileUnknownEntity } from "./entities/doc-file-unknown-entity"
-
-// Type exports
 export type * from "./types"
-
-// Value Object exports
 export { DocContentMdValue } from "./values/doc-content-md-value"
 export { DocDirectoryPathValue } from "./values/doc-directory-path-value"
 export { DocFileContentIndexValue } from "./values/doc-file-content-index-value"
@@ -44,7 +34,6 @@ export { DocSchemaFieldSelectTextMultipleValue } from "./values/doc-schema-field
 export { DocSchemaFieldSelectTextSingleValue } from "./values/doc-schema-field-select-text-single-value"
 export { DocSchemaFieldTextMultipleValue } from "./values/doc-schema-field-text-multiple-value"
 export { DocSchemaFieldTextSingleValue } from "./values/doc-schema-field-text-single-value"
-// Schema Field Value exports
 export type { DocSchemaFieldValue } from "./values/doc-schema-field-value"
 export { DocSchemaValue } from "./values/doc-schema-value"
 export { DocTreeDirectoryNodeValue } from "./values/doc-tree-directory-node-value"

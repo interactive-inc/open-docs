@@ -24,11 +24,11 @@ export class DocFileRelationReference {
     Object.freeze(this)
   }
 
-  get fileSystem() {
+  get fileSystem(): DocFileSystem {
     return this.props.fileSystem
   }
 
-  get basePath() {
+  get basePath(): string {
     return this.fileSystem.getBasePath()
   }
 

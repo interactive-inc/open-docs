@@ -125,7 +125,7 @@ test("不明な型でエラーが発生する", () => {
 
   expect(() => {
     factory.fromSchemaEntry("unknown", {
-      type: "invalid-type" as any,
+      type: "invalid-type" as never,
       required: false,
       title: null,
       description: null,

@@ -23,27 +23,27 @@ export class DocFileIndexReference {
     Object.freeze(this)
   }
 
-  get fileSystem() {
+  get fileSystem(): DocFileSystem {
     return this.props.fileSystem
   }
 
-  get basePath() {
+  get basePath(): string {
     return this.fileSystem.getBasePath()
   }
 
-  get filePath() {
+  get filePath(): string {
     return this.props.path
   }
 
-  get fileFullPath() {
+  get fileFullPath(): string {
     return this.pathSystem.join(this.basePath, this.filePath)
   }
 
-  get durectoryPath() {
+  get durectoryPath(): string {
     return this.pathSystem.dirname(this.filePath)
   }
 
-  async read() {
+  async read(): Promise<DocFileIndexEntity> {
     const content = await this.fileSystem.readFile(this.filePath)
     if (content === null) {
       const dirName = this.filePath.split("/").pop() || "directory"
@@ -80,7 +80,7 @@ export class DocFileIndexReference {
   /**
    * ファイルの内容を読み込む
    */
-  async readContent() {
+  async readContent(): Promise<Error | string> {
     const entity = await this.read()
     if (entity instanceof Error) {
       return entity
@@ -120,8 +120,8 @@ export class DocFileIndexReference {
   /**
    * ファイルを削除
    */
-  async delete(): Promise<void> {
-    await this.fileSystem.deleteFile(this.filePath)
+  async delete(): Promise<Error | null> {
+    return await this.fileSystem.deleteFile(this.filePath)
   }
 
   /**

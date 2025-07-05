@@ -132,7 +132,7 @@ test("無効なデータでエラーが発生する", () => {
     new DocRelationFieldValue({
       fieldName: "",
       filePath: "users/authors",
-      isArray: "not-boolean" as any,
+      isArray: "not-boolean" as never,
     })
   }).toThrow()
 })

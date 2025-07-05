@@ -78,13 +78,13 @@ test("無効なデータでエラーが発生する", () => {
   expect(() => {
     new DocRelationValue({
       path: "invalid",
-      files: "not-an-array" as any,
+      files: "not-an-array" as never,
     })
   }).toThrow()
 
   expect(() => {
     new DocRelationValue({
-      path: 123 as any,
+      path: 123 as never,
       files: [],
     })
   }).toThrow()
@@ -94,7 +94,9 @@ test("ファイルデータが無効な場合もエラーが発生する", () =>
   expect(() => {
     new DocRelationValue({
       path: "users",
-      files: [{ name: 123 as any, label: "Invalid", value: null, path: null }],
+      files: [
+        { name: 123 as never, label: "Invalid", value: null, path: null },
+      ],
     })
   }).toThrow()
 })

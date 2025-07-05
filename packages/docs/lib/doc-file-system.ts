@@ -57,7 +57,7 @@ export class DocFileSystem {
   /**
    * 指定されたパスのファイルを削除
    */
-  async deleteFile(relativePath: string) {
+  async deleteFile(relativePath: string): Promise<Error | null> {
     try {
       const fullPath = this.pathSystem.join(this.basePath, relativePath)
       await fs.unlink(fullPath)

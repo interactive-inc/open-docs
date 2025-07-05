@@ -11,7 +11,8 @@
     "rootDir": "lib",
     "skipLibCheck": true,
     "strict": true,
-    "target": "esnext"
+    "target": "esnext",
+    "noImplicitAny": true
   },
-  "include": ["lib/**/*.ts", "debug/**/*.ts"],
+  "include": ["lib/**/*.ts"]
 }

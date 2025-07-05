@@ -24,35 +24,35 @@ export class DocFileMdReference {
     Object.freeze(this)
   }
 
-  get fileSystem() {
+  get fileSystem(): DocFileSystem {
     return this.props.fileSystem
   }
 
-  get basePath() {
+  get basePath(): string {
     return this.fileSystem.getBasePath()
   }
 
-  get path() {
+  get path(): string {
     return this.props.path
   }
 
-  get fullPath() {
+  get fullPath(): string {
     return this.pathSystem.join(this.basePath, this.path)
   }
 
-  get directoryPath() {
+  get directoryPath(): string {
     return this.pathSystem.dirname(this.path)
   }
 
-  get archivedPath() {
+  get archivedPath(): string {
     return this.pathSystem.join(this.directoryPath, "_", this.nameWithExtension)
   }
 
-  get name() {
+  get name(): string {
     return this.pathSystem.basename(this.path, ".md")
   }
 
-  get nameWithExtension() {
+  get nameWithExtension(): string {
     return `${this.name}.md`
   }
 
@@ -115,7 +115,7 @@ export class DocFileMdReference {
   /**
    * ファイルの内容を読み込む
    */
-  async readContent() {
+  async readContent(): Promise<Error | string> {
     const entity = await this.read()
     if (entity instanceof Error) {
       return entity
@@ -126,14 +126,14 @@ export class DocFileMdReference {
   /**
    * ファイルに内容を書き込む
    */
-  async writeContent(content: string) {
+  async writeContent(content: string): Promise<void> {
     return await this.fileSystem.writeFile(this.path, content)
   }
 
   /**
    * Entityを書き込む
    */
-  async write(entity: DocFileMdEntity) {
+  async write(entity: DocFileMdEntity): Promise<void> {
     const content = entity.content.toText()
     return await this.fileSystem.writeFile(this.path, content)
   }
@@ -141,7 +141,7 @@ export class DocFileMdReference {
   /**
    * 新しいファイルをデフォルトコンテンツで作成
    */
-  async writeDefault() {
+  async writeDefault(): Promise<void> {
     const fileName = this.pathSystem.basename(this.path, ".md")
     const defaultContent = [
       `# ${fileName}`,
@@ -154,7 +154,7 @@ export class DocFileMdReference {
   /**
    * ファイルを削除
    */
-  async delete() {
+  async delete(): Promise<Error | null> {
     return await this.fileSystem.deleteFile(this.path)
   }
 

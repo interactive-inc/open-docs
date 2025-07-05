@@ -90,7 +90,7 @@ test("JSON形式に変換できる", () => {
 test("無効なデータでエラーが発生する", () => {
   expect(() => {
     new DocRelationFileValue({
-      name: 123 as any,
+      name: 123 as never,
       label: "ラベル",
       value: null,
       path: null,

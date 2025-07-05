@@ -124,6 +124,6 @@ test("JSON形式に変換できる", () => {
 
 test("無効なタイプでエラーが発生する", () => {
   expect(() => {
-    new DocSchemaFieldTypeValue("invalid-type" as any)
+    new DocSchemaFieldTypeValue("invalid-type" as never)
   }).toThrow()
 })

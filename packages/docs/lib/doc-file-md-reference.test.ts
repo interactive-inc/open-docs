@@ -1,10 +1,10 @@
 import { expect, test } from "bun:test"
 import { DocFileMdReference } from "./doc-file-md-reference"
+import type { DocFileSystem } from "./doc-file-system"
 import { DocFileSystemDebug } from "./doc-file-system-debug"
+import { DocPathSystem } from "./doc-path-system"
 import { DocFileMdEntity } from "./entities/doc-file-md-entity"
 import { DocFilePathValue } from "./values/doc-file-path-value"
-import type { DocFileSystem } from "./doc-file-system"
-import { DocPathSystem } from "./doc-path-system"
 
 test("DocFileMdReference - writeメソッドがフロントマターを含む完全なテキストを書き込む", async () => {
   const fileSystem = DocFileSystemDebug.createWithFiles({

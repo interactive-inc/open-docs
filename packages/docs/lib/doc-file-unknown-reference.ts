@@ -23,31 +23,31 @@ export class DocFileUnknownReference {
     Object.freeze(this)
   }
 
-  get fileSystem() {
+  get fileSystem(): DocFileSystem {
     return this.props.fileSystem
   }
 
-  get basePath() {
+  get basePath(): string {
     return this.fileSystem.getBasePath()
   }
 
-  get path() {
+  get path(): string {
     return this.props.path
   }
 
-  get directoryPath() {
+  get directoryPath(): string {
     return this.pathSystem.dirname(this.path)
   }
 
-  get fileFullPath() {
+  get fileFullPath(): string {
     return this.pathSystem.join(this.basePath, this.path)
   }
 
-  get durectoryPath() {
+  get durectoryPath(): string {
     return this.pathSystem.dirname(this.path)
   }
 
-  directory() {
+  directory(): DocDirectoryReference {
     return new DocDirectoryReference({
       archiveDirectoryName: "_",
       indexFileName: "index.md",
@@ -57,7 +57,7 @@ export class DocFileUnknownReference {
     })
   }
 
-  async read() {
+  async read(): Promise<Error | DocFileMdEntity | DocFileUnknownEntity> {
     const content = await this.fileSystem.readFile(this.path)
 
     if (content === null) {
@@ -101,12 +101,15 @@ export class DocFileUnknownReference {
   /**
    * ファイルの内容を読み込む
    */
-  async readContent() {
+  async readContent(): Promise<Error | string> {
     const entity = await this.read()
     if (entity instanceof Error) {
       return entity
     }
-    return entity.value.content
+    if (typeof entity.value.content === "string") {
+      return entity.value.content
+    }
+    return entity.value.content.body
   }
 
   /**
@@ -133,8 +136,8 @@ export class DocFileUnknownReference {
   /**
    * ファイルを削除
    */
-  async delete(): Promise<void> {
-    await this.fileSystem.deleteFile(this.path)
+  async delete(): Promise<Error | null> {
+    return await this.fileSystem.deleteFile(this.path)
   }
 
   /**
