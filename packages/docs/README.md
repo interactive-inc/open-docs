@@ -3,6 +3,8 @@
 技術仕様書、製品資料など、Markdownで記述された資料をリポジトリで管理する際に、それらを効率的に読み書きするためのAPIを提供します。
 
 ```ts
+import { DocClient, DocFileSystem, DocPathSystem } from "@interactive-inc/docs"
+
 const docClient = new DocClient({
   fileSystem: new DocFileSystem({
     basePath: "/docs", // リポジトリ内のドキュメントルート
@@ -33,8 +35,6 @@ npm install @interactive-inc/docs
 
 このライブラリは、Markdownファイルを構造化されたディレクトリでの動作を想定しています。
 
-### ディレクトリ構造の例
-
 以下は製品仕様書を管理する場合の一例です。ディレクトリ構造は自由に設計できます：
 
 ```
@@ -54,15 +54,7 @@ docs/                   # ドキュメントルート（任意の名前）
 └── index.md            # ルートドキュメント
 ```
 
-```ts
-const fileRefs = docClient.directory("products/product-1/features").files()
-
-for (const fileRef of fileRefs) {
-  const entity = await fileRef.read()
-  if (entity instanceof Error) throw entity
-  console.log(entity.content.body)
-}
-```
+## 機能
 
 ### アーカイブシステム
 
@@ -78,7 +70,7 @@ const fileRef = docClient.directory("specs/v1").mdFile("deprecated-api.md")
 await fileRef.archive()
 ```
 
-### FrontMatterによるメタデータ管理
+### メタデータ管理
 
 各Markdownファイルの先頭にYAML形式でメタデータを記述：
 
@@ -94,6 +86,8 @@ is-done: false
 ---
 
 # ログイン機能
+
+説明...
 
 本文...
 ```
@@ -111,37 +105,59 @@ if (file instanceof Error) throw file
 // "ログイン機能"
 console.log(file.content.frontMatter.title)
 
-// "2025.01"
-console.log(file.content.frontMatter.milestone)
-
 // ["authentication", "security"]
 console.log(file.content.frontMatter.features)
 ```
 
 ### ファイル間のリレーション
 
-FrontMatterを使用して、ドキュメント間の関連を定義:
+FrontMatterとスキーマを使用して、ドキュメント間の関連を定義できます。
+
+#### スキーマの定義（index.md）
 
 ```markdown
 ---
-# pages/login-page.md
-title: ログイン画面
-features:
-  - login
-  - password-reset
+title: 機能一覧
+schema:
+  page:
+    type: relation
+    path: "../pages"
+    title: 関連ページ
+    required: false
+  tags:
+    type: multi-relation
+    path: "../tags"
+    title: タグ
+    required: false
 ---
 ```
 
+#### リレーションの使用
+
+features/login.md
+
+```markdown
+---
+title: ログイン機能
+page: login-page
+tags:
+  - authentication
+  - security
+---
+```
+
+#### 使い方
+
 ```ts
-// ページが参照している機能を取得
-const pageRef = docClient.directory("pages").mdFile("login-page.md")
+const featureRef = docClient.directory("features").mdFile("login.md")
 
-const page = await pageRef.read()
+const relatedTags = await featureRef.relations("tags")
 
-if (page instanceof Error) throw page
-
-const featureIds = page.content.frontMatter.value.features || []
-// ["login", "password-reset"]
+for (const tagRef of relatedTags) {
+  const tagEntity = await tagRef.read()
+  if (tagEntity instanceof Error) continue
+  console.log(tagEntity.content.title)
+}
 ```
 
 ## 使い方
