@@ -9,43 +9,49 @@ import { factory } from "../utils/factory"
 /**
  * GET /api/directories/:path - ディレクトリデータ取得（ディレクトリ専用）
  */
-export const GET = factory.createHandlers(async (c) => {
-  const rawPath = c.req.param("path")
+export const GET = factory.createHandlers(
+  zValidator("param", z.object({ path: z.string() })),
+  async (c) => {
+    const param = c.req.valid("param")
 
-  const currentPath = rawPath && typeof rawPath === "string" ? rawPath : ""
+    const rawPath = param.path
 
-  if (currentPath === "/") {
-    throw new HTTPException(400, { message: "パスが無効です。" })
-  }
+    const currentPath = rawPath && typeof rawPath === "string" ? rawPath : ""
 
-  const engine = docClient()
+    if (currentPath === "/") {
+      throw new HTTPException(400, { message: "パスが無効です。" })
+    }
 
-  const directory = engine.directory(currentPath)
+    const engine = docClient()
 
-  const files = await directory.readFiles()
+    const directory = engine.directory(currentPath)
 
-  const indexFile = await directory.indexFile().read()
+    const files = await directory.readFiles()
 
-  const relations = await directory.indexFile().readRelations()
+    const indexFile = await directory.indexFile().read()
 
-  const json = zDirectoryJson.parse({
-    cwd: cwd(),
-    files: files.map((file) => {
-      return file.toJson()
-    }),
-    indexFile: indexFile.toJson(),
-    relations: relations.map((relation) => {
-      return relation.toJson()
-    }),
-  } satisfies z.infer<typeof zDirectoryJson>)
+    const relations = await directory.indexFile().readRelations()
 
-  return c.json(json)
-})
+    const json = zDirectoryJson.parse({
+      cwd: cwd(),
+      files: files.map((file) => {
+        return file.toJson()
+      }),
+      indexFile: indexFile.toJson(),
+      relations: relations.map((relation) => {
+        return relation.toJson()
+      }),
+    } satisfies z.infer<typeof zDirectoryJson>)
+
+    return c.json(json)
+  },
+)
 
 /**
  * ディレクトリのプロパティ（index.mdのフロントマター）を更新する
  */
 export const PUT = factory.createHandlers(
+  zValidator("param", z.object({ path: z.string().nullable() })),
   zValidator(
     "json",
     z.object({
@@ -58,8 +64,10 @@ export const PUT = factory.createHandlers(
   async (c) => {
     const body = c.req.valid("json")
 
-    const rawPath = c.req.param("path")
-    // pathパラメータが文字列であることを確認、デフォルトは空文字列
+    const param = c.req.valid("param")
+
+    const rawPath = param.path
+
     let directoryPath = rawPath && typeof rawPath === "string" ? rawPath : ""
 
     // "/" を空文字列に正規化（ルートディレクトリの場合）

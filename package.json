@@ -8,7 +8,6 @@
     "start": "bun run index",
     "build": "bun run --cwd packages/docs build && bun run --cwd packages/docs-router build && bun run --cwd packages/docs-client build",
     "dev:client": "bun run --cwd packages/docs-client dev",
-    "dev:server": "bun run --cwd packages/docs-router dev",
     "dev": "bun run index.dev"
   },
   "workspaces": [
@@ -17,10 +16,7 @@
     "packages/docs"
   ],
   "dependencies": {
-    "@hono/node-server": "^1.14.4",
-    "@modelcontextprotocol/sdk": "^1.13.0",
-    "hono": "^4.8.3",
-    "zod": "^3.25.67"
+    "@modelcontextprotocol/sdk": "^1.13.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.0.6",

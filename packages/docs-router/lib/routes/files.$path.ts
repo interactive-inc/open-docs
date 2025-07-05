@@ -9,35 +9,41 @@ import { factory } from "../utils/factory"
  * @param path ファイルパス
  * @returns ファイル情報とコンテンツ
  */
-export const GET = factory.createHandlers(async (c) => {
-  const rawPath = c.req.param("path")
+export const GET = factory.createHandlers(
+  zValidator("param", z.object({ path: z.string() })),
+  async (c) => {
+    const param = c.req.valid("param")
 
-  // pathパラメータが文字列であることを確認
-  if (!rawPath || typeof rawPath !== "string") {
-    throw new HTTPException(400, {
-      message: "Path parameter is required and must be a string",
-    })
-  }
+    const rawPath = param.path
 
-  const filePath = rawPath.startsWith("/") ? rawPath.slice(1) : rawPath
+    // pathパラメータが文字列であることを確認
+    if (!rawPath || typeof rawPath !== "string") {
+      throw new HTTPException(400, {
+        message: "Path parameter is required and must be a string",
+      })
+    }
 
-  const client = docClient()
+    const filePath = rawPath.startsWith("/") ? rawPath.slice(1) : rawPath
 
-  const file = client.mdFile(filePath)
+    const client = docClient()
 
-  const entity = await file.read()
+    const file = client.mdFile(filePath)
 
-  if (entity instanceof Error) {
-    throw new HTTPException(404, { message: entity.message })
-  }
+    const entity = await file.read()
 
-  return c.json(entity.toJson())
-})
+    if (entity instanceof Error) {
+      throw new HTTPException(404, { message: entity.message })
+    }
+
+    return c.json(entity.toJson())
+  },
+)
 
 /**
  * ファイルのプロパティ（フロントマター）またはコンテンツを更新する
  */
 export const PUT = factory.createHandlers(
+  zValidator("param", z.object({ path: z.string() })),
   zValidator(
     "json",
     z.object({
@@ -51,7 +57,9 @@ export const PUT = factory.createHandlers(
   async (c) => {
     const body = c.req.valid("json")
 
-    const rawPath = c.req.param("path")
+    const param = c.req.valid("param")
+
+    const rawPath = param.path
 
     // pathパラメータが文字列であることを確認
     if (!rawPath || typeof rawPath !== "string") {
@@ -175,35 +183,40 @@ export const PUT = factory.createHandlers(
 /**
  * ファイルを削除する
  */
-export const DELETE = factory.createHandlers(async (c) => {
-  const rawPath = c.req.param("path")
+export const DELETE = factory.createHandlers(
+  zValidator("param", z.object({ path: z.string() })),
+  async (c) => {
+    const param = c.req.valid("param")
 
-  // pathパラメータが文字列であることを確認
-  if (!rawPath || typeof rawPath !== "string") {
-    throw new HTTPException(400, {
-      message: "Path parameter is required and must be a string",
-    })
-  }
+    const rawPath = param.path
 
-  const filePath = rawPath.startsWith("/") ? rawPath.slice(1) : rawPath
+    // pathパラメータが文字列であることを確認
+    if (!rawPath || typeof rawPath !== "string") {
+      throw new HTTPException(400, {
+        message: "Path parameter is required and must be a string",
+      })
+    }
 
-  const client = docClient()
+    const filePath = rawPath.startsWith("/") ? rawPath.slice(1) : rawPath
 
-  const fileRef = client.mdFile(filePath)
+    const client = docClient()
 
-  const exists = await fileRef.exists()
+    const fileRef = client.mdFile(filePath)
 
-  if (!exists) {
-    throw new HTTPException(404, {
-      message: `ファイルが見つかりません: ${filePath}`,
-    })
-  }
+    const exists = await fileRef.exists()
 
-  const result = await fileRef.delete()
+    if (!exists) {
+      throw new HTTPException(404, {
+        message: `ファイルが見つかりません: ${filePath}`,
+      })
+    }
 
-  if (result instanceof Error) {
-    throw new HTTPException(500, { message: result.message })
-  }
+    const result = await fileRef.delete()
 
-  return c.json({ success: true })
-})
+    if (result instanceof Error) {
+      throw new HTTPException(500, { message: result.message })
+    }
+
+    return c.json({ success: true })
+  },
+)

@@ -1,4 +1,7 @@
 import fs from "node:fs/promises"
+import { routes } from "@interactive-inc/docs-router"
+import { Hono } from "hono"
+import { cors } from "hono/cors"
 import { createFactory } from "hono/factory"
 
 const factory = createFactory()
@@ -32,3 +35,11 @@ export const handlers = factory.createHandlers(async (c) => {
 
   return c.html(text)
 })
+
+export const app = new Hono()
+
+app.use(cors())
+
+app.route("/api", routes)
+
+app.get("*", ...handlers)

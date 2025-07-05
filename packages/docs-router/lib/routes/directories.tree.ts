@@ -1,4 +1,3 @@
-import type { DocTreeDirectoryNode } from "@interactive-inc/docs"
 import { docClient } from "../utils/doc-client"
 import { factory } from "../utils/factory"
 
@@ -9,7 +8,7 @@ import { factory } from "../utils/factory"
 export const GET = factory.createHandlers(async (c) => {
   const client = docClient()
 
-  const directoryTree: DocTreeDirectoryNode[] = await client.directoryTree()
+  const directoryTree = await client.directoryTree()
 
   return c.json(directoryTree)
 })

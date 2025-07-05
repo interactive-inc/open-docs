@@ -9,8 +9,8 @@
     "build": "vite build && tsgo -p tsconfig.index.json"
   },
   "dependencies": {
-    "@hono/node-server": "^1.14.4",
-    "hono": "^4.8.3"
+    "@hono/node-server": "^1.15.0",
+    "hono": "^4.8.4"
   },
   "devDependencies": {
     "@dnd-kit/core": "^6.3.1",
