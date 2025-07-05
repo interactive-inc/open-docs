@@ -1,3 +1,5 @@
+import { DocClient, DocFileSystem, DocPathSystem } from "@interactive-inc/docs"
+import { contextStorage } from "hono/context-storage"
 import { HTTPException } from "hono/http-exception"
 import {
   GET as getDirectory,
@@ -12,10 +14,11 @@ import {
 } from "./routes/files.$path"
 import { factory } from "./utils/factory"
 
-/**
- * Docs API router application
- */
-export const routes = factory
+type Props = {
+  basePath: string
+}
+
+const _routes = factory
   .createApp()
   .get("/directories", ...getDirectory)
   .put("/directories", ...updateDirectory)
@@ -27,19 +30,47 @@ export const routes = factory
   .get("/files/:path{.+}", ...getFile)
   .delete("/files/:path{.+}", ...deleteFile)
 
-routes.onError((err, c) => {
-  console.error("API Error:", err)
+/**
+ * Docs API router application
+ */
+export function routes(props: Props) {
+  const appRoutes = factory
+    .createApp()
+    .use(contextStorage())
+    .use((c, next) => {
+      const pathSystem = new DocPathSystem()
+      const fileSystem = new DocFileSystem({
+        basePath: props.basePath,
+        pathSystem,
+      })
+      const client = new DocClient({
+        fileSystem,
+      })
+      c.set("client", client)
+      return next()
+    })
+    .route("/", _routes)
 
-  if (err instanceof HTTPException) {
-    return c.json({ error: err.message }, err.status)
-  }
+  appRoutes.onError((err, c) => {
+    console.error("API Error:", err)
 
-  return c.json(
-    {
-      error: "Internal server error",
-      message: err.message,
-      stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
-    },
-    500,
-  )
-})
+    if (err instanceof HTTPException) {
+      return c.json({ error: err.message }, err.status)
+    }
+
+    return c.json(
+      {
+        error: "Internal server error",
+        message: err.message,
+        stack: err.stack,
+      },
+      500,
+    )
+  })
+
+  return appRoutes
+}
+
+const apiRoutes = factory.createApp().route("/api", _routes)
+
+export type Routes = typeof apiRoutes

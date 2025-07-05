@@ -1,26 +1,10 @@
-import { hc } from "hono/client"
-import type { app } from "@/lib/api-route"
+import { client } from "@interactive-inc/docs-router/client"
 
-const baseUrl = "http://localhost:4244"
+interface Window {
+  __API_BASE_URL__: string | undefined
+}
+declare var window: Window
 
-export const apiClient = hc<typeof app>(baseUrl, {
-  async fetch(input: RequestInfo | URL, requestInit?: RequestInit) {
-    const resp = await fetch(input, {
-      ...requestInit,
-      // credentials: "include",
-      mode: "cors",
-    })
+const baseUrl = window.__API_BASE_URL__ || "http://localhost:4244"
 
-    if (resp.ok) {
-      return resp
-    }
-
-    const error = await resp.json()
-
-    if (typeof error === "object" && error !== null && "message" in error) {
-      throw new Error(error.message)
-    }
-
-    throw new Error(resp.statusText)
-  },
-})
+export const apiClient = client(baseUrl)

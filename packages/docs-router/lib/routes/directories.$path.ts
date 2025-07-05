@@ -3,14 +3,13 @@ import { HTTPException } from "hono/http-exception"
 import { z } from "zod/v4"
 import { zDirectoryJson } from "../models"
 import { cwd } from "../utils/cwd"
-import { docClient } from "../utils/doc-client"
 import { factory } from "../utils/factory"
 
 /**
  * GET /api/directories/:path - ディレクトリデータ取得（ディレクトリ専用）
  */
 export const GET = factory.createHandlers(
-  zValidator("param", z.object({ path: z.string() })),
+  zValidator("param", z.object({ path: z.string().optional() })),
   async (c) => {
     const param = c.req.valid("param")
 
@@ -22,9 +21,7 @@ export const GET = factory.createHandlers(
       throw new HTTPException(400, { message: "パスが無効です。" })
     }
 
-    const engine = docClient()
-
-    const directory = engine.directory(currentPath)
+    const directory = c.var.client.directory(currentPath)
 
     const files = await directory.readFiles()
 
@@ -75,9 +72,7 @@ export const PUT = factory.createHandlers(
       directoryPath = ""
     }
 
-    const client = docClient()
-
-    const directoryRef = client.directory(directoryPath)
+    const directoryRef = c.var.client.directory(directoryPath)
 
     const indexFileRef = directoryRef.indexFile()
 

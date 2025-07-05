@@ -1,12 +1,13 @@
 {
   "name": "@interactive-inc/docs-client",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "type": "module",
   "scripts": {
     "check": "tsgo --noEmit",
     "dev": "bun --bun vite",
     "build:app": "vite build",
-    "build": "vite build && tsgo -p tsconfig.index.json"
+    "build:lib": "bun build lib/index.ts --target=node --outfile=build/index.js",
+    "build": "rm -rf build && bun run build:app && bun run build:lib"
   },
   "dependencies": {
     "@hono/node-server": "^1.15.0",
@@ -52,6 +53,10 @@
     ".": "./build/index.js"
   },
   "files": [
-    "build/"
-  ]
+    "build/",
+    "bin/"
+  ],
+  "bin": {
+    "docs": "bin/docs.js"
+  }
 }

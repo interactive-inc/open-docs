@@ -1,11 +1,11 @@
 {
   "name": "@interactive-inc/docs-router",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "scripts": {
     "check": "tsgo --noEmit",
-    "build": "tsgo",
-    "dev": "NODE_ENV=development bun run server.ts --watch"
+    "build": "rm -rf build && tsgo",
+    "dev": "bun run server.ts --watch"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.7.0",

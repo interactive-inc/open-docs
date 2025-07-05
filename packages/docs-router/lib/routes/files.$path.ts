@@ -1,7 +1,6 @@
 import { zValidator } from "@hono/zod-validator"
 import { HTTPException } from "hono/http-exception"
 import { z } from "zod/v4"
-import { docClient } from "../utils/doc-client"
 import { factory } from "../utils/factory"
 
 /**
@@ -10,7 +9,7 @@ import { factory } from "../utils/factory"
  * @returns ファイル情報とコンテンツ
  */
 export const GET = factory.createHandlers(
-  zValidator("param", z.object({ path: z.string() })),
+  zValidator("param", z.object({ path: z.string().optional() })),
   async (c) => {
     const param = c.req.valid("param")
 
@@ -25,9 +24,7 @@ export const GET = factory.createHandlers(
 
     const filePath = rawPath.startsWith("/") ? rawPath.slice(1) : rawPath
 
-    const client = docClient()
-
-    const file = client.mdFile(filePath)
+    const file = c.var.client.mdFile(filePath)
 
     const entity = await file.read()
 
@@ -70,9 +67,7 @@ export const PUT = factory.createHandlers(
 
     const filePath = rawPath.startsWith("/") ? rawPath.slice(1) : rawPath
 
-    const client = docClient()
-
-    const fileRef = client.mdFile(filePath)
+    const fileRef = c.var.client.mdFile(filePath)
 
     const exists = await fileRef.exists()
 
@@ -106,7 +101,7 @@ export const PUT = factory.createHandlers(
     }
 
     if (body.properties !== null) {
-      const indexFileRef = client.file(filePath).directory().indexFile()
+      const indexFileRef = c.var.client.file(filePath).directory().indexFile()
       const indexFile = await indexFileRef.read()
       if (indexFile instanceof Error) {
         throw new HTTPException(500, {
@@ -130,7 +125,7 @@ export const PUT = factory.createHandlers(
 
       // 説明を更新
       if (body.description !== null) {
-        const pathSystem = client.pathSystem
+        const pathSystem = c.var.client.pathSystem
         const fileName = pathSystem.basename(filePath, ".md")
         const defaultTitle = fileName === "index" ? "概要" : fileName
         updatedContent = updatedContent.withDescription(
@@ -156,7 +151,7 @@ export const PUT = factory.createHandlers(
 
       // 説明を更新
       if (body.description !== null) {
-        const pathSystem = client.pathSystem
+        const pathSystem = c.var.client.pathSystem
         const fileName = pathSystem.basename(filePath, ".md")
         const defaultTitle = fileName === "index" ? "概要" : fileName
         updatedContent = updatedContent.withDescription(
@@ -199,9 +194,7 @@ export const DELETE = factory.createHandlers(
 
     const filePath = rawPath.startsWith("/") ? rawPath.slice(1) : rawPath
 
-    const client = docClient()
-
-    const fileRef = client.mdFile(filePath)
+    const fileRef = c.var.client.mdFile(filePath)
 
     const exists = await fileRef.exists()
 

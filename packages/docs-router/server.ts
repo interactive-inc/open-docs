@@ -1,14 +1,22 @@
+import path from "node:path"
 import { Hono } from "hono"
 import { cors } from "hono/cors"
 import { routes } from "./lib"
 
-export const app = new Hono().use(cors()).route("/api", routes)
+const app = new Hono()
 
-const port = process.env.PORT || 4244
+app.use(cors())
 
-console.log(`🚀 Server starting on http://localhost:${port}`)
+app.get("/", (c) => {
+  return c.json({ message: "Welcome to the Docs API" })
+})
+
+app.route(
+  "/api",
+  routes({ basePath: path.join(process.cwd(), "..", "..", "docs") }),
+)
 
 export default {
-  port,
+  port: 4244,
   fetch: app.fetch,
 }

@@ -1,7 +1,6 @@
 import { zValidator } from "@hono/zod-validator"
 import { HTTPException } from "hono/http-exception"
 import { z } from "zod/v4"
-import { docClient } from "../utils/doc-client"
 import { factory } from "../utils/factory"
 
 /**
@@ -18,7 +17,7 @@ export const POST = factory.createHandlers(
   async (c) => {
     const body = c.req.valid("json")
 
-    const directory = docClient().directory(body.directoryPath)
+    const directory = c.var.client.directory(body.directoryPath)
 
     const fileRef = await directory.createMdFile(body.fileName)
 

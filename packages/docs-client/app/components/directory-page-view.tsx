@@ -115,8 +115,6 @@ export function DirectoryPageView(props: Props) {
   }
 
   const handleIconSelect = async (newIcon: string) => {
-    console.log("Selected icon:", newIcon)
-    console.log("Current path:", props.currentPath)
     setIcon(newIcon)
     try {
       const response = await apiClient.api.directories[":path{.+}"].$put({

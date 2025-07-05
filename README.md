@@ -1,1 +1,6 @@
-# Open Docs
+# @interactive-inc/docs
+
+```
+bun i
+bun run dev
+```

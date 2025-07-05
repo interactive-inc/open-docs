@@ -5,7 +5,7 @@
   "scripts": {
     "format": "biome check . --fix --unsafe",
     "claude": "claude --continue --dangerously-skip-permissions",
-    "start": "bun run index",
+    "start": "bun run --cwd packages/docs-client -p 4044",
     "build": "bun run --cwd packages/docs build && bun run --cwd packages/docs-router build && bun run --cwd packages/docs-client build",
     "dev:client": "bun run --cwd packages/docs-client dev",
     "dev": "bun run index.dev"

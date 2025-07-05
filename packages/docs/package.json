@@ -1,11 +1,10 @@
 {
   "name": "@interactive-inc/docs",
-  "version": "0.0.7",
+  "version": "0.0.9",
   "type": "module",
   "scripts": {
     "check": "tsgo --noEmit",
-    "build": "tsgo",
-    "publish": "npm publish"
+    "build": "rm -rf build && tsgo"
   },
   "dependencies": {
     "yaml": "^2.8.0",
