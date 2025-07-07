@@ -97,12 +97,11 @@ export class DocSchemaFieldFactory {
       return this.createDefaultTextField()
     }
 
-    const fieldObj = field
-    const fieldType = this.getFieldProperty(fieldObj, "type")
-    const fieldRequired = this.getFieldProperty(fieldObj, "required")
-    const fieldTitle = this.getFieldProperty(fieldObj, "title")
-    const fieldDescription = this.getFieldProperty(fieldObj, "description")
-    const fieldDefault = this.getFieldProperty(fieldObj, "default")
+    const fieldType = this.getFieldProperty(field, "type")
+    const fieldRequired = this.getFieldProperty(field, "required")
+    const fieldTitle = this.getFieldProperty(field, "title")
+    const fieldDescription = this.getFieldProperty(field, "description")
+    const fieldDefault = this.getFieldProperty(field, "default")
 
     // 型の正規化
     const normalizedType = this.normalizeType(fieldType)
@@ -120,7 +119,7 @@ export class DocSchemaFieldFactory {
     // 型固有のデフォルト値を追加
     return {
       ...baseField,
-      ...this.getTypeSpecificDefaults(fieldObj, typeValue),
+      ...this.getTypeSpecificDefaults(field, typeValue),
     }
   }
 
