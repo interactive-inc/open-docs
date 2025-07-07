@@ -43,3 +43,17 @@ test("DocClient - basePathを取得", () => {
 
   expect(client.basePath()).toBe("/test/docs")
 })
+
+test("DocClient - mdFileで.md拡張子を自動補完", () => {
+  const pathSystem = new DocPathSystem()
+  const fileSystem = new DocFileSystem({ basePath: "/test", pathSystem })
+  const client = new DocClient({ fileSystem })
+
+  // .md拡張子がない場合は自動で補完される
+  const fileWithoutExt = client.mdFile("foo")
+  expect(fileWithoutExt.path).toBe("foo.md")
+
+  // .md拡張子がある場合はそのまま
+  const fileWithExt = client.mdFile("bar.md")
+  expect(fileWithExt.path).toBe("bar.md")
+})

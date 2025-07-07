@@ -71,8 +71,12 @@ export class DocClient {
    * Markdownファイル参照を取得
    */
   mdFile(relativePath: string): DocFileMdReference {
+    const normalizedPath = relativePath.endsWith(".md")
+      ? relativePath
+      : `${relativePath}.md`
+
     return new DocFileMdReference({
-      path: relativePath,
+      path: normalizedPath,
       fileSystem: this.fileSystem,
       pathSystem: this.pathSystem,
     })
