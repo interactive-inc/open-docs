@@ -240,14 +240,14 @@ test("multi-string型をmulti-textに正規化する", () => {
 
 test("undefinedプロパティがnullに変換される", () => {
   const factory = new DocSchemaFieldFactory()
-  
+
   // titleプロパティが存在しない場合
   const field = factory.fromUnknown("field", {
     type: "text",
     required: true,
     // title: undefined (プロパティが存在しない)
   })
-  
+
   expect(field.title).toBe("")
   expect(field.description).toBe("")
 })

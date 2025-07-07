@@ -1,12 +1,7 @@
-build/*.test.ts
-build/*.spec.ts
-lib/
-
-.gitignore
 .npmignore
-index.html
-tsconfig.json
+build/**/*.test.ts
+lib
+node_modules
+README.md
 tsconfig.json
 tsconfig.tsbuildinfo
-vite-env.d.ts
-vite.config.ts

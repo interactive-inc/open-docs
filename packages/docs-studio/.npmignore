@@ -1,0 +1,12 @@
+build/*.test.ts
+build/*.spec.ts
+lib/
+
+.gitignore
+.npmignore
+index.html
+tsconfig.json
+tsconfig.json
+tsconfig.tsbuildinfo
+vite-env.d.ts
+vite.config.ts

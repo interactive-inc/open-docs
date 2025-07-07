@@ -1,38 +1,41 @@
-import { parseArgs } from "node:util"
-import { serve } from "@hono/node-server"
-import { createApp } from "./app"
-
-const help = `Usage:
-  docs [<docs-path>] -p <port>
-  docs --help`
-
-const args = parseArgs({
-  args: process.argv.slice(2),
-  options: {
-    help: { type: "boolean", short: "h" },
-    version: { type: "boolean", short: "v" },
-    port: { type: "string", short: "p", default: "4244" },
-  },
-  strict: true,
-  allowPositionals: true,
-})
-
-if (args.values.help) {
-  showUsage()
-  process.exit(0)
-}
-
-const app = createApp({
-  docsPath: args.positionals[0] ?? "docs",
-  apiBaseUrl: `http://localhost:${args.values.port}`,
-})
-
-const port = args.values.port ? parseInt(args.values.port, 10) : 4244
-
-serve({ fetch: app.fetch, port }, (info) => {
-  console.log(`Server running at http://localhost:${info.port}`)
-})
-
-function showUsage(): void {
-  console.log(help)
-}
+export { DocClient } from "./doc-client"
+export { DocDirectoryReference } from "./doc-directory-reference"
+export { DocFileIndexReference } from "./doc-file-index-reference"
+export { DocFileMdReference } from "./doc-file-md-reference"
+export { DocFileRelationReference } from "./doc-file-relation-reference"
+export { DocFileSystem } from "./doc-file-system"
+export { DocFileTreeSystem as FileTreeSystem } from "./doc-file-tree-system"
+export { DocFileUnknownReference } from "./doc-file-unknown-reference"
+export { DocMarkdownSystem } from "./doc-markdown-system"
+export { DocPathSystem } from "./doc-path-system"
+export { DocFileIndexEntity } from "./entities/doc-file-index-entity"
+export { DocFileMdEntity } from "./entities/doc-file-md-entity"
+export { DocFileUnknownEntity } from "./entities/doc-file-unknown-entity"
+export * from "./models"
+export type * from "./types"
+export { DocContentMdValue } from "./values/doc-content-md-value"
+export { DocDirectoryPathValue } from "./values/doc-directory-path-value"
+export { DocFileContentIndexValue } from "./values/doc-file-content-index-value"
+export { DocFileContentMdValue } from "./values/doc-file-content-md-value"
+export { DocFilePathValue } from "./values/doc-file-path-value"
+export { DocFrontMatterIndexValue } from "./values/doc-front-matter-index-value"
+export { DocFrontMatterMdValue } from "./values/doc-front-matter-md-value"
+export { DocRelationFileValue } from "./values/doc-relation-file-value"
+export { DocRelationValue } from "./values/doc-relation-value"
+export { DocSchemaFieldBooleanMultipleValue } from "./values/doc-schema-field-boolean-multiple-value"
+export { DocSchemaFieldBooleanSingleValue } from "./values/doc-schema-field-boolean-single-value"
+export { DocSchemaFieldFactory } from "./values/doc-schema-field-factory"
+export { DocSchemaFieldNumberMultipleValue } from "./values/doc-schema-field-number-multiple-value"
+export { DocSchemaFieldNumberSingleValue } from "./values/doc-schema-field-number-single-value"
+export { DocSchemaFieldRelationMultipleValue } from "./values/doc-schema-field-relation-multiple-value"
+export { DocSchemaFieldRelationSingleValue } from "./values/doc-schema-field-relation-single-value"
+export { DocSchemaFieldSelectNumberMultipleValue } from "./values/doc-schema-field-select-number-multiple-value"
+export { DocSchemaFieldSelectNumberSingleValue } from "./values/doc-schema-field-select-number-single-value"
+export { DocSchemaFieldSelectTextMultipleValue } from "./values/doc-schema-field-select-text-multiple-value"
+export { DocSchemaFieldSelectTextSingleValue } from "./values/doc-schema-field-select-text-single-value"
+export { DocSchemaFieldTextMultipleValue } from "./values/doc-schema-field-text-multiple-value"
+export { DocSchemaFieldTextSingleValue } from "./values/doc-schema-field-text-single-value"
+export type { DocSchemaFieldValue } from "./values/doc-schema-field-value"
+export { DocSchemaValue } from "./values/doc-schema-value"
+export { DocTreeDirectoryNodeValue } from "./values/doc-tree-directory-node-value"
+export { DocTreeFileNodeValue } from "./values/doc-tree-file-node-value"

@@ -2,7 +2,7 @@ import {
   zDocFile,
   zDocFileIndex,
   zDocRelation,
-} from "@interactive-inc/docs/models"
+} from "@interactive-inc/docs-client"
 import { z } from "zod/v4"
 
 // serverパッケージ固有の定義

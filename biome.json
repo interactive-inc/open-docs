@@ -25,7 +25,6 @@
       "**/*.json",
       "!**/build/**/*",
       "!**/route-tree.gen.ts"
-    ],
-    "experimentalScannerIgnores": []
+    ]
   }
 }

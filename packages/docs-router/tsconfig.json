@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "composite": true,
     "declaration": true,
     "declarationMap": true,
     "esModuleInterop": true,
@@ -14,5 +13,5 @@
     "target": "esnext"
   },
   "include": ["lib/**/*.ts"],
-  "references": [{ "path": "../docs" }]
+  "references": [{ "path": "../docs-client" }]
 }

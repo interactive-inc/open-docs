@@ -3,7 +3,7 @@
 技術仕様書、製品資料など、Markdownで記述された資料をリポジトリで管理する際に、それらを効率的に読み書きするためのAPIを提供します。
 
 ```ts
-import { DocClient, DocFileSystem, DocPathSystem } from "@interactive-inc/docs"
+import { DocClient, DocFileSystem, DocPathSystem } from "@interactive-inc/docs-client"
 
 const docClient = new DocClient({
   fileSystem: new DocFileSystem({
@@ -165,7 +165,7 @@ for (const tagRef of relatedTags) {
 ### 初期設定
 
 ```ts
-import { DocClient, DocFileSystem, DocPathSystem } from "@interactive-inc/docs"
+import { DocClient, DocFileSystem, DocPathSystem } from "@interactive-inc/docs-client"
 
 const docClient = new DocClient({
   fileSystem: new DocFileSystem({

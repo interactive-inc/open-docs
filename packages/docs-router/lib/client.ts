@@ -1,5 +1,5 @@
 import { hc } from "hono/client"
-import type { Routes } from "./index"
+import type { Routes } from "./routes"
 
 export function client(baseUrl: string) {
   return hc<Routes>(baseUrl, {

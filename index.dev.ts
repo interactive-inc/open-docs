@@ -8,7 +8,7 @@ const concurrentlyResult = concurrently(
       prefixColor: "yellow",
     },
     {
-      command: "bun run --cwd packages/docs-client dev",
+      command: "bun run --cwd packages/docs-studio dev",
       name: "🐦",
       prefixColor: "blue",
     },

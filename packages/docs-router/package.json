@@ -1,15 +1,16 @@
 {
   "name": "@interactive-inc/docs-router",
-  "version": "0.0.2",
+  "version": "0.0.9",
   "type": "module",
   "scripts": {
     "check": "tsgo --noEmit",
-    "build": "rm -rf build && tsgo",
-    "dev": "bun run server.ts --watch"
+    "build": "tsup",
+    "dev": "bun run server.ts --watch",
+    "deploy": "bun run build && npm publish"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.7.0",
-    "@interactive-inc/docs": "workspace:*",
+    "@interactive-inc/docs-client": "latest",
     "hono": "^4.8.4",
     "zod": "^3.25.74"
   },
@@ -21,6 +22,6 @@
   "module": "build/index.js",
   "exports": {
     ".": "./build/index.js",
-    "./*": "./build/*.js"
+    "./client": "./build/client.js"
   }
 }

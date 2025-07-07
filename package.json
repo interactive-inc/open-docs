@@ -6,12 +6,13 @@
     "format": "biome check . --fix --unsafe",
     "claude": "claude --continue --dangerously-skip-permissions",
     "start": "bun run --cwd packages/docs-client -p 4044",
-    "build": "bun run --cwd packages/docs build && bun run --cwd packages/docs-router build && bun run --cwd packages/docs-client build",
     "dev:client": "bun run --cwd packages/docs-client dev",
-    "dev": "bun run index.dev"
+    "dev": "bun run index.dev",
+    "check": "bun --cwd packages/docs-client check && bun --cwd packages/docs-router check && bun --cwd packages/docs-studio check && bun --cwd packages/docs check"
   },
   "workspaces": [
     "packages/docs-client",
+    "packages/docs-studio",
     "packages/docs-router",
     "packages/docs"
   ],
@@ -25,6 +26,7 @@
     "@typescript/native-preview": "^7.0.0-dev.20250617.1",
     "concurrently": "^9.1.2",
     "esbuild": "^0.25.5",
+    "tsup": "^8.5.0",
     "typescript": "^5.8.3"
   }
 }
