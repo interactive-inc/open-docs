@@ -173,15 +173,18 @@ test("fromUnknownメソッドで未検証データから生成できる", () => 
 test("型固有のデフォルト値が設定される", () => {
   const factory = new DocSchemaFieldFactory()
 
-  // リレーション型でpathが無い場合
+  // リレーション型でpathが設定されている場合
   const relation = factory.fromUnknown("rel", {
     type: "relation",
     required: true,
     title: null,
     description: null,
     default: null,
+    path: "some/valid/path",
   })
-  expect((relation as DocSchemaFieldRelationSingleValue).path).toBe("")
+  expect((relation as DocSchemaFieldRelationSingleValue).path).toBe(
+    "some/valid/path",
+  )
 
   // 選択型でoptionsが無い場合
   const select = factory.fromUnknown("sel", {
@@ -192,6 +195,33 @@ test("型固有のデフォルト値が設定される", () => {
     default: null,
   })
   expect((select as DocSchemaFieldSelectTextSingleValue).options).toEqual([])
+})
+
+test("リレーション型でpathが空の場合はエラーが発生する", () => {
+  const factory = new DocSchemaFieldFactory()
+
+  // pathが空文字列の場合
+  expect(() => {
+    factory.fromUnknown("rel", {
+      type: "relation",
+      required: true,
+      title: null,
+      description: null,
+      default: null,
+      path: "",
+    })
+  }).toThrow()
+
+  // pathが未定義の場合
+  expect(() => {
+    factory.fromUnknown("rel", {
+      type: "relation",
+      required: true,
+      title: null,
+      description: null,
+      default: null,
+    })
+  }).toThrow()
 })
 
 test("multi-string型をmulti-textに正規化する", () => {

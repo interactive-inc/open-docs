@@ -1,19 +1,6 @@
-import {
-  zDocSchemaField,
-  zDocSchemaFieldBoolean,
-  zDocSchemaFieldMultiBoolean,
-  zDocSchemaFieldMultiNumber,
-  zDocSchemaFieldMultiRelation,
-  zDocSchemaFieldMultiSelectNumber,
-  zDocSchemaFieldMultiSelectText,
-  zDocSchemaFieldMultiText,
-  zDocSchemaFieldNumber,
-  zDocSchemaFieldRelation,
-  zDocSchemaFieldSelectNumber,
-  zDocSchemaFieldSelectText,
-  zDocSchemaFieldText,
-} from "../models"
+import { zDocSchemaField } from "../models"
 import type { DocSchemaField } from "../types"
+
 import { DocSchemaFieldBooleanMultipleValue } from "./doc-schema-field-boolean-multiple-value"
 import { DocSchemaFieldBooleanSingleValue } from "./doc-schema-field-boolean-single-value"
 import { DocSchemaFieldNumberMultipleValue } from "./doc-schema-field-number-multiple-value"
@@ -41,75 +28,52 @@ export class DocSchemaFieldFactory {
    * スキーマエントリから適切な型のフィールドを生成
    */
   fromSchemaEntry(key: string, field: DocSchemaField): DocSchemaFieldValue {
-    // データが完全であることを前提とする
-    const validated = field
-
-    if (validated.type === "text") {
-      const textField = zDocSchemaFieldText.parse(validated)
-      return new DocSchemaFieldTextSingleValue(key, textField)
+    if (field.type === "text") {
+      return new DocSchemaFieldTextSingleValue(key, field)
     }
 
-    if (validated.type === "multi-text") {
-      const multiTextField = zDocSchemaFieldMultiText.parse(validated)
-      return new DocSchemaFieldTextMultipleValue(key, multiTextField)
+    if (field.type === "multi-text") {
+      return new DocSchemaFieldTextMultipleValue(key, field)
     }
 
-    if (validated.type === "number") {
-      const numberField = zDocSchemaFieldNumber.parse(validated)
-      return new DocSchemaFieldNumberSingleValue(key, numberField)
+    if (field.type === "number") {
+      return new DocSchemaFieldNumberSingleValue(key, field)
     }
 
-    if (validated.type === "multi-number") {
-      const multiNumberField = zDocSchemaFieldMultiNumber.parse(validated)
-      return new DocSchemaFieldNumberMultipleValue(key, multiNumberField)
+    if (field.type === "multi-number") {
+      return new DocSchemaFieldNumberMultipleValue(key, field)
     }
 
-    if (validated.type === "boolean") {
-      const booleanField = zDocSchemaFieldBoolean.parse(validated)
-      return new DocSchemaFieldBooleanSingleValue(key, booleanField)
+    if (field.type === "boolean") {
+      return new DocSchemaFieldBooleanSingleValue(key, field)
     }
 
-    if (validated.type === "multi-boolean") {
-      const multiBooleanField = zDocSchemaFieldMultiBoolean.parse(validated)
-      return new DocSchemaFieldBooleanMultipleValue(key, multiBooleanField)
+    if (field.type === "multi-boolean") {
+      return new DocSchemaFieldBooleanMultipleValue(key, field)
     }
 
-    if (validated.type === "select-text") {
-      const selectTextField = zDocSchemaFieldSelectText.parse(validated)
-      return new DocSchemaFieldSelectTextSingleValue(key, selectTextField)
+    if (field.type === "select-text") {
+      return new DocSchemaFieldSelectTextSingleValue(key, field)
     }
 
-    if (validated.type === "select-number") {
-      const selectNumberField = zDocSchemaFieldSelectNumber.parse(validated)
-      return new DocSchemaFieldSelectNumberSingleValue(key, selectNumberField)
+    if (field.type === "select-number") {
+      return new DocSchemaFieldSelectNumberSingleValue(key, field)
     }
 
-    if (validated.type === "multi-select-text") {
-      const multiSelectTextField =
-        zDocSchemaFieldMultiSelectText.parse(validated)
-      return new DocSchemaFieldSelectTextMultipleValue(
-        key,
-        multiSelectTextField,
-      )
+    if (field.type === "multi-select-text") {
+      return new DocSchemaFieldSelectTextMultipleValue(key, field)
     }
 
-    if (validated.type === "multi-select-number") {
-      const multiSelectNumberField =
-        zDocSchemaFieldMultiSelectNumber.parse(validated)
-      return new DocSchemaFieldSelectNumberMultipleValue(
-        key,
-        multiSelectNumberField,
-      )
+    if (field.type === "multi-select-number") {
+      return new DocSchemaFieldSelectNumberMultipleValue(key, field)
     }
 
-    if (validated.type === "relation") {
-      const relationField = zDocSchemaFieldRelation.parse(validated)
-      return new DocSchemaFieldRelationSingleValue(key, relationField)
+    if (field.type === "relation") {
+      return new DocSchemaFieldRelationSingleValue(key, field)
     }
 
-    if (validated.type === "multi-relation") {
-      const multiRelationField = zDocSchemaFieldMultiRelation.parse(validated)
-      return new DocSchemaFieldRelationMultipleValue(key, multiRelationField)
+    if (field.type === "multi-relation") {
+      return new DocSchemaFieldRelationMultipleValue(key, field)
     }
 
     throw new Error("Unknown field type")
@@ -148,9 +112,9 @@ export class DocSchemaFieldFactory {
     const baseField = {
       type: normalizedType,
       required: fieldRequired ?? false,
-      title: fieldTitle !== undefined ? fieldTitle : null,
-      description: fieldDescription !== undefined ? fieldDescription : null,
-      default: fieldDefault !== undefined ? fieldDefault : null,
+      title: fieldTitle,
+      description: fieldDescription,
+      default: fieldDefault,
     }
 
     // 型固有のデフォルト値を追加
@@ -193,7 +157,7 @@ export class DocSchemaFieldFactory {
     if (Object.hasOwn(obj, key)) {
       return Object.getOwnPropertyDescriptor(obj, key)?.value
     }
-    return undefined
+    return null
   }
 
   /**
@@ -207,12 +171,12 @@ export class DocSchemaFieldFactory {
 
     // リレーション型の場合、pathが必要
     if (fieldType.isRelation) {
-      defaults.path = this.getFieldProperty(field, "path") || ""
+      defaults.path = this.getFieldProperty(field, "path") ?? ""
     }
 
     // 選択型の場合、optionsが必要
     if (fieldType.isSelect) {
-      defaults.options = this.getFieldProperty(field, "options") || []
+      defaults.options = this.getFieldProperty(field, "options") ?? []
     }
 
     return defaults

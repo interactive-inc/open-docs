@@ -331,6 +331,13 @@ export class DocFileMdReference {
   }
 
   /**
+   * 複数のリレーションを取得する
+   */
+  async relations(key: string): Promise<DocFileMdReference[]> {
+    return this.multiRelation(key)
+  }
+
+  /**
    * スキーマに基づいて複数のリレーションを取得する
    */
   async multiRelation(key: string): Promise<DocFileMdReference[]> {

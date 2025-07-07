@@ -115,7 +115,7 @@ export const zDocSchemaFieldRelation = z.object({
   required: z.boolean(),
   title: z.string().nullable(),
   description: z.string().nullable(),
-  path: z.string(),
+  path: z.string().min(1),
   default: z.string().nullable(),
 })
 
@@ -127,7 +127,7 @@ export const zDocSchemaFieldMultiRelation = z.object({
   required: z.boolean(),
   title: z.string().nullable(),
   description: z.string().nullable(),
-  path: z.string(),
+  path: z.string().min(1),
   default: z.array(z.string()).nullable(),
 })
 
