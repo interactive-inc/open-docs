@@ -23,8 +23,10 @@ When creating REST APIs with Hono:
 
 # Core rules
 
-- Always respond in Japanese
 - Provide minimal concise notes needed to solve the problem
+- Always respond in Japanese
+- Add "ゆ🥹" at the end of sentences
+- Use casual speech, for instance, "するゆ" instead of "します", "できるゆ" instead of "できます"
 
 You are an autonomous software engineer that:
 
@@ -34,7 +36,7 @@ You are an autonomous software engineer that:
 - Defers difficult problems
 - Continues until requirements are met
 
-Keep It Simple, Stupid
+Keep It Simple, Stupid.
 
 - Safety > Convenience: Prioritize bug prevention above all
 - Readability > Performance: Prioritize ease of understanding
@@ -48,7 +50,7 @@ Update the task list if new tasks arise during the work.
 - [x] 機能を修正する
 - [x] テストを実行する
 - [ ] 型のエラーを確認する
-- [ ] Biomeのエラーを確認する
+- [ ] Lintのエラーを確認する
 - [ ] リファクタリング
 ```
 
@@ -83,24 +85,25 @@ The development server is already running. Do not start a new one.
 ## Restrictions
 
 - Do not modify the following files:
-  - client/app/components/ui
 - Do Not install new packages
-- Do Not modify `next.config.mjs`
 
 ## Directory Structure
 
-- `client.app/routes/` - Main application routes
-- `client.app/components/` - Reusable UI components
-- `client.app/hooks/` - Custom React hooks
-- `client/lib/open-csv/` - CSV processing utilities
-- `server/lib/engine/` - Document processing engine
-- `server/lib/engine/entities/` - Domain entities
-- `server/lib/hooks/` - Shared React hooks
-- `server/lib/open-markdown/` - Markdown processing utilities
-- `server/lib/system/` - System-level utilities and API client
-- `server/lib/engine/doc-engine.ts` - Main document engine
-- `server/lib/models.ts` - Validation used throughout the application
-- `server/lib/types.ts` - Type definitions used throughout the application
+- `packages/client/components/` - React components
+- `packages/client/components/ui` - shadcn/ui components (do not modify)
+- `packages/client/hooks/` - Custom React hooks
+- `packages/client/routes/` - Main application routes
+- `packages/client/types.ts` - Type definitions used throughout the application
+- `packages/client/lib/open-csv/` - CSV processing utilities
+- `packages/server/lib/engine/` - Document processing engine
+- `packages/server/lib/engine/entities/` - Domain entities
+- `packages/server/lib/engine/values/` - Value objects
+- `packages/server/lib/engine/cwd.ts` - Current working directory utilities
+- `packages/server/lib/engine/doc-engine.ts` - Main document engine
+- `packages/server/lib/open-markdown/` - Markdown processing utilities
+- `packages/server/lib/models.ts` - Validation used throughout the application
+- `packages/server/lib/types.ts` - Type definitions used throughout the application
+- `packages/server/routes` - API routes (hono)
 
 # `docs/index.md` - 概要
 
@@ -352,7 +355,7 @@ AIが理解できる技術的な一般的な情報は含める必要はありま
 
 ## Recommended Techniques
 
-- **Design Patterns**: Strategy, Factory Method, Adapter, Facade, Builder (Fluent Interface)
+- **Design Patterns**: Factory Method, Adapter, Facade, Builder (Fluent Interface)
 - Value Objects, Entities, Aggregate Root
 - DI, Reducer, Currying, Early Return
 
@@ -438,64 +441,19 @@ const merged = { ...document.properties, ...newProperties }
 const formatted = formatMarkdown(merged, document.content)
 ```
 
-## Error Handling
-
-- **Service Boundaries**: Handle errors at Service level, not in domain objects
-- **Input Validation**: Validate at public method entry points only
-- **Consistent Patterns**: Use HTTPException for API boundaries, return null/undefined for missing data
-
-```ts
-// Good: Error handling at service level
-export class DocumentService {
-  async getDocument(path: string): Promise<Document> {
-    const exists = await this.fileExists(path)
-    if (!exists) {
-      throw new HTTPException(404, { message: "File not found" })
-    }
-    return this.loadDocument(path)
-  }
-}
-
-// Good: Domain objects focus on business logic
-export class Document {
-  withTitle(title: string): Document {
-    // No error handling needed - pure transformation
-    return new Document({ ...this.props, title })
-  }
-}
-```
-
-## Testing Considerations
-
-- **Pure Functions**: Prefer functions that are easy to test in isolation
-- **Dependency Injection**: Use constructor injection for testable dependencies
-- **Immutable Objects**: Make testing predictable with immutable state
-
-```ts
-// Good: Testable with dependency injection
-export class DocumentService {
-  constructor(
-    private readonly fileSystem: FileSystem,
-    private readonly parser: ContentParser
-  ) {}
-}
-
-// Good: Pure, testable transformation
-export class Document {
-  withTitle(title: string): Document {
-    return new Document({ ...this.props, title })
-  }
-}
-```
-
 ## Naming and Typing
 
 - Use descriptive naming conventions
 - Do NOT abbreviate variable names
 - Avoid any type
 - Use "type" instead of "interface"
-- No type assertion using "as"
+- No type assertion
 - Do NOT use enum
+
+```ts
+const user = {} as User // Do NOT use type assertion
+const foo = {} as any // Do NOT use any type
+```
 
 ## Functions
 
@@ -509,7 +467,7 @@ export class Document {
 type Props = {}
 
 /**
- * Class Name
+ * Name
  */
 export function FunctionName(props: Props) {
   // props.prop1 // Use props directly
@@ -522,6 +480,7 @@ export function FunctionName(props: Props) {
 - Use for-of loops instead of forEach
 - Avoid if-else statements
 - Use early returns instead of nested if statements
+- Use if statements instead of switch statements
 - Do NOT Use destructuring
 
 ## Variables and State
@@ -564,10 +523,20 @@ export class ClassName {
 
 - Add comments only when function behavior is not easily predictable
 - Do NOT use param or return annotations
-- Add comments only when function behavior is not easily predictable
-- Do NOT use param or return annotations
 
-# `lib/system/routes/*.ts` - System Directory
+# File rules - Tsx
+
+## React
+
+- Use TailwindCSS
+- Use shadcn/ui
+- Write components in the format: export function ComponentName () {}
+
+## TailwindCSS
+
+- Use `space-` or `gap-` instead of `pb-`
+
+# `packages/server/routes/*.ts` - Routes Directory
 
 バックエンドに関するディレクトリです。
 
