@@ -16,8 +16,12 @@ import type { DocSchemaFieldValue } from "./doc-schema-field-value"
  * スキーマとリレーション
  */
 export class DocSchemaValue {
-  constructor(readonly value: DocSchemaRecord) {
-    zDocSchema.parse(value)
+  readonly value: DocSchemaRecord
+
+  constructor(value: DocSchemaRecord) {
+    // スキーマを正規化してからバリデーション
+    this.value = DocSchemaValue.normalizeSchema(value)
+    zDocSchema.parse(this.value)
     Object.freeze(this.value)
     Object.freeze(this)
   }
@@ -41,7 +45,7 @@ export class DocSchemaValue {
 
     const factory = new DocSchemaFieldFactory()
 
-    return factory.fromSchemaEntry(name, fieldDef)
+    return factory.fromUnknown(name, fieldDef)
   }
 
   get fields() {
@@ -52,7 +56,7 @@ export class DocSchemaValue {
       if (!fieldValue) {
         throw new Error(`Field ${name} not found in schema`)
       }
-      return factory.fromSchemaEntry(name, fieldValue)
+      return factory.fromUnknown(name, fieldValue)
     })
   }
 
@@ -321,5 +325,24 @@ export class DocSchemaValue {
 
   toJson(): DocSchemaRecord {
     return this.value
+  }
+
+  /**
+   * スキーマを正規化
+   */
+  private static normalizeSchema(schema: DocSchemaRecord): DocSchemaRecord {
+    const normalized: DocSchemaRecord = {}
+    const factory = new DocSchemaFieldFactory()
+
+    for (const [key, field] of Object.entries(schema)) {
+      try {
+        const normalizedField = factory.fromUnknown(key, field)
+        normalized[key] = normalizedField.toJson()
+      } catch {
+        // 無効なフィールドはスキップ
+      }
+    }
+
+    return normalized
   }
 }

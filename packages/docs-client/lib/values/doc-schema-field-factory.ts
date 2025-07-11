@@ -111,9 +111,9 @@ export class DocSchemaFieldFactory {
     const baseField = {
       type: normalizedType,
       required: fieldRequired ?? false,
-      title: fieldTitle,
-      description: fieldDescription,
-      default: fieldDefault,
+      title: fieldTitle ?? null,
+      description: fieldDescription ?? null,
+      default: fieldDefault ?? null,
     }
 
     // 型固有のデフォルト値を追加
@@ -130,9 +130,9 @@ export class DocSchemaFieldFactory {
     return {
       type: "text",
       required: false,
-      title: "",
-      description: "",
-      default: "",
+      title: null,
+      description: null,
+      default: null,
     }
   }
 
