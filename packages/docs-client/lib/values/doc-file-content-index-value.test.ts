@@ -26,7 +26,7 @@ test("DocFileContentIndexValue - 基本的な作成とプロパティアクセ�
   expect(value.body).toBe("# タイトル\n\n説明文\n\n本文")
   expect(value.title).toBe("タイトル")
   expect(value.description).toBe("説明文")
-  expect(value.frontMatter.icon).toBe("📁")
+  expect(value.frontMatter.icon()).toBe("📁")
 })
 
 test("DocFileContentIndexValue - frontMatter getterが値オブジェクトを返す", () => {
@@ -44,7 +44,7 @@ test("DocFileContentIndexValue - frontMatter getterが値オブジェクトを�
 
   const frontMatter = value.frontMatter
   expect(frontMatter).toBeInstanceOf(DocFrontMatterIndexValue)
-  expect(frontMatter.icon).toBe("📁")
+  expect(frontMatter.icon()).toBe("📁")
 })
 
 test("DocFileContentIndexValue - withTitleで新しいインスタンスを作成", () => {
@@ -140,8 +140,8 @@ test("DocFileContentIndexValue - withFrontMatterで新しいインスタンス�
   const newValue = value.withFrontMatter(newFrontMatter)
 
   expect(newValue).not.toBe(value)
-  expect(newValue.frontMatter.icon).toBe("📂")
-  expect(value.frontMatter.icon).toBe("📁") // 元は変更されない
+  expect(newValue.frontMatter.icon()).toBe("📂")
+  expect(value.frontMatter.icon()).toBe("📁") // 元は変更されない
 })
 
 test("DocFileContentIndexValue - fromMarkdownでMarkdownから生成", () => {
@@ -163,15 +163,15 @@ schema: {}
   expect(value.title).toBe("ドキュメントタイトル")
   expect(value.description).toBe("これは説明文です。")
   expect(value.body).toContain("# ドキュメントタイトル")
-  expect(value.frontMatter.icon).toBe("📁")
+  expect(value.frontMatter.icon()).toBe("📁")
 })
 
 test("DocFileContentIndexValue - emptyでデフォルトコンテンツを生成", () => {
   const value = DocFileContentIndexValue.empty("テストディレクトリ")
 
   expect(value.title).toBe("テストディレクトリ")
-  expect(value.frontMatter.icon).toBe("")
-  expect(value.frontMatter.schema.toJson()).toEqual({})
+  expect(value.frontMatter.icon()).toBe("")
+  expect(value.frontMatter.schema().toJson()).toEqual({})
   expect(value.body).toContain("# テストディレクトリ")
 })
 

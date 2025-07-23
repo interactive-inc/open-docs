@@ -2,6 +2,7 @@ import { DocFileIndexReference } from "./doc-file-index-reference"
 import { DocFileMdReference } from "./doc-file-md-reference"
 import type { DocFileSystem } from "./doc-file-system"
 import type { DocPathSystem } from "./doc-path-system"
+import { DocFrontMatterIndexValue } from "./values/doc-front-matter-index-value"
 import { DocTreeDirectoryNodeValue } from "./values/doc-tree-directory-node-value"
 import { DocTreeFileNodeValue } from "./values/doc-tree-file-node-value"
 
@@ -99,7 +100,13 @@ export class DocFileTreeSystem {
     if (await indexFile.exists()) {
       const entity = await indexFile.read()
       title = entity.value.content.title || fileName
-      icon = entity.value.content.frontMatter.icon || "📁"
+      const content = entity.content
+      const frontMatter = content.frontMatter
+      // frontMatterはDocFrontMatterIndexValueインスタンスで、iconはメソッド
+      if (frontMatter instanceof DocFrontMatterIndexValue) {
+        const iconValue = frontMatter.icon()
+        icon = iconValue || "📁"
+      }
     }
 
     const children = await this.buildFileTree(filePath)
@@ -188,7 +195,13 @@ export class DocFileTreeSystem {
     if (await indexFile.exists()) {
       const entity = await indexFile.read()
       title = entity.value.content.title || fileName
-      icon = entity.value.content.frontMatter.icon || "📁"
+      const content = entity.content
+      const frontMatter = content.frontMatter
+      // frontMatterはDocFrontMatterIndexValueインスタンスで、iconはメソッド
+      if (frontMatter instanceof DocFrontMatterIndexValue) {
+        const iconValue = frontMatter.icon()
+        icon = iconValue || "📁"
+      }
     }
 
     const children = await this.buildDirectoryTree(filePath)

@@ -20,8 +20,9 @@ export function FilePageView(props: Props) {
 
   const fileData = fileQuery.data
 
-  const directorySchema =
-    directoryQuery.data?.indexFile?.content?.frontMatter?.schema || {}
+  const directorySchemaValue =
+    directoryQuery.data?.indexFile?.content?.frontMatter?.schema()
+  const directorySchema = directorySchemaValue?.toJson() || {}
 
   const relations = directoryQuery.data?.relations || []
 

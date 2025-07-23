@@ -1,4 +1,5 @@
 import { stringify } from "yaml"
+import { z } from "zod"
 import { zDocFileMdFrontMatter } from "../models"
 import type {
   DocFieldMultiBoolean,
@@ -18,7 +19,7 @@ import { DocSchemaFieldNumberSingleValue } from "./doc-schema-field-number-singl
 import { DocSchemaFieldTextMultipleValue } from "./doc-schema-field-text-multiple-value"
 import { DocSchemaFieldTextSingleValue } from "./doc-schema-field-text-single-value"
 import type { DocSchemaFieldValue } from "./doc-schema-field-value"
-import type { DocSchemaValue } from "./doc-schema-value"
+import { DocSchemaValue } from "./doc-schema-value"
 
 /**
  * FrontMatter
@@ -35,6 +36,10 @@ export class DocFrontMatterMdValue {
 
   toYaml(): string {
     return stringify(this.value).trim()
+  }
+
+  schema<T extends z.ZodTypeAny = z.ZodTypeAny>(zodSchema?: T): DocSchemaValue<T> {
+    return new DocSchemaValue(this.value.schema, zodSchema)
   }
 
   /**

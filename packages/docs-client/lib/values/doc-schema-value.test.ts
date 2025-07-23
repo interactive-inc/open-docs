@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test"
+import { z } from "zod"
 import { DocSchemaFieldRelationMultipleValue } from "./doc-schema-field-relation-multiple-value"
 import { DocSchemaFieldRelationSingleValue } from "./doc-schema-field-relation-single-value"
 import { DocSchemaFieldTextSingleValue } from "./doc-schema-field-text-single-value"
@@ -332,4 +333,142 @@ test("JSON形式に変換できる", () => {
   const json = schema.toJson()
 
   expect(json).toEqual(schemaData)
+})
+
+// 以下は doc-schema-value-generic.test.ts から統合されたテスト
+
+test("DocSchemaValue - 動的スキーマ生成で検証できる", () => {
+  // typeとrequiredのみを持つ最小限のスキーマ
+  const minimalSchema = {
+    name: {
+      type: "text",
+      required: true,
+    },
+    age: {
+      type: "number",
+      required: false,
+    },
+  }
+
+  const value = new DocSchemaValue(minimalSchema)
+
+  expect(value.value.name).toEqual({
+    type: "text",
+    required: true,
+    title: null,
+    description: null,
+    default: "",
+  })
+
+  expect(value.value.age).toEqual({
+    type: "number",
+    required: false,
+    title: null,
+    description: null,
+    default: 0,
+  })
+})
+
+test("DocSchemaValue - カスタムZodスキーマで検証できる", () => {
+  // カスタムZodスキーマ
+  const customSchema = z.object({
+    name: z.object({
+      type: z.literal("text"),
+      required: z.literal(true),
+      title: z.string(),
+      description: z.string(),
+      default: z.string(),
+    }),
+  })
+
+  const schemaData = {
+    name: {
+      type: "text",
+      required: true,
+      title: "名前",
+      description: "ユーザーの名前",
+      default: "ゲスト",
+    },
+  }
+
+  const value = new DocSchemaValue(schemaData, customSchema)
+
+  expect(value.value.name).toEqual({
+    type: "text",
+    required: true,
+    title: "名前",
+    description: "ユーザーの名前",
+    default: "ゲスト",
+  })
+})
+
+test("DocSchemaValue - 無効なフィールドでエラーが発生する", () => {
+  // typeがない無効なフィールド
+  const invalidSchema = {
+    name: {
+      required: true,
+    },
+  }
+
+  expect(() => new DocSchemaValue(invalidSchema)).toThrow(
+    'Field "name" must have "type" and "required" properties',
+  )
+})
+
+test("DocSchemaValue - 無効なtypeでエラーが発生する", () => {
+  const invalidSchema = {
+    name: {
+      type: "invalid-type",
+      required: true,
+    },
+  }
+
+  expect(() => new DocSchemaValue(invalidSchema)).toThrow(
+    'Field "name"',
+  )
+})
+
+test("DocSchemaValue - スキーマがオブジェクトでない場合エラーが発生する", () => {
+  expect(() => new DocSchemaValue("invalid")).toThrow(
+    "Schema must be an object",
+  )
+  expect(() => new DocSchemaValue(null)).toThrow("Schema must be an object")
+  expect(() => new DocSchemaValue([])).toThrow()
+})
+
+test("DocSchemaValue - フィールドがオブジェクトでない場合エラーが発生する", () => {
+  const invalidSchema = {
+    name: "string-value",
+  }
+
+  expect(() => new DocSchemaValue(invalidSchema)).toThrow(
+    'Field "name" must be an object',
+  )
+})
+
+test("DocSchemaValue - リレーションフィールドでpathが必須", () => {
+  const schemaWithRelation = {
+    author: {
+      type: "relation",
+      required: true,
+      path: "authors",
+    },
+  }
+
+  const value = new DocSchemaValue(schemaWithRelation)
+
+  expect(value.value.author).toEqual({
+    type: "relation",
+    required: true,
+    title: null,
+    description: null,
+    path: "authors",
+    default: null,
+  })
+})
+
+test("DocSchemaValue - カスタムZodスキーマで空のスキーマを作成できる", () => {
+  const customSchema = z.object({})
+  const value = DocSchemaValue.empty(customSchema)
+  expect(value.value).toEqual({})
 })

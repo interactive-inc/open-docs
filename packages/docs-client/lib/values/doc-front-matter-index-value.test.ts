@@ -23,8 +23,8 @@ test("DocFrontMatterIndexValue - 基本的な作成とプロパティアクセ�
     },
   })
 
-  expect(value.icon).toBe("📁")
-  const schema = value.schema.toJson()
+  expect(value.icon()).toBe("📁")
+  const schema = value.schema().toJson()
   expect(schema.name?.type).toBe("text")
   expect(schema.name?.required).toBe(true)
   expect(schema.age?.type).toBe("number")
@@ -38,8 +38,8 @@ test("DocFrontMatterIndexValue - 空のschemaの場合", () => {
     schema: {},
   })
 
-  expect(value.icon).toBe("")
-  expect(value.schema.toJson()).toEqual({})
+  expect(value.icon()).toBe("")
+  expect(value.schema().toJson()).toEqual({})
 })
 
 test("DocFrontMatterIndexValue - toYamlでYAML文字列を生成", () => {

@@ -113,7 +113,7 @@ export const PUT = factory.createHandlers(
         frontMatter = frontMatter.withProperty(
           key,
           value,
-          indexFile.content.frontMatter.schema,
+          indexFile.content.frontMatter.schema(),
         )
       }
       let updatedContent = file.content.withFrontMatter(frontMatter)

@@ -1,4 +1,5 @@
 import { parse, stringify } from "yaml"
+import { z } from "zod"
 import { zDocFileIndexFrontMatter } from "../models"
 import type {
   DocFileIndexFrontMatter,
@@ -20,15 +21,15 @@ export class DocFrontMatterIndexValue {
   /**
    * アイコンを取得
    */
-  get icon(): string | null {
+  icon(): string {
     return this.value.icon
   }
 
   /**
    * スキーマを取得
    */
-  get schema(): DocSchemaValue {
-    return new DocSchemaValue(this.value.schema)
+  schema<T extends z.ZodTypeAny = z.ZodTypeAny>(zodSchema?: T): DocSchemaValue<T> {
+    return new DocSchemaValue(this.value.schema, zodSchema)
   }
 
   /**

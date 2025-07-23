@@ -221,6 +221,21 @@ export const zDocFileMdFrontMatter = z.record(
 export const zDocSchema = z.record(z.string(), zDocSchemaField)
 
 /**
+ * 最小限のスキーマフィールド定義（typeとrequiredのみ）
+ * 動的スキーマ生成用
+ */
+export const zDocSchemaFieldMinimal = z.object({
+  type: zDocSchemaFieldType,
+  required: z.boolean(),
+})
+
+/**
+ * 最小限のスキーマ定義
+ * 動的検証用
+ */
+export const zDocSchemaMinimal = z.record(z.string(), zDocSchemaFieldMinimal)
+
+/**
  * index.mdファイル専用のfrontMatterスキーマ
  * iconとschemaフィールドのみを持つ
  */

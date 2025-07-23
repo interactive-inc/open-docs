@@ -72,7 +72,7 @@ export function DirectoryPageView(props: Props) {
     if (directoryData?.indexFile) {
       setTitle(directoryData.indexFile.content.title || "")
       setDescription(directoryData.indexFile.content.description || "")
-      setIcon(directoryData.indexFile.content.frontMatter?.icon || "📁")
+      setIcon(directoryData.indexFile.content.frontMatter?.icon() || "📁")
     }
   }, [directoryData])
 
@@ -169,9 +169,10 @@ export function DirectoryPageView(props: Props) {
         <DirectoryTableView
           files={mdFiles}
           columns={(() => {
-            const schema = directoryData.indexFile?.content.frontMatter?.schema
-            if (!schema) return []
+            const schemaValue = directoryData.indexFile?.content.frontMatter?.schema()
+            if (!schemaValue) return []
             
+            const schema = schemaValue.toJson()
             const columns = Object.entries(schema).map(([key, fieldValue]) => {
               // fieldValueが正しいオブジェクトであることを確認
               if (!fieldValue || typeof fieldValue !== 'object' || !('type' in fieldValue)) {

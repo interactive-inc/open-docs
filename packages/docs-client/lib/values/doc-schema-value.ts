@@ -1,3 +1,4 @@
+import type { z } from "zod"
 import { zDocFileMdFrontMatter, zDocRelationFile, zDocSchema } from "../models"
 import type {
   DocFileMdFrontMatter,
@@ -7,35 +8,62 @@ import type {
   RelationFieldTypes,
 } from "../types"
 import { DocFrontMatterMdValue } from "./doc-front-matter-md-value"
+import { DocSchemaBuilder } from "./doc-schema-builder"
 import { DocSchemaFieldFactory } from "./doc-schema-field-factory"
 import { DocSchemaFieldRelationMultipleValue } from "./doc-schema-field-relation-multiple-value"
 import { DocSchemaFieldRelationSingleValue } from "./doc-schema-field-relation-single-value"
 import type { DocSchemaFieldValue } from "./doc-schema-field-value"
 
 /**
- * スキーマとリレーション
+ * 型安全なスキーマ値オブジェクト
+ * @template T - Zodスキーマの型（オプショナル）
  */
-export class DocSchemaValue {
+export class DocSchemaValue<T extends z.ZodTypeAny = z.ZodTypeAny> {
   readonly value: DocSchemaRecord
+  private readonly zodSchema: T | null
 
-  constructor(value: DocSchemaRecord) {
-    // スキーマを正規化してからバリデーション
-    this.value = DocSchemaValue.normalizeSchema(value)
+  constructor(value: unknown, zodSchema?: T, schemaBuilder?: DocSchemaBuilder) {
+    this.zodSchema = zodSchema || null
+    const builder = schemaBuilder || new DocSchemaBuilder()
+
+    if (this.zodSchema) {
+      // カスタムZodスキーマが提供された場合は、それで検証
+      const parsed = this.zodSchema.parse(value)
+      this.value = DocSchemaValue.normalizeSchema(parsed)
+    } else {
+      // Zodスキーマがない場合は、動的にスキーマを生成して検証
+      const dynamicSchema = builder.createDynamicSchema(value)
+      const parsed = dynamicSchema.parse(value)
+      this.value = DocSchemaValue.normalizeSchema(parsed)
+    }
+
+    // 完全なスキーマで最終検証（エラーを出す）
     zDocSchema.parse(this.value)
+
     Object.freeze(this.value)
     Object.freeze(this)
   }
 
   /**
    * フィールド名の一覧を取得
+   * Zodスキーマを使用している場合は自動的に型安全
    */
-  get fieldNames(): string[] {
-    return Object.keys(this.value)
+  get fieldNames(): T extends z.ZodTypeAny
+    ? Array<keyof z.infer<T> & string>
+    : string[] {
+    return Object.keys(this.value) as T extends z.ZodTypeAny
+      ? Array<keyof z.infer<T> & string>
+      : string[]
   }
 
   /**
    * 指定されたフィールド名のフィールドを取得
+   * Zodスキーマを使用している場合は型安全
    */
+  field<K extends keyof z.infer<T> & string>(
+    name: K,
+  ): DocSchemaFieldValue | null
+  field(name: string): DocSchemaFieldValue | null
   field(name: string): DocSchemaFieldValue | null {
     const fieldDef = this.value[name]
 
@@ -48,7 +76,11 @@ export class DocSchemaValue {
     return factory.fromUnknown(name, fieldDef)
   }
 
-  get fields() {
+  /**
+   * すべてのフィールドを取得
+   * 注意: 型安全性のため、個別にfield()メソッドを使用することを推奨
+   */
+  get fields(): DocSchemaFieldValue[] {
     const factory = new DocSchemaFieldFactory()
 
     return this.fieldNames.map((name) => {
@@ -75,8 +107,11 @@ export class DocSchemaValue {
   /**
    * 空のスキーマエンティティを作成
    */
-  static empty(): DocSchemaValue {
-    return new DocSchemaValue({})
+  static empty<T extends z.ZodTypeAny = z.ZodTypeAny>(
+    zodSchema?: T,
+    dynamicBuilder?: DocSchemaBuilder,
+  ): DocSchemaValue<T> {
+    return new DocSchemaValue({}, zodSchema, dynamicBuilder)
   }
 
   /**
@@ -273,6 +308,24 @@ export class DocSchemaValue {
   }
 
   /**
+   * 型安全にFrontMatterを補完する（Zodスキーマを使用している場合）
+   */
+  getTypedCompleteFrontMatter(rawFrontMatter: Partial<z.infer<T>>): z.infer<T> {
+    if (!this.zodSchema) {
+      throw new Error("Typed method requires a Zod schema")
+    }
+
+    const defaultFrontMatter = this.generateDefaultFrontMatter()
+    const merged = this.mergePreservingExistingValues(
+      defaultFrontMatter,
+      rawFrontMatter,
+    )
+
+    // Zodスキーマで検証して型安全な結果を返す
+    return this.zodSchema.parse(merged)
+  }
+
+  /**
    * スキーマからデフォルトFrontMatterを生成
    */
   private generateDefaultFrontMatter(): DocFileMdFrontMatter {
@@ -328,19 +381,20 @@ export class DocSchemaValue {
   }
 
   /**
-   * スキーマを正規化
+   * スキーマを正規化（エラーを出すように変更）
    */
-  private static normalizeSchema(schema: DocSchemaRecord): DocSchemaRecord {
+  private static normalizeSchema(schema: unknown): DocSchemaRecord {
+    if (typeof schema !== "object" || schema === null) {
+      throw new Error("Schema must be an object")
+    }
+
     const normalized: DocSchemaRecord = {}
     const factory = new DocSchemaFieldFactory()
 
     for (const [key, field] of Object.entries(schema)) {
-      try {
-        const normalizedField = factory.fromUnknown(key, field)
-        normalized[key] = normalizedField.toJson()
-      } catch {
-        // 無効なフィールドはスキップ
-      }
+      // エラーを出すように変更（スキップしない）
+      const normalizedField = factory.fromUnknown(key, field)
+      normalized[key] = normalizedField.toJson()
     }
 
     return normalized
