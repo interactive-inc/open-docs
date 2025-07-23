@@ -27,9 +27,10 @@ export function FilePageView(props: Props) {
   const relations = directoryQuery.data?.relations || []
 
   // contentがオブジェクトの場合はbodyプロパティを使用
-  const initialContent = typeof fileData?.content === 'string' 
-    ? fileData.content 
-    : fileData?.content?.body || ""
+  const initialContent =
+    typeof fileData?.content === "string"
+      ? fileData.content
+      : fileData?.content?.body || ""
   const [currentContent, setCurrentContent] = useState(initialContent)
 
   const updateProperties = useFilePropertiesMutation()
@@ -57,9 +58,10 @@ export function FilePageView(props: Props) {
   const handleReload = async () => {
     const result = await fileQuery.refetch()
     if (result.data === undefined) return
-    const content = typeof result.data.content === 'string'
-      ? result.data.content
-      : result.data.content?.body || ""
+    const content =
+      typeof result.data.content === "string"
+        ? result.data.content
+        : result.data.content?.body || ""
     setCurrentContent(content)
   }
 
@@ -78,8 +80,9 @@ export function FilePageView(props: Props) {
   }
 
   // pathオブジェクトから実際のパス文字列を取得
-  const filePath = typeof fileData.path === 'string' ? fileData.path : fileData.path?.path
-  
+  const filePath =
+    typeof fileData.path === "string" ? fileData.path : fileData.path?.path
+
   if (filePath?.endsWith(".md")) {
     return (
       <main className="p-2">

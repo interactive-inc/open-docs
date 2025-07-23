@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { ArrowLeft } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { ReloadButton } from "@/components/reload-button"
 import { SidebarButton } from "@/components/sidebar-button"
 import { Button } from "@/components/ui/button"
@@ -31,11 +31,11 @@ export function FileHeader(props: Props) {
   }
 
   const [title, setTitle] = useState(getInitialTitle())
-  
+
   // propsが変更されたときにタイトルを更新
   useEffect(() => {
     setTitle(getInitialTitle())
-  }, [props.fileData.title, props.filePath])
+  }, [getInitialTitle])
 
   const updateTitleMutation = useMutation({
     async mutationFn(newTitle: string) {
@@ -82,34 +82,32 @@ export function FileHeader(props: Props) {
   }
 
   return (
-    <>
-      <div className="flex items-center gap-2">
-        <SidebarButton />
-        <VscodeButton
-          cwd={props.cwd}
-          filePath={props.fileData.path}
-          size="icon"
-          variant="outline"
-        />
-        <Button onClick={handleBackClick} size="icon" variant="outline">
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
+    <div className="flex items-center gap-2">
+      <SidebarButton />
+      <VscodeButton
+        cwd={props.cwd}
+        filePath={props.fileData.path}
+        size="icon"
+        variant="outline"
+      />
+      <Button onClick={handleBackClick} size="icon" variant="outline">
+        <ArrowLeft className="h-4 w-4" />
+      </Button>
 
-        <Input
-          value={title}
-          onChange={handleTitleChange}
-          onBlur={handleTitleBlur}
-          placeholder="タイトルを入力"
-          className="flex-1"
-        />
-        <ReloadButton
-          onReload={props.onReload}
-          size="icon"
-          variant="outline"
-          disabled={props.isLoading}
-        />
-        {props.children}
-      </div>
-    </>
+      <Input
+        value={title}
+        onChange={handleTitleChange}
+        onBlur={handleTitleBlur}
+        placeholder="タイトルを入力"
+        className="flex-1"
+      />
+      <ReloadButton
+        onReload={props.onReload}
+        size="icon"
+        variant="outline"
+        disabled={props.isLoading}
+      />
+      {props.children}
+    </div>
   )
 }

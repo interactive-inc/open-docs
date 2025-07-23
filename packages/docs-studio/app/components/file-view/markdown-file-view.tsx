@@ -4,7 +4,11 @@ import { ArchiveRestoreBanner } from "@/components/file-view/archive-restore-ban
 import { EditableFrontMatterView } from "@/components/file-view/editable-front-matter-view"
 import { FileHeader } from "@/components/file-view/file-header"
 import { Card } from "@/components/ui/card"
-import type { DocRelation, DocSchemaRecord, DocFileMdFrontMatter } from "@/lib/types"
+import type {
+  DocFileMdFrontMatter,
+  DocRelation,
+  DocSchemaRecord,
+} from "@/lib/types"
 
 import "github-markdown-css"
 

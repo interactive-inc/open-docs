@@ -35,24 +35,37 @@ export function MilestonesEditor(props: Props) {
   })
 
   function isDocFileMd(file: DocFile): file is DocFileMd {
-    return file.type === 'markdown'
+    return file.type === "markdown"
   }
-  
-  function hasMarkdownContent(file: { content: unknown }): file is { content: { title: string; description: string; frontMatter: Record<string, unknown> } } {
-    return typeof file.content === 'object' && file.content !== null && 'frontMatter' in file.content
+
+  function hasMarkdownContent(file: { content: unknown }): file is {
+    content: {
+      title: string
+      description: string
+      frontMatter: Record<string, unknown>
+    }
+  } {
+    return (
+      typeof file.content === "object" &&
+      file.content !== null &&
+      "frontMatter" in file.content
+    )
   }
 
   const milestones = (milestonesData.files || []).filter(isDocFileMd)
   const features = (featuresData.files || []).filter(isDocFileMd)
 
   function getFeaturesByMilestone(milestoneId: string) {
-    return features.filter(
-      (feature) => {
-        if (!hasMarkdownContent(feature)) return false
-        const frontMatter = feature.content.frontMatter
-        return typeof frontMatter === 'object' && frontMatter !== null && 'milestone' in frontMatter && frontMatter.milestone === milestoneId
-      }
-    )
+    return features.filter((feature) => {
+      if (!hasMarkdownContent(feature)) return false
+      const frontMatter = feature.content.frontMatter
+      return (
+        typeof frontMatter === "object" &&
+        frontMatter !== null &&
+        "milestone" in frontMatter &&
+        frontMatter.milestone === milestoneId
+      )
+    })
   }
 
   return (
@@ -63,10 +76,14 @@ export function MilestonesEditor(props: Props) {
           <Card key={milestone.path.name} className="gap-2 overflow-hidden p-2">
             <div className="space-y-1">
               <h2 className="font-semibold text-xl">
-                {hasMarkdownContent(milestone) ? milestone.content.title || milestone.path.name : milestone.path.name}
+                {hasMarkdownContent(milestone)
+                  ? milestone.content.title || milestone.path.name
+                  : milestone.path.name}
               </h2>
               <p className="text-muted-foreground text-sm">
-                {hasMarkdownContent(milestone) ? milestone.content.description : ''}
+                {hasMarkdownContent(milestone)
+                  ? milestone.content.description
+                  : ""}
               </p>
             </div>
             {milestoneFeatures.length > 0 ? (
@@ -74,10 +91,14 @@ export function MilestonesEditor(props: Props) {
                 {milestoneFeatures.map((feature) => (
                   <div key={feature.path.name} className="rounded border p-2">
                     <h3 className="font-medium">
-                      {hasMarkdownContent(feature) ? feature.content.title || feature.path.name : feature.path.name}
+                      {hasMarkdownContent(feature)
+                        ? feature.content.title || feature.path.name
+                        : feature.path.name}
                     </h3>
                     <p className="text-muted-foreground text-sm">
-                      {hasMarkdownContent(feature) ? feature.content.description : ''}
+                      {hasMarkdownContent(feature)
+                        ? feature.content.description
+                        : ""}
                     </p>
                   </div>
                 ))}

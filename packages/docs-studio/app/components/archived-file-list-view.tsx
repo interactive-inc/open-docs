@@ -8,7 +8,7 @@ import { normalizePath } from "@/lib/path-utils"
 import type { DocFile, DocFileMd } from "@/lib/types"
 
 function isDocFileMd(file: DocFile): file is DocFileMd {
-  return 'frontMatter' in file && 'title' in file
+  return "frontMatter" in file && "title" in file
 }
 
 type Props = {
@@ -56,7 +56,10 @@ export function ArchivedFileListView(props: Props) {
         variant={"secondary"}
       >
         <span>📦</span>
-        <span>{props.files.filter(isDocFileMd).length}件のファイルが整理されています。</span>
+        <span>
+          {props.files.filter(isDocFileMd).length}
+          件のファイルが整理されています。
+        </span>
         <span className="text-xs">{isExpanded ? "▼" : "▶"}</span>
       </Button>
       {isExpanded && (

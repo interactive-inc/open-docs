@@ -10,7 +10,7 @@ import type { DocFile, DocFileMd, DocRelationFile } from "@/lib/types"
 import { FeatureItem } from "./feature-item"
 
 function isDocFileMd(file: DocFile): file is DocFileMd {
-  return file.type === 'markdown'
+  return file.type === "markdown"
 }
 
 type Priority = "high" | "medium" | "low"
@@ -44,11 +44,11 @@ export function ProjectPageGroup(props: Props) {
         low: 2,
       }
       const aPriority =
-        ((a.content.frontMatter as Record<string, unknown>)?.priority as Priority) ||
-        "low"
+        ((a.content.frontMatter as Record<string, unknown>)
+          ?.priority as Priority) || "low"
       const bPriority =
-        ((b.content.frontMatter as Record<string, unknown>)?.priority as Priority) ||
-        "low"
+        ((b.content.frontMatter as Record<string, unknown>)
+          ?.priority as Priority) || "low"
       return (priorityOrder[aPriority] || 2) - (priorityOrder[bPriority] || 2)
     })
 
@@ -70,12 +70,17 @@ export function ProjectPageGroup(props: Props) {
         {/* 左側: ページ情報 */}
         <div className="space-y-2 lg:w-1/3">
           <h2 className="font-semibold text-lg">
-            {isDocFileMd(props.group.page) ? props.group.page.content.title || props.group.page.path.name : props.group.page.path.name}
+            {isDocFileMd(props.group.page)
+              ? props.group.page.content.title || props.group.page.path.name
+              : props.group.page.path.name}
           </h2>
           <div className="text-xs opacity-50">{props.group.page.path.name}</div>
-          {isDocFileMd(props.group.page) && props.group.page.content.description && (
-            <p className="text-sm opacity-50">{props.group.page.content.description}</p>
-          )}
+          {isDocFileMd(props.group.page) &&
+            props.group.page.content.description && (
+              <p className="text-sm opacity-50">
+                {props.group.page.content.description}
+              </p>
+            )}
         </div>
         {/* 右側: 関連機能一覧 */}
         <div className="flex-1">
@@ -110,7 +115,10 @@ export function ProjectPageGroup(props: Props) {
                 </SelectTrigger>
                 <SelectContent>
                   {availableFeatures.map((feature) => (
-                    <SelectItem key={feature.path.path} value={feature.path.path || ""}>
+                    <SelectItem
+                      key={feature.path.path}
+                      value={feature.path.path || ""}
+                    >
                       {feature.content.title || feature.path.name}
                     </SelectItem>
                   ))}

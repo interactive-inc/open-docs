@@ -5,7 +5,7 @@ import type { DocFile, DocFileMd, DocRelationFile } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 function isDocFileMd(file: DocFile): file is DocFileMd {
-  return file.type === 'markdown'
+  return file.type === "markdown"
 }
 
 type Priority = "high" | "medium" | "low"
@@ -27,7 +27,10 @@ export function FeatureItem(props: Props) {
     return null
   }
 
-  const frontMatter = props.feature.content.frontMatter as Record<string, unknown>
+  const frontMatter = props.feature.content.frontMatter as Record<
+    string,
+    unknown
+  >
 
   const isDone = (frontMatter?.["is-done"] as boolean) === true
 
@@ -104,7 +107,9 @@ export function FeatureItem(props: Props) {
         </h3>
       </div>
       {props.feature.content.description && (
-        <p className="text-sm opacity-80">{props.feature.content.description}</p>
+        <p className="text-sm opacity-80">
+          {props.feature.content.description}
+        </p>
       )}
       <div className="flex flex-col items-end justify-between gap-2 lg:flex-row">
         <div className="text-xs opacity-50">{props.feature.path.name}</div>

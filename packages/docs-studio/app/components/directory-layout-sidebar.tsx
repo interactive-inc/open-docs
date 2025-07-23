@@ -1,13 +1,8 @@
+import type { DocTreeFileNode, DocTreeNode } from "@interactive-inc/docs-client"
 import { useSuspenseQuery } from "@tanstack/react-query"
-import {
-  Link,
-  useLocation,
-  useNavigate,
-  useRouter,
-} from "@tanstack/react-router"
+import { useLocation, useNavigate } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 import { DirectoryFileTreeNode } from "@/components/directory-file-tree-node"
-import { Button } from "@/components/ui/button"
 import {
   Sidebar,
   SidebarContent,
@@ -17,29 +12,18 @@ import {
   SidebarGroupLabel,
   SidebarInset,
   SidebarMenu,
-  SidebarMenuItem,
   SidebarProvider,
 } from "@/components/ui/sidebar"
 import { apiClient } from "@/lib/api-client"
 import { normalizePath } from "@/lib/path-utils"
-import type { DocFileNode } from "@/lib/types"
 
-type FileNode = {
-  type: 'file' | 'directory'
-  name: string
-  path: string
-  icon?: string
-  title?: string
-  children?: unknown[]
-}
-
-function isFileNode(node: unknown): node is FileNode {
+function _isFileNode(node: DocTreeNode): node is DocTreeFileNode {
   return (
-    typeof node === 'object' &&
+    typeof node === "object" &&
     node !== null &&
-    'type' in node &&
-    'name' in node &&
-    'path' in node
+    "type" in node &&
+    "name" in node &&
+    "path" in node
   )
 }
 
@@ -52,21 +36,19 @@ export function DirectoryLayoutSidebar(props: Props) {
 
   const [selectedDirectory, setSelectedDirectory] = useState<string>("")
 
-  const _router = useRouter()
-
   const navigate = useNavigate()
 
   const path = useLocation({ select: (location) => location.pathname })
 
   const query = useSuspenseQuery({
-    queryKey: ["file-tree"],
+    queryKey: [apiClient.api.directories.tree.$url()],
     queryFn: async () => {
-      const response = await apiClient.api.directories.tree.$get()
-      return response.json()
+      const resp = await apiClient.api.directories.tree.$get()
+      return resp.json()
     },
   })
 
-  const files = query.data
+  const treeNodes: DocTreeNode[] = query.data
 
   function getCurrentPath(path: string) {
     const dirPath = path
@@ -92,23 +74,22 @@ export function DirectoryLayoutSidebar(props: Props) {
   getCurrentPath(path)
 
   useEffect(() => {
-    const collectAllDirectoryPaths = (nodes: unknown[]): string[] => {
+    const collectAllDirectoryPaths = (nodes: DocTreeNode[]): string[] => {
       const paths: string[] = []
       for (const node of nodes) {
-        if (isFileNode(node) && node.type === "directory") {
-          const nodePath = normalizePath(node.path)
-          paths.push(nodePath)
-          if (node.children) {
-            paths.push(...collectAllDirectoryPaths(node.children))
-          }
+        if (node.type !== "directory") continue
+        const nodePath = normalizePath(node.path)
+        paths.push(nodePath)
+        if (node.children) {
+          paths.push(...collectAllDirectoryPaths(node.children))
         }
       }
       return paths
     }
 
-    const allPaths = collectAllDirectoryPaths(files)
+    const allPaths = collectAllDirectoryPaths(treeNodes)
     setOpenPaths(new Set(allPaths))
-  }, [files])
+  }, [treeNodes])
 
   useEffect(() => {
     const getCurrentDirectoryFromPath = (pathname: string) => {
@@ -147,20 +128,11 @@ export function DirectoryLayoutSidebar(props: Props) {
     setOpenPaths(newOpenPaths)
   }
 
-  const renderAllDirectories = (nodes: unknown[], currentDepth = 0) => {
-    return nodes.filter(isFileNode).map((node) => (
-      <DirectoryFileTreeNode
-        key={node.path || `file-${node.name}`}
-        node={node}
-        depth={currentDepth}
-        currentPath={window.location.pathname.match(/\/(.*)$/)?.[1] || ""}
-        onSelectDirectory={handleSelectDirectory}
-        openPaths={openPaths}
-        onToggleOpen={handleToggleOpen}
-        selectedDirectory={selectedDirectory}
-      />
-    ))
-  }
+  const directoryNodes = treeNodes.filter((node) => {
+    return node.type === "directory"
+  })
+
+  const currentPath = window.location.pathname.match(/\/(.*)$/)?.[1] || ""
 
   return (
     <SidebarProvider>
@@ -169,7 +141,19 @@ export function DirectoryLayoutSidebar(props: Props) {
           <SidebarGroup>
             <SidebarGroupLabel>{"ファイル"}</SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>{renderAllDirectories(files)}</SidebarMenu>
+              <SidebarMenu>
+                {directoryNodes.map((node) => (
+                  <DirectoryFileTreeNode
+                    key={node.path || `file-${node.name}`}
+                    node={node}
+                    depth={0}
+                    currentPath={currentPath}
+                    onSelectDirectory={handleSelectDirectory}
+                    onToggleOpen={handleToggleOpen}
+                    selectedDirectory={selectedDirectory}
+                  />
+                ))}
+              </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
