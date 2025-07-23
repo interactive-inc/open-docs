@@ -3,7 +3,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { useFilePropertiesMutation } from "@/hooks/use-file-properties-mutation"
 import { apiClient } from "@/lib/api-client"
-import type { DocDirectory, DocFile, DocFileMd, DocRelation, DocRelationFile } from "@/lib/types"
+import type { DocFile, DocFileMd, DocRelationFile } from "@/lib/types"
 import { ProjectPageGroup } from "./project-page-group"
 import { UnlinkedFeaturesSection } from "./unlinked-features-section"
 
@@ -16,11 +16,15 @@ type PageGroup = {
   features: DocFile[]
 }
 
+const directoryEndpoint = apiClient.api.directories[":path{.+}"]
+
 export function ProjectView(props: Props) {
   const pagesQuery = useSuspenseQuery({
-    queryKey: ["apps/client", props.project],
+    queryKey: [
+      directoryEndpoint.$url({ param: { path: `${props.project}/pages` } }),
+    ],
     queryFn: async () => {
-      const response = await apiClient.api.directories[":path{.+}"].$get({
+      const response = await directoryEndpoint.$get({
         param: { path: `${props.project}/pages` },
       })
       return response.json()
@@ -28,9 +32,11 @@ export function ProjectView(props: Props) {
   })
 
   const featuresQuery = useSuspenseQuery({
-    queryKey: ["apps/client",`products/${props.project}/features`],
+    queryKey: [
+      directoryEndpoint.$url({ param: { path: `${props.project}/features` } }),
+    ],
     queryFn: async () => {
-      const response = await apiClient.api.directories[":path{.+}"].$get({
+      const response = await directoryEndpoint.$get({
         param: { path: `${props.project}/features` },
       })
       return response.json()
@@ -41,16 +47,13 @@ export function ProjectView(props: Props) {
 
   const features: DocFile[] = featuresQuery.data.files || []
 
-  const milestoneRelation = featuresQuery.data.relations?.find(
-    (rel: DocRelation) => {return rel.path === `${props.project}/milestones`},
-  )
+  const milestoneRelation = featuresQuery.data.relations?.find((rel) => {
+    return rel.path === `${props.project}/milestones`
+  })
 
   const milestoneOptions = milestoneRelation?.files || []
 
-  // マイルストーンフィルター状態
-  const [selectedMilestone, setSelectedMilestone] = useState<string | null>(
-    null,
-  )
+  const [currentMilestone, setCurrentMilestone] = useState<string | null>(null)
 
   const updatePropertiesMutation = useFilePropertiesMutation()
 
@@ -58,16 +61,12 @@ export function ProjectView(props: Props) {
     featurePath: string,
     milestone: string,
   ) => {
-    try {
-      await updatePropertiesMutation.mutateAsync({
-        path: featurePath,
-        field: "milestone",
-        value: milestone,
-      })
-      await featuresQuery.refetch()
-    } catch (error) {
-      console.error("Failed to update milestone:", error)
-    }
+    await updatePropertiesMutation.mutateAsync({
+      path: featurePath,
+      field: "milestone",
+      value: milestone,
+    })
+    await featuresQuery.refetch()
   }
 
   const handlePropertyUpdate = async (
@@ -93,8 +92,9 @@ export function ProjectView(props: Props) {
     if (!page) return
 
     const currentFeatures =
-      (page.type === 'markdown'
-        ? (page.content.frontMatter as Record<string, unknown>)?.features as string[]
+      (page.type === "markdown"
+        ? ((page.content.frontMatter as Record<string, unknown>)
+            ?.features as string[])
         : []) || []
     const updatedFeatures = [...currentFeatures, featurePath]
 
@@ -114,8 +114,9 @@ export function ProjectView(props: Props) {
       if (!page) return
 
       const currentFeatures =
-        (page.type === 'markdown'
-          ? (page.content.frontMatter as Record<string, unknown>)?.features as string[]
+        (page.type === "markdown"
+          ? ((page.content.frontMatter as Record<string, unknown>)
+              ?.features as string[])
           : []) || []
 
       // フィーチャーを削除
@@ -135,32 +136,35 @@ export function ProjectView(props: Props) {
 
   // フィルタリング関数
   const filterFeaturesByMilestone = (features: DocFile[]) => {
-    if (!selectedMilestone) return features
+    if (!currentMilestone) return features
     return features.filter((feature) => {
-      if (feature.type !== 'markdown') return false
+      if (feature.type !== "markdown") return false
       const milestone = (feature.content.frontMatter as Record<string, unknown>)
         ?.milestone as string
-      return milestone === selectedMilestone
+      return milestone === currentMilestone
     })
   }
 
   function isDocFileMdWithFeatures(file: DocFile): file is DocFileMd {
-    return file.type === 'markdown'
+    return file.type === "markdown"
   }
 
   // ページと関連機能をグループ化
   const pageGroups: PageGroup[] = pages
     .filter(isDocFileMdWithFeatures)
     .map((page: DocFileMd) => {
-      const pageFeatures = isDocFileMdWithFeatures(page) 
-        ? ((page.content.frontMatter as Record<string, unknown>)?.features as string[]) || []
+      const pageFeatures = isDocFileMdWithFeatures(page)
+        ? ((page.content.frontMatter as Record<string, unknown>)
+            ?.features as string[]) || []
         : []
       const relatedFeatures = features.filter((feature: DocFile) => {
         return pageFeatures.includes(feature.path.path)
       })
 
       // フィルタリング適用
-      const filteredFeatures = filterFeaturesByMilestone(relatedFeatures).filter((feature): feature is DocFileMd => feature.type === 'markdown')
+      const filteredFeatures = filterFeaturesByMilestone(
+        relatedFeatures,
+      ).filter((feature): feature is DocFileMd => feature.type === "markdown")
 
       return {
         page,
@@ -184,8 +188,8 @@ export function ProjectView(props: Props) {
       {/* マイルストーンフィルターボタン */}
       <div className="flex flex-wrap gap-2">
         <Button
-          variant={selectedMilestone === null ? "default" : "secondary"}
-          onClick={() => setSelectedMilestone(null)}
+          variant={currentMilestone === null ? "default" : "secondary"}
+          onClick={() => setCurrentMilestone(null)}
           size="sm"
         >
           すべて
@@ -194,9 +198,9 @@ export function ProjectView(props: Props) {
           <Button
             key={milestone.name}
             variant={
-              selectedMilestone === milestone.name ? "default" : "secondary"
+              currentMilestone === milestone.name ? "default" : "secondary"
             }
-            onClick={() => setSelectedMilestone(milestone.name)}
+            onClick={() => setCurrentMilestone(milestone.name)}
             size="sm"
           >
             {milestone.name}
@@ -219,7 +223,10 @@ export function ProjectView(props: Props) {
           />
         ))}
         <UnlinkedFeaturesSection
-          unlinkedFeatures={unlinkedFeatures.filter((feature): feature is DocFileMd => 'frontMatter' in feature && 'title' in feature)}
+          unlinkedFeatures={unlinkedFeatures.filter(
+            (feature): feature is DocFileMd =>
+              "frontMatter" in feature && "title" in feature,
+          )}
           milestoneOptions={milestoneOptions}
           onMilestoneUpdate={handleMilestoneUpdate}
           onPropertyUpdate={handlePropertyUpdate}

@@ -8,7 +8,12 @@ import { Textarea } from "@/components/ui/textarea"
 import { VscodeButton } from "@/components/vscode-button"
 import { useDirectoryQuery } from "@/hooks/use-directory-query"
 import { apiClient } from "@/lib/api-client"
-import type { DocFile, DocFileMd, DocFileUnknown, DocSchemaFieldType } from "@/lib/types"
+import type {
+  DocFile,
+  DocFileMd,
+  DocFileUnknown,
+  DocSchemaFieldType,
+} from "@/lib/types"
 
 /**
  * テーブルカラムの型定義
@@ -22,15 +27,15 @@ type DocTableColumn = {
 }
 
 function isDocFileMd(file: DocFile): file is DocFileMd {
-  return file.type === 'markdown'
+  return file.type === "markdown"
 }
 
 function isDocFileUnknown(file: DocFile): file is DocFileUnknown {
-  return file.type === 'unknown'
+  return file.type === "unknown"
 }
 
-function hasIsArchived(file: DocFile): file is (DocFileMd | DocFileUnknown) {
-  return file.type === 'markdown' || file.type === 'unknown'
+function hasIsArchived(file: DocFile): file is DocFileMd | DocFileUnknown {
+  return file.type === "markdown" || file.type === "unknown"
 }
 
 type Props = {
@@ -46,22 +51,25 @@ export function DirectoryPageView(props: Props) {
   const [showArchived, setShowArchived] = useState(false)
 
   // ファイルをタイプ別にフィルタリング
-  const allMdFiles = directoryData.files.filter((file: DocFile) => isDocFileMd(file))
-  
+  const allMdFiles = directoryData.files.filter((file: DocFile) =>
+    isDocFileMd(file),
+  )
+
   const activeMdFiles = allMdFiles.filter((file: DocFile) => {
     return !hasIsArchived(file) || !file.isArchived
   })
-  
+
   const archivedMdFiles = allMdFiles.filter((file: DocFile) => {
     return hasIsArchived(file) && file.isArchived
   })
-  
-  
+
   // 表示するファイルを決定
   const mdFiles = showArchived ? allMdFiles : activeMdFiles
-  
+
   const otherFiles = directoryData.files.filter((file: DocFile) => {
-    return isDocFileUnknown(file) && (hasIsArchived(file) ? !file.isArchived : true)
+    return (
+      isDocFileUnknown(file) && (hasIsArchived(file) ? !file.isArchived : true)
+    )
   })
 
   const [title, setTitle] = useState("")
@@ -83,7 +91,9 @@ export function DirectoryPageView(props: Props) {
   const handleTitleBlur = async () => {
     await apiClient.api.directories[":path{.+}"].$put({
       param: {
-        path: props.currentPath.startsWith("/") ? props.currentPath.substring(1) : props.currentPath,
+        path: props.currentPath.startsWith("/")
+          ? props.currentPath.substring(1)
+          : props.currentPath,
       },
       json: {
         title: title,
@@ -103,7 +113,9 @@ export function DirectoryPageView(props: Props) {
   const handleDescriptionBlur = async () => {
     await apiClient.api.directories[":path{.+}"].$put({
       param: {
-        path: props.currentPath.startsWith("/") ? props.currentPath.substring(1) : props.currentPath,
+        path: props.currentPath.startsWith("/")
+          ? props.currentPath.substring(1)
+          : props.currentPath,
       },
       json: {
         title: null,
@@ -119,7 +131,9 @@ export function DirectoryPageView(props: Props) {
     try {
       const response = await apiClient.api.directories[":path{.+}"].$put({
         param: {
-          path: props.currentPath.startsWith("/") ? props.currentPath.substring(1) : props.currentPath,
+          path: props.currentPath.startsWith("/")
+            ? props.currentPath.substring(1)
+            : props.currentPath,
         },
         json: {
           title: null,
@@ -171,22 +185,33 @@ export function DirectoryPageView(props: Props) {
           columns={(() => {
             const schema = directoryData.indexFile?.content.frontMatter?.schema
             if (!schema) return []
-            
-            const columns = Object.entries(schema).map(([key, fieldValue]) => {
-              // fieldValueが正しいオブジェクトであることを確認
-              if (!fieldValue || typeof fieldValue !== 'object' || !('type' in fieldValue)) {
-                return null
-              }
-              
-              const value = fieldValue as Record<string, unknown>
-              return { 
-                key, 
-                label: typeof value.title === 'string' ? value.title : key, 
-                type: String(value.type) as DocTableColumn['type'], 
-                path: (value.type === 'relation' || value.type === 'multi-relation') && typeof value.path === 'string' ? value.path : "", 
-                options: Array.isArray(value.options) ? value.options : [] 
-              }
-            }).filter((col): col is NonNullable<typeof col> => col !== null)
+
+            const columns = Object.entries(schema)
+              .map(([key, fieldValue]) => {
+                // fieldValueが正しいオブジェクトであることを確認
+                if (
+                  !fieldValue ||
+                  typeof fieldValue !== "object" ||
+                  !("type" in fieldValue)
+                ) {
+                  return null
+                }
+
+                const value = fieldValue as Record<string, unknown>
+                return {
+                  key,
+                  label: typeof value.title === "string" ? value.title : key,
+                  type: String(value.type) as DocTableColumn["type"],
+                  path:
+                    (value.type === "relation" ||
+                      value.type === "multi-relation") &&
+                    typeof value.path === "string"
+                      ? value.path
+                      : "",
+                  options: Array.isArray(value.options) ? value.options : [],
+                }
+              })
+              .filter((col): col is NonNullable<typeof col> => col !== null)
             return columns
           })()}
           directoryPath={props.currentPath}

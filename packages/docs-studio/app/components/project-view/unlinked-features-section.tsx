@@ -4,7 +4,7 @@ import type { DocFile, DocFileMd, DocRelationFile } from "@/lib/types"
 import { FeatureItem } from "./feature-item"
 
 function isDocFileMd(file: DocFile): file is DocFileMd {
-  return file.type === 'markdown'
+  return file.type === "markdown"
 }
 
 type Priority = "high" | "medium" | "low"
@@ -34,11 +34,11 @@ export function UnlinkedFeaturesSection(props: Props) {
         low: 2,
       }
       const aPriority =
-        ((a.content.frontMatter as Record<string, unknown>)?.priority as Priority) ||
-        "low"
+        ((a.content.frontMatter as Record<string, unknown>)
+          ?.priority as Priority) || "low"
       const bPriority =
-        ((b.content.frontMatter as Record<string, unknown>)?.priority as Priority) ||
-        "low"
+        ((b.content.frontMatter as Record<string, unknown>)
+          ?.priority as Priority) || "low"
       return (priorityOrder[aPriority] || 2) - (priorityOrder[bPriority] || 2)
     })
 

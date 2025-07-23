@@ -3,7 +3,7 @@ import type { DocFile, DocFileUnknown } from "@/lib/types"
 import { FileCard } from "./file-card"
 
 function isDocFileUnknown(file: DocFile): file is DocFileUnknown {
-  return 'extension' in file
+  return "extension" in file
 }
 
 type Props = {

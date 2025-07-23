@@ -9,7 +9,7 @@ export const Route = createFileRoute("/$/")({
 function Component() {
   const pathname = useLocation({ select: (location) => location.pathname })
 
-   const supportedExtensions = [".md", ".csv", ".json", ".mermaid"]
+  const supportedExtensions = [".md", ".csv", ".json", ".mermaid"]
 
   const isFile = supportedExtensions.some((ext) => pathname.endsWith(ext))
 

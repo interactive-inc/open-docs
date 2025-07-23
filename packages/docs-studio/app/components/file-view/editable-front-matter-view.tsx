@@ -1,5 +1,9 @@
 import { Card } from "@/components/ui/card"
-import type { DocRelation, DocSchemaRecord, DocFileMdFrontMatter } from "@/lib/types"
+import type {
+  DocFileMdFrontMatter,
+  DocRelation,
+  DocSchemaRecord,
+} from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { FrontMatterInputField } from "./front-matter-input-field"
 

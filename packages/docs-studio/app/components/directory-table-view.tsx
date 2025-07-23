@@ -15,7 +15,12 @@ import {
 } from "@/components/ui/table"
 import { apiClient } from "@/lib/api-client"
 import { normalizePath } from "@/lib/path-utils"
-import type { DocFile, DocFileMd, DocRelation, DocSchemaFieldType } from "@/lib/types"
+import type {
+  DocFile,
+  DocFileMd,
+  DocRelation,
+  DocSchemaFieldType,
+} from "@/lib/types"
 
 /**
  * テーブルカラムの型定義
@@ -29,7 +34,7 @@ type DocTableColumn = {
 }
 
 function isDocFileMd(file: DocFile): file is DocFileMd {
-  return file.type === 'markdown'
+  return file.type === "markdown"
 }
 
 type Props = {
@@ -71,7 +76,7 @@ export function DirectoryTableView(props: Props) {
 
   const updateCellMutation = useMutation({
     async mutationFn(params: { path: string; field: string; value: unknown }) {
-      console.log('Updating cell:', params)
+      console.log("Updating cell:", params)
       try {
         const endpoint = apiClient.api.files[":path{.+}"]
         const resp = await endpoint.$put({
@@ -85,19 +90,19 @@ export function DirectoryTableView(props: Props) {
           },
         })
 
-        console.log('Response status:', resp.status)
-        
+        console.log("Response status:", resp.status)
+
         if (!resp.ok) {
           const errorText = await resp.text()
-          console.error('Response error:', errorText)
+          console.error("Response error:", errorText)
           throw new Error(`API Error: ${resp.status} - ${errorText}`)
         }
 
         const result = await resp.json()
-        console.log('Update response:', result)
+        console.log("Update response:", result)
         return result
       } catch (error) {
-        console.error('Update request failed:', error)
+        console.error("Update request failed:", error)
         throw error
       }
     },
@@ -105,12 +110,12 @@ export function DirectoryTableView(props: Props) {
       // キャッシュを無効化
       queryClient.invalidateQueries({ queryKey: ["file-tree"] })
       queryClient.invalidateQueries({ queryKey: ["directory"] })
-      
+
       if (!props.onDataChanged) return
       props.onDataChanged()
     },
     onError(error) {
-      console.error('Update mutation failed:', error)
+      console.error("Update mutation failed:", error)
     },
   })
 
@@ -219,7 +224,6 @@ export function DirectoryTableView(props: Props) {
     },
   })
 
-
   const handleDeleteClick = (filePath: string) => {
     if (deleteConfirmFiles.has(filePath)) {
       // 2回目のクリック - ファイルを削除
@@ -254,7 +258,7 @@ export function DirectoryTableView(props: Props) {
         </TableHeader>
         <TableBody>
           {props.files.filter(isDocFileMd).map((fileData) => {
-            const isArchived = 'isArchived' in fileData && fileData.isArchived
+            const isArchived = "isArchived" in fileData && fileData.isArchived
             return (
               <TableRow
                 key={fileData.path.path}
@@ -355,7 +359,7 @@ export function DirectoryTableView(props: Props) {
           })}
         </TableBody>
       </Table>
-      <div className="border-t p-2 flex gap-2">
+      <div className="flex gap-2 border-t p-2">
         <Button
           size="sm"
           variant="secondary"
@@ -371,10 +375,9 @@ export function DirectoryTableView(props: Props) {
             variant={props.showArchived ? "default" : "outline"}
             onClick={props.onToggleArchived}
           >
-            {props.showArchived 
+            {props.showArchived
               ? `表示中（${props.archivedCount}件）`
-              : `非表示（${props.archivedCount}件）`
-            }
+              : `非表示（${props.archivedCount}件）`}
           </Button>
         )}
       </div>
