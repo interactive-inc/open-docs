@@ -1,6 +1,6 @@
 {
   "name": "@interactive-inc/docs",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "type": "module",
   "scripts": {
     "check": "tsgo --noEmit",
@@ -9,9 +9,9 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.15.0",
-    "@interactive-inc/docs-client": "*",
-    "@interactive-inc/docs-router": "*",
-    "@interactive-inc/docs-studio": "*",
+    "@interactive-inc/docs-client": "latest",
+    "@interactive-inc/docs-router": "latest",
+    "@interactive-inc/docs-studio": "latest",
     "hono": "^4.8.4"
   },
   "publishConfig": {
