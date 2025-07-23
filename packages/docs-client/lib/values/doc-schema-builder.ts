@@ -136,7 +136,7 @@ export class DocSchemaBuilder {
         default: z.array(z.number()).nullable().default(null),
       })
     }
-    
+
     throw new Error(`Unknown field type: ${type}`)
   }
 }

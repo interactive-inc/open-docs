@@ -423,9 +423,7 @@ test("DocSchemaValue - 無効なtypeでエラーが発生する", () => {
     },
   }
 
-  expect(() => new DocSchemaValue(invalidSchema)).toThrow(
-    'Field "name"',
-  )
+  expect(() => new DocSchemaValue(invalidSchema)).toThrow('Field "name"')
 })
 
 test("DocSchemaValue - スキーマがオブジェクトでない場合エラーが発生する", () => {

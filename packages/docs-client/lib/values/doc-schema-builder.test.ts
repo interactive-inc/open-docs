@@ -31,7 +31,6 @@ test("DocSchemaBuilder - カスタムビルダーをDIできる", () => {
   })
 })
 
-
 test("DocSchemaBuilder - 単体で動作する", () => {
   const builder = new DocSchemaBuilder()
   const schema = {
