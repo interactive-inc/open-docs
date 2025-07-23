@@ -2,7 +2,7 @@ import path from "node:path"
 import { parseArgs } from "node:util"
 import { serve } from "@hono/node-server"
 import { routes } from "@interactive-inc/docs-router"
-import { createHanders } from "@interactive-inc/docs-studio"
+import { createHandlers } from "@interactive-inc/docs-studio"
 import { Hono } from "hono"
 import { cors } from "hono/cors"
 
@@ -55,7 +55,7 @@ function createApp(props: Props) {
 
   hono.route("/api", routes({ basePath }))
 
-  const handlers = createHanders({
+  const handlers = createHandlers({
     apiBaseUrl: props.apiBaseUrl,
   })
 

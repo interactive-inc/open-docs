@@ -66,7 +66,7 @@ export function MarkdownFileView(props: Props): ReactNode {
       <Card className="overflow-hidden rounded-md p-0">
         <div
           className="markdown-body p-4"
-          // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: markdown content needs HTML rendering
           dangerouslySetInnerHTML={{ __html: html }}
         />
       </Card>

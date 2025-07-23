@@ -21,8 +21,8 @@ export function FilePageView(props: Props) {
   const fileData = fileQuery.data
 
   const directorySchemaValue =
-    directoryQuery.data?.indexFile?.content?.frontMatter?.schema()
-  const directorySchema = directorySchemaValue?.toJson() || {}
+    directoryQuery.data?.indexFile?.content?.frontMatter?.schema
+  const directorySchema = directorySchemaValue || {}
 
   const relations = directoryQuery.data?.relations || []
 

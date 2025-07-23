@@ -13,7 +13,7 @@ type Props = {
   apiBaseUrl?: string
 }
 
-export function createHanders(props: Props) {
+export function createHandlers(props: Props) {
   return factory.createHandlers(async (c) => {
     if (c.req.path === "/assets/index.js") {
       const text = await fs.readFile(

@@ -33,9 +33,10 @@ export function FileHeader(props: Props) {
   const [title, setTitle] = useState(getInitialTitle())
 
   // propsが変更されたときにタイトルを更新
+  // biome-ignore lint/correctness/useExhaustiveDependencies: getInitialTitle depends on props
   useEffect(() => {
     setTitle(getInitialTitle())
-  }, [getInitialTitle])
+  }, [props.fileData.title, props.filePath])
 
   const updateTitleMutation = useMutation({
     async mutationFn(newTitle: string) {

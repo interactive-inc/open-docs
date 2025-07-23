@@ -80,7 +80,7 @@ export function DirectoryPageView(props: Props) {
     if (directoryData?.indexFile) {
       setTitle(directoryData.indexFile.content.title || "")
       setDescription(directoryData.indexFile.content.description || "")
-      setIcon(directoryData.indexFile.content.frontMatter?.icon() || "📁")
+      setIcon(directoryData.indexFile.content.frontMatter?.icon || "📁")
     }
   }, [directoryData])
 

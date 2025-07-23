@@ -16,7 +16,7 @@ export function MultiNumberEditableCell(props: Props) {
 
   const [editValue, setEditValue] = useState(formatValue(props.value))
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: formatValue is stable
   useEffect(() => {
     setEditValue(formatValue(props.value))
   }, [props.value])

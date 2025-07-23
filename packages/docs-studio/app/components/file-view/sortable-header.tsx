@@ -3,11 +3,10 @@ import { CSS } from "@dnd-kit/utilities"
 
 type Props = {
   id: string
-  index: number
   children: React.ReactNode
 }
 
-export function CsvSortableHeader({ id, index, children }: Props) {
+export function CsvSortableHeader({ id, children }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id })
 
