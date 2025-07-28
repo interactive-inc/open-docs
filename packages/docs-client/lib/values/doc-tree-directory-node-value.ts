@@ -1,17 +1,18 @@
-import { zDocTreeDirectoryNode, zDocTreeNode } from "../models"
-import type { DocTreeDirectoryNode, DocTreeNode } from "../types"
+import { zDocTreeDirectoryNode, zDocTreeNode } from "@/models"
+import type { DocTreeDirectoryNode, DocTreeNode } from "@/types"
 import { DocTreeFileNodeValue } from "./doc-tree-file-node-value"
+import type { DocTreeNodeValue } from "./doc-tree-node-value"
 
 type Props = {
   name: string
   path: string
   icon: string
   title: string
-  children: (DocTreeFileNodeValue | DocTreeDirectoryNodeValue)[]
+  children: DocTreeNodeValue[]
 }
 
 /**
- * ツリーディレクトリノード値オブジェクト
+ * Tree directory node value object
  */
 export class DocTreeDirectoryNodeValue {
   constructor(private readonly props: Props) {
@@ -45,7 +46,7 @@ export class DocTreeDirectoryNodeValue {
   }
 
   /**
-   * プレーンオブジェクトに変換
+   * Convert to plain object
    */
   toJson(): DocTreeDirectoryNode {
     return {
@@ -59,14 +60,14 @@ export class DocTreeDirectoryNodeValue {
   }
 
   /**
-   * プロパティから作成
+   * Create from properties
    */
   static from(props: Props): DocTreeDirectoryNodeValue {
     return new DocTreeDirectoryNodeValue(props)
   }
 
   /**
-   * JSONオブジェクトから作成
+   * Create from JSON object
    */
   static fromJson(json: unknown): DocTreeDirectoryNodeValue {
     const parsed = zDocTreeDirectoryNode.parse(json) as DocTreeDirectoryNode
@@ -77,7 +78,7 @@ export class DocTreeDirectoryNodeValue {
       icon: parsed.icon,
       title: parsed.title,
       children: parsed.children.map((child: unknown) => {
-        // childの型を検証
+        // Validate child type
         const parsedChild = zDocTreeNode.parse(child) as DocTreeNode
 
         if (parsedChild.type === "file") {

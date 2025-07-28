@@ -1,7 +1,7 @@
-import { z } from "zod/v4"
+import { z } from "zod"
 
 /**
- * ファイルパス情報
+ * File path information
  */
 export const zDocFilePath = z.object({
   name: z.string(),
@@ -10,42 +10,52 @@ export const zDocFilePath = z.object({
   nameWithExtension: z.string(),
 })
 
-const zDocSchemaFieldTypeText = z.literal("text")
-const zDocSchemaFieldTypeNumber = z.literal("number")
-const zDocSchemaFieldTypeBoolean = z.literal("boolean")
-const zDocSchemaFieldTypeMultiText = z.literal("multi-text")
-const zDocSchemaFieldTypeMultiNumber = z.literal("multi-number")
-const zDocSchemaFieldTypeMultiBoolean = z.literal("multi-boolean")
-const zDocSchemaFieldTypeRelation = z.literal("relation")
-const zDocSchemaFieldTypeMultiRelation = z.literal("multi-relation")
-const zDocSchemaFieldTypeSelectText = z.literal("select-text")
-const zDocSchemaFieldTypeSelectNumber = z.literal("select-number")
-const zDocSchemaFieldTypeMultiSelectText = z.literal("multi-select-text")
-const zDocSchemaFieldTypeMultiSelectNumber = z.literal("multi-select-number")
+export const zDocMetaFieldTypeText = z.literal("text")
+
+export const zDocMetaFieldTypeNumber = z.literal("number")
+
+export const zDocMetaFieldTypeBoolean = z.literal("boolean")
+
+export const zDocMetaFieldTypeSelectText = z.literal("select-text")
+
+export const zDocMetaFieldTypeSelectNumber = z.literal("select-number")
+
+export const zDocMetaFieldTypeRelation = z.literal("relation")
+
+export const zDocMetaFieldTypeMultiText = z.literal("multi-text")
+
+export const zDocMetaFieldTypeMultiNumber = z.literal("multi-number")
+
+export const zDocMetaFieldTypeMultiRelation = z.literal("multi-relation")
+
+export const zDocMetaFieldTypeMultiSelectText = z.literal("multi-select-text")
+
+export const zDocMetaFieldTypeMultiSelectNumber = z.literal(
+  "multi-select-number",
+)
 
 /**
- * スキーマフィールドで使用可能な型の定義
+ * Available types for schema fields
  */
-export const zDocSchemaFieldType = z.union([
-  zDocSchemaFieldTypeText,
-  zDocSchemaFieldTypeNumber,
-  zDocSchemaFieldTypeBoolean,
-  zDocSchemaFieldTypeMultiText,
-  zDocSchemaFieldTypeMultiNumber,
-  zDocSchemaFieldTypeMultiBoolean,
-  zDocSchemaFieldTypeRelation,
-  zDocSchemaFieldTypeMultiRelation,
-  zDocSchemaFieldTypeSelectText,
-  zDocSchemaFieldTypeSelectNumber,
-  zDocSchemaFieldTypeMultiSelectText,
-  zDocSchemaFieldTypeMultiSelectNumber,
+export const zDocMetaFieldType = z.union([
+  zDocMetaFieldTypeText,
+  zDocMetaFieldTypeNumber,
+  zDocMetaFieldTypeBoolean,
+  zDocMetaFieldTypeMultiText,
+  zDocMetaFieldTypeMultiNumber,
+  zDocMetaFieldTypeRelation,
+  zDocMetaFieldTypeMultiRelation,
+  zDocMetaFieldTypeSelectText,
+  zDocMetaFieldTypeSelectNumber,
+  zDocMetaFieldTypeMultiSelectText,
+  zDocMetaFieldTypeMultiSelectNumber,
 ])
 
 /**
- * 文字列フィールド
+ * Text field
  */
 export const zDocSchemaFieldText = z.object({
-  type: zDocSchemaFieldTypeText,
+  type: zDocMetaFieldTypeText,
   required: z.boolean(),
   title: z.string().nullable(),
   description: z.string().nullable(),
@@ -53,10 +63,10 @@ export const zDocSchemaFieldText = z.object({
 })
 
 /**
- * 数値フィールド
+ * Number field
  */
 export const zDocSchemaFieldNumber = z.object({
-  type: zDocSchemaFieldTypeNumber,
+  type: zDocMetaFieldTypeNumber,
   required: z.boolean(),
   title: z.string().nullable(),
   description: z.string().nullable(),
@@ -64,10 +74,10 @@ export const zDocSchemaFieldNumber = z.object({
 })
 
 /**
- * ブールフィールド
+ * Boolean field
  */
 export const zDocSchemaFieldBoolean = z.object({
-  type: zDocSchemaFieldTypeBoolean,
+  type: zDocMetaFieldTypeBoolean,
   required: z.boolean(),
   title: z.string().nullable(),
   description: z.string().nullable(),
@@ -75,10 +85,10 @@ export const zDocSchemaFieldBoolean = z.object({
 })
 
 /**
- * マルチテキストフィールド
+ * Multi-text field
  */
 export const zDocSchemaFieldMultiText = z.object({
-  type: zDocSchemaFieldTypeMultiText,
+  type: zDocMetaFieldTypeMultiText,
   required: z.boolean(),
   title: z.string().nullable(),
   description: z.string().nullable(),
@@ -86,10 +96,10 @@ export const zDocSchemaFieldMultiText = z.object({
 })
 
 /**
- * マルチ数値フィールド
+ * Multi-number field
  */
 export const zDocSchemaFieldMultiNumber = z.object({
-  type: zDocSchemaFieldTypeMultiNumber,
+  type: zDocMetaFieldTypeMultiNumber,
   required: z.boolean(),
   title: z.string().nullable(),
   description: z.string().nullable(),
@@ -97,21 +107,10 @@ export const zDocSchemaFieldMultiNumber = z.object({
 })
 
 /**
- * マルチブールフィールド
- */
-export const zDocSchemaFieldMultiBoolean = z.object({
-  type: zDocSchemaFieldTypeMultiBoolean,
-  required: z.boolean(),
-  title: z.string().nullable(),
-  description: z.string().nullable(),
-  default: z.array(z.boolean()).nullable(),
-})
-
-/**
- * リレーションフィールド
+ * Relation field
  */
 export const zDocSchemaFieldRelation = z.object({
-  type: zDocSchemaFieldTypeRelation,
+  type: zDocMetaFieldTypeRelation,
   required: z.boolean(),
   title: z.string().nullable(),
   description: z.string().nullable(),
@@ -120,10 +119,10 @@ export const zDocSchemaFieldRelation = z.object({
 })
 
 /**
- * マルチリレーションフィールド
+ * Multi-relation field
  */
 export const zDocSchemaFieldMultiRelation = z.object({
-  type: zDocSchemaFieldTypeMultiRelation,
+  type: zDocMetaFieldTypeMultiRelation,
   required: z.boolean(),
   title: z.string().nullable(),
   description: z.string().nullable(),
@@ -132,10 +131,10 @@ export const zDocSchemaFieldMultiRelation = z.object({
 })
 
 /**
- * 選択テキストフィールド
+ * Select text field
  */
 export const zDocSchemaFieldSelectText = z.object({
-  type: zDocSchemaFieldTypeSelectText,
+  type: zDocMetaFieldTypeSelectText,
   required: z.boolean(),
   title: z.string().nullable(),
   description: z.string().nullable(),
@@ -144,10 +143,10 @@ export const zDocSchemaFieldSelectText = z.object({
 })
 
 /**
- * 選択数値フィールド
+ * Select number field
  */
 export const zDocSchemaFieldSelectNumber = z.object({
-  type: zDocSchemaFieldTypeSelectNumber,
+  type: zDocMetaFieldTypeSelectNumber,
   required: z.boolean(),
   title: z.string().nullable(),
   description: z.string().nullable(),
@@ -156,10 +155,10 @@ export const zDocSchemaFieldSelectNumber = z.object({
 })
 
 /**
- * マルチ選択テキストフィールド
+ * Multi-select text field
  */
 export const zDocSchemaFieldMultiSelectText = z.object({
-  type: zDocSchemaFieldTypeMultiSelectText,
+  type: zDocMetaFieldTypeMultiSelectText,
   required: z.boolean(),
   title: z.string().nullable(),
   description: z.string().nullable(),
@@ -168,10 +167,10 @@ export const zDocSchemaFieldMultiSelectText = z.object({
 })
 
 /**
- * マルチ選択数値フィールド
+ * Multi-select number field
  */
 export const zDocSchemaFieldMultiSelectNumber = z.object({
-  type: zDocSchemaFieldTypeMultiSelectNumber,
+  type: zDocMetaFieldTypeMultiSelectNumber,
   required: z.boolean(),
   title: z.string().nullable(),
   description: z.string().nullable(),
@@ -180,15 +179,14 @@ export const zDocSchemaFieldMultiSelectNumber = z.object({
 })
 
 /**
- * スキーマフィールドのUnion型定義
+ * Union type for schema fields
  */
-export const zDocSchemaField = z.union([
+export const zDocFileIndexSchemaField = z.union([
   zDocSchemaFieldText,
   zDocSchemaFieldNumber,
   zDocSchemaFieldBoolean,
   zDocSchemaFieldMultiText,
   zDocSchemaFieldMultiNumber,
-  zDocSchemaFieldMultiBoolean,
   zDocSchemaFieldRelation,
   zDocSchemaFieldMultiRelation,
   zDocSchemaFieldSelectText,
@@ -197,56 +195,151 @@ export const zDocSchemaField = z.union([
   zDocSchemaFieldMultiSelectNumber,
 ])
 
+export const zDocMetaFieldText = z.string().nullable()
+
+export const zDocMetaFieldBoolean = z.boolean().nullable()
+
+export const zDocMetaFieldNumber = z.number().nullable()
+
+export const zDocMetaFieldSelectText = z.string().nullable()
+
+export const zDocMetaFieldSelectNumber = z.number().nullable()
+
+export const zDocMetaFieldRelation = z.string().nullable()
+
+export const zDocMetaFieldMultiText = z.string().array()
+
+export const zDocMetaFieldMultiNumber = z.number().array()
+
+export const zDocMetaFieldMultiBoolean = z.boolean().array()
+
+export const zDocMetaFieldMultiSelectText = z.string().array()
+
+export const zDocMetaFieldMultiSelectNumber = z.number().array()
+
+export const zDocMetaFieldMultiRelation = z.string().array()
+
+export const zDocMetaField = z.union([
+  zDocMetaFieldText,
+  zDocMetaFieldBoolean,
+  zDocMetaFieldNumber,
+  zDocMetaFieldSelectText,
+  zDocMetaFieldSelectNumber,
+  zDocMetaFieldRelation,
+  zDocMetaFieldMultiText,
+  zDocMetaFieldMultiNumber,
+  zDocMetaFieldMultiBoolean,
+  zDocMetaFieldMultiSelectText,
+  zDocMetaFieldMultiSelectNumber,
+  zDocMetaFieldMultiRelation,
+  z.null(),
+  z.undefined(),
+])
+
 /**
- * frontMatterスキーマ
+ * FrontMatter schema
  */
-export const zDocFileMdFrontMatter = z.record(
+export const zDocFileMdMeta = z.record(z.string(), zDocMetaField)
+
+/**
+ * Schema definition
+ * Mapping of field names to schema fields
+ */
+export const zDocFileIndexSchema = z.record(
   z.string(),
-  z.union([
-    z.string(),
-    z.boolean(),
-    z.number(),
-    z.array(z.string()),
-    z.array(z.number()),
-    z.array(z.boolean()),
-    z.record(z.string(), z.unknown()),
-    z.null(),
-  ]),
+  zDocFileIndexSchemaField,
 )
 
-/**
- * スキーマ定義
- * フィールド名とスキーマフィールドのマッピング
- */
-export const zDocSchema = z.record(z.string(), zDocSchemaField)
+export const zDocCustomSchemaFieldText = z.object({
+  type: zDocMetaFieldTypeText,
+  required: z.boolean(),
+})
 
-/**
- * 最小限のスキーマフィールド定義（typeとrequiredのみ）
- * 動的スキーマ生成用
- */
-export const zDocSchemaFieldMinimal = z.object({
-  type: zDocSchemaFieldType,
+export const zDocCustomSchemaFieldNumber = z.object({
+  type: zDocMetaFieldTypeNumber,
+  required: z.boolean(),
+})
+
+export const zDocCustomSchemaFieldBoolean = z.object({
+  type: zDocMetaFieldTypeBoolean,
+  required: z.boolean(),
+})
+
+export const zDocCustomSchemaFieldRelation = z.object({
+  type: zDocMetaFieldTypeRelation,
+  required: z.boolean(),
+})
+
+export const zDocCustomSchemaFieldSelectText = z.object({
+  type: zDocMetaFieldTypeSelectText,
+  required: z.boolean(),
+})
+
+export const zDocCustomSchemaFieldSelectNumber = z.object({
+  type: zDocMetaFieldTypeSelectNumber,
+  required: z.boolean(),
+})
+
+export const zDocCustomSchemaFieldMultiText = z.object({
+  type: zDocMetaFieldTypeMultiText,
+  required: z.boolean(),
+})
+
+export const zDocCustomSchemaFieldMultiNumber = z.object({
+  type: zDocMetaFieldTypeMultiNumber,
+  required: z.boolean(),
+})
+
+export const zDocCustomSchemaFieldMultiRelation = z.object({
+  type: zDocMetaFieldTypeMultiRelation,
+  required: z.boolean(),
+})
+
+export const zDocCustomSchemaFieldMultiSelectText = z.object({
+  type: zDocMetaFieldTypeMultiSelectText,
+  required: z.boolean(),
+})
+
+export const zDocCustomSchemaFieldMultiSelectNumber = z.object({
+  type: zDocMetaFieldTypeMultiSelectNumber,
   required: z.boolean(),
 })
 
 /**
- * 最小限のスキーマ定義
- * 動的検証用
+ * For dynamic schema generation
  */
-export const zDocSchemaMinimal = z.record(z.string(), zDocSchemaFieldMinimal)
+export const zDocCustomSchemaField = z.union([
+  zDocCustomSchemaFieldText,
+  zDocCustomSchemaFieldNumber,
+  zDocCustomSchemaFieldBoolean,
+  zDocCustomSchemaFieldRelation,
+  zDocCustomSchemaFieldSelectText,
+  zDocCustomSchemaFieldSelectNumber,
+  zDocCustomSchemaFieldMultiText,
+  zDocCustomSchemaFieldMultiNumber,
+  zDocCustomSchemaFieldMultiRelation,
+  zDocCustomSchemaFieldMultiSelectText,
+  zDocCustomSchemaFieldMultiSelectNumber,
+])
 
 /**
- * index.mdファイル専用のfrontMatterスキーマ
- * iconとschemaフィールドのみを持つ
+ * Minimal schema definition
+ * For dynamic validation
  */
-export const zDocFileIndexFrontMatter = z.object({
-  type: z.literal("index-frontmatter"),
-  icon: z.string(),
-  schema: zDocSchema,
+export const zDocCustomSchema = z.record(z.string(), zDocCustomSchemaField)
+
+/**
+ * FrontMatter schema for index.md files
+ * Contains only icon and schema fields
+ */
+export const zDocFileIndexMeta = z.object({
+  type: z.literal("index-meta"),
+  icon: z.string().nullable(),
+  schema: zDocFileIndexSchema,
 })
 
 /**
- * リレーションフィールド
+ * Relation field
  */
 export const zDocRelationField = z.object({
   fieldName: z.string(),
@@ -255,7 +348,7 @@ export const zDocRelationField = z.object({
 })
 
 /**
- * リレーションオプション
+ * Relation options
  */
 export const zDocRelationFile = z.object({
   name: z.string(),
@@ -265,7 +358,7 @@ export const zDocRelationFile = z.object({
 })
 
 /**
- * リレーショングループ
+ * Relation group
  */
 export const zDocRelation = z.object({
   path: z.string(),
@@ -273,39 +366,39 @@ export const zDocRelation = z.object({
 })
 
 /**
- * Markdownコンテンツ情報（通常のMDファイル用）
+ * Markdown content information (for regular MD files)
  */
-export const zDocFileContentMd = z.object({
+export const zDocFileMdContent = z.object({
   type: z.literal("markdown-content"),
   body: z.string(),
   title: z.string(),
   description: z.string(),
-  frontMatter: zDocFileMdFrontMatter,
+  meta: zDocFileMdMeta,
 })
 
 /**
- * Markdownコンテンツ情報（indexファイル用）
+ * Markdown content information (for index files)
  */
-export const zDocFileContentIndex = z.object({
+export const zDocFileIndexContent = z.object({
   type: z.literal("markdown-index"),
   body: z.string(),
   title: z.string(),
   description: z.string(),
-  frontMatter: zDocFileIndexFrontMatter,
+  meta: zDocFileIndexMeta,
 })
 
 /**
- * index.mdファイル
+ * index.md file
  */
 export const zDocFileIndex = z.object({
   type: z.literal("index"),
   path: zDocFilePath,
-  content: zDocFileContentIndex,
+  content: zDocFileIndexContent,
   isArchived: z.boolean(),
 })
 
 /**
- * その他のファイル（非マークダウン）
+ * Other files (non-markdown)
  */
 export const zDocFileUnknown = z.object({
   type: z.literal("unknown"),
@@ -316,22 +409,22 @@ export const zDocFileUnknown = z.object({
 })
 
 /**
- * マークダウンファイル（index.md以外）
+ * Markdown file (excluding index.md)
  */
 export const zDocFileMd = z.object({
   type: z.literal("markdown"),
   path: zDocFilePath,
-  content: zDocFileContentMd,
+  content: zDocFileMdContent,
   isArchived: z.boolean(),
 })
 
 /**
- * ファイルのunion型（index.md、通常のmd、その他）
+ * File union type (index.md, regular md, other)
  */
 export const zDocFile = z.union([zDocFileIndex, zDocFileMd, zDocFileUnknown])
 
 /**
- * ファイルノード（ファイル専用）
+ * File node (for files only)
  */
 export const zDocTreeFileNode = z.object({
   type: z.literal("file"),
@@ -342,7 +435,7 @@ export const zDocTreeFileNode = z.object({
 })
 
 /**
- * ディレクトリノード（ディレクトリ専用）
+ * Directory node (for directories only)
  */
 export const zDocTreeDirectoryNode: z.ZodSchema = z.lazy(() => {
   return z.object({
@@ -356,6 +449,27 @@ export const zDocTreeDirectoryNode: z.ZodSchema = z.lazy(() => {
 })
 
 /**
- * ツリーノードの統合型
+ * Unified tree node type
  */
 export const zDocTreeNode = z.union([zDocTreeFileNode, zDocTreeDirectoryNode])
+
+/**
+ * DocClient configuration
+ */
+export const zDocClientConfig = z
+  .object({
+    defaultIndexIcon: z.string().optional(),
+    indexFileName: z.string().optional(),
+    archiveDirectoryName: z.string().optional(),
+    defaultDirectoryName: z.string().optional(),
+    indexMetaIncludes: z.array(z.string()).optional(),
+    directoryExcludes: z.array(z.string()).optional(),
+  })
+  .transform((data) => ({
+    defaultIndexIcon: data.defaultIndexIcon ?? "📃",
+    indexFileName: data.indexFileName ?? "index.md",
+    archiveDirectoryName: data.archiveDirectoryName ?? "_",
+    defaultDirectoryName: data.defaultDirectoryName ?? "Directory",
+    indexMetaIncludes: data.indexMetaIncludes ?? [],
+    directoryExcludes: data.directoryExcludes ?? [".vitepress"],
+  }))

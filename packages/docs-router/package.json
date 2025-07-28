@@ -1,6 +1,6 @@
 {
   "name": "@interactive-inc/docs-router",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "type": "module",
   "scripts": {
     "check": "tsgo --noEmit",
@@ -12,7 +12,7 @@
     "@hono/zod-validator": "^0.7.0",
     "@interactive-inc/docs-client": "latest",
     "hono": "^4.8.4",
-    "zod": "^3.25.74"
+    "zod": "^4.0.10"
   },
   "publishConfig": {
     "access": "public"

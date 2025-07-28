@@ -1,84 +1,97 @@
 import { expect, test } from "bun:test"
-import { DocFileContentIndexValue } from "../values/doc-file-content-index-value"
+import { defaultTestConfig } from "../utils"
+import { DocFileIndexContentValue } from "../values/doc-file-index-content-value"
 import { DocFileIndexEntity } from "./doc-file-index-entity"
 
 test("DocFileIndexEntity - 基本的な作成とプロパティアクセス", () => {
-  const entity = new DocFileIndexEntity({
-    type: "index",
-    content: {
-      type: "markdown-index",
-      body: "# タイトル\n\n説明文",
-      title: "タイトル",
-      description: "説明文",
-      frontMatter: {
-        type: "index-frontmatter",
-        icon: "📁",
-        schema: {},
+  const entity = new DocFileIndexEntity(
+    {
+      type: "index",
+      content: {
+        type: "markdown-index",
+        body: "# タイトル\n\n説明文",
+        title: "タイトル",
+        description: "説明文",
+        meta: {
+          type: "index-meta",
+          icon: "📁",
+          schema: {},
+        },
       },
+      path: {
+        path: "docs/index.md",
+        name: "index",
+        fullPath: "/Users/test/docs/index.md",
+        nameWithExtension: "index.md",
+      },
+      isArchived: false,
     },
-    path: {
-      path: "docs/index.md",
-      name: "index",
-      fullPath: "/Users/test/docs/index.md",
-      nameWithExtension: "index.md",
-    },
-    isArchived: false,
-  })
+    {},
+    defaultTestConfig,
+  )
 
   expect(entity.value.type).toBe("index")
 })
 
 test("DocFileIndexEntity - content getterが値オブジェクトを返す", () => {
-  const entity = new DocFileIndexEntity({
-    type: "index",
-    content: {
-      type: "markdown-index",
-      body: "# タイトル",
-      title: "タイトル",
-      description: "",
-      frontMatter: {
-        type: "index-frontmatter",
-        icon: "📁",
-        schema: {},
+  const entity = new DocFileIndexEntity(
+    {
+      type: "index",
+      content: {
+        type: "markdown-index",
+        body: "# タイトル",
+        title: "タイトル",
+        description: "",
+        meta: {
+          type: "index-meta",
+          icon: "📁",
+          schema: {},
+        },
       },
+      path: {
+        path: "docs/index.md",
+        name: "index",
+        fullPath: "/Users/test/docs/index.md",
+        nameWithExtension: "index.md",
+      },
+      isArchived: false,
     },
-    path: {
-      path: "docs/index.md",
-      name: "index",
-      fullPath: "/Users/test/docs/index.md",
-      nameWithExtension: "index.md",
-    },
-    isArchived: false,
-  })
+    {},
+    defaultTestConfig,
+  )
 
   const content = entity.content
-  expect(content).toBeInstanceOf(DocFileContentIndexValue)
+  expect(content).toBeInstanceOf(DocFileIndexContentValue)
   expect(content.title).toBe("タイトル")
   expect(content.body).toBe("# タイトル")
 })
 
 test("DocFileIndexEntity - path getterがオブジェクトを返す", () => {
-  const entity = new DocFileIndexEntity({
-    type: "index",
-    content: {
-      type: "markdown-index",
-      body: "",
-      title: "",
-      description: "",
-      frontMatter: {
-        type: "index-frontmatter",
-        icon: "",
-        schema: {},
+  const entity = new DocFileIndexEntity(
+    {
+      type: "index",
+      content: {
+        type: "markdown-index",
+        body: "",
+        title: "",
+        description: "",
+        meta: {
+          type: "index-meta",
+          icon: "",
+          schema: {},
+        },
       },
+      path: {
+        path: "docs/index.md",
+        name: "index",
+        fullPath: "/Users/test/docs/index.md",
+        nameWithExtension: "index.md",
+      },
+      isArchived: false,
     },
-    path: {
-      path: "docs/index.md",
-      name: "index",
-      fullPath: "/Users/test/docs/index.md",
-      nameWithExtension: "index.md",
-    },
-    isArchived: false,
-  })
+    {},
+    defaultTestConfig,
+  )
 
   const path = entity.path
   expect(path.name).toBe("index")
@@ -88,27 +101,31 @@ test("DocFileIndexEntity - path getterがオブジェクトを返す", () => {
 })
 
 test("DocFileIndexEntity - withContentで新しいインスタンスを作成", () => {
-  const entity = new DocFileIndexEntity({
-    type: "index",
-    content: {
-      type: "markdown-index",
-      body: "# 古いタイトル",
-      title: "古いタイトル",
-      description: "",
-      frontMatter: {
-        type: "index-frontmatter",
-        icon: "📁",
-        schema: {},
+  const entity = new DocFileIndexEntity(
+    {
+      type: "index",
+      content: {
+        type: "markdown-index",
+        body: "# 古いタイトル",
+        title: "古いタイトル",
+        description: "",
+        meta: {
+          type: "index-meta",
+          icon: "📁",
+          schema: {},
+        },
       },
+      path: {
+        path: "docs/index.md",
+        name: "index",
+        fullPath: "/Users/test/docs/index.md",
+        nameWithExtension: "index.md",
+      },
+      isArchived: false,
     },
-    path: {
-      path: "docs/index.md",
-      name: "index",
-      fullPath: "/Users/test/docs/index.md",
-      nameWithExtension: "index.md",
-    },
-    isArchived: false,
-  })
+    {},
+    defaultTestConfig,
+  )
 
   const newContent = entity.content.withTitle("新しいタイトル")
   const newEntity = entity.withContent(newContent)
@@ -119,27 +136,31 @@ test("DocFileIndexEntity - withContentで新しいインスタンスを作成", 
 })
 
 test("DocFileIndexEntity - withPathで新しいインスタンスを作成", () => {
-  const entity = new DocFileIndexEntity({
-    type: "index",
-    content: {
-      type: "markdown-index",
-      body: "",
-      title: "",
-      description: "",
-      frontMatter: {
-        type: "index-frontmatter",
-        icon: "",
-        schema: {},
+  const entity = new DocFileIndexEntity(
+    {
+      type: "index",
+      content: {
+        type: "markdown-index",
+        body: "",
+        title: "",
+        description: "",
+        meta: {
+          type: "index-meta",
+          icon: "",
+          schema: {},
+        },
       },
+      path: {
+        path: "docs/index.md",
+        name: "index",
+        fullPath: "/Users/test/docs/index.md",
+        nameWithExtension: "index.md",
+      },
+      isArchived: false,
     },
-    path: {
-      path: "docs/index.md",
-      name: "index",
-      fullPath: "/Users/test/docs/index.md",
-      nameWithExtension: "index.md",
-    },
-    isArchived: false,
-  })
+    {},
+    defaultTestConfig,
+  )
 
   const newPath = {
     path: "docs/new-index.md",
@@ -162,8 +183,8 @@ test("DocFileIndexEntity - toJsonで元のデータ構造を返す", () => {
       body: "# タイトル",
       title: "タイトル",
       description: "説明",
-      frontMatter: {
-        type: "index-frontmatter" as const,
+      meta: {
+        type: "index-meta" as const,
         icon: "📁",
         schema: {},
       },
@@ -177,32 +198,36 @@ test("DocFileIndexEntity - toJsonで元のデータ構造を返す", () => {
     isArchived: false,
   }
 
-  const entity = new DocFileIndexEntity(data)
+  const entity = new DocFileIndexEntity(data, {}, defaultTestConfig)
   expect(entity.toJson()).toEqual(data)
 })
 
 test("DocFileIndexEntity - 不変性の確認", () => {
-  const entity = new DocFileIndexEntity({
-    type: "index",
-    content: {
-      type: "markdown-index",
-      body: "",
-      title: "",
-      description: "",
-      frontMatter: {
-        type: "index-frontmatter",
-        icon: "",
-        schema: {},
+  const entity = new DocFileIndexEntity(
+    {
+      type: "index",
+      content: {
+        type: "markdown-index",
+        body: "",
+        title: "",
+        description: "",
+        meta: {
+          type: "index-meta",
+          icon: "",
+          schema: {},
+        },
       },
+      path: {
+        path: "docs/index.md",
+        name: "index",
+        fullPath: "/Users/test/docs/index.md",
+        nameWithExtension: "index.md",
+      },
+      isArchived: false,
     },
-    path: {
-      path: "docs/index.md",
-      name: "index",
-      fullPath: "/Users/test/docs/index.md",
-      nameWithExtension: "index.md",
-    },
-    isArchived: false,
-  })
+    {},
+    defaultTestConfig,
+  )
 
   expect(() => {
     // @ts-expect-error - 不変性のテスト

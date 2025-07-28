@@ -1,8 +1,8 @@
-import { zDocRelationFile } from "../models"
-import type { DocRelationFile } from "../types"
+import { zDocRelationFile } from "@/models"
+import type { DocRelationFile } from "@/types"
 
 /**
- * リレーションファイル
+ * Relation file
  */
 export class DocRelationFileValue {
   constructor(private readonly value: DocRelationFile) {
@@ -12,28 +12,28 @@ export class DocRelationFileValue {
   }
 
   /**
-   * ファイルパス
+   * File path
    */
   get id() {
     return this.value.name
   }
 
   /**
-   * スラッグ
+   * Slug
    */
   get slug() {
     return this.value.name
   }
 
   /**
-   * 表示用ラベル
+   * Display label
    */
   get label() {
     return this.value.label || this.value.name
   }
 
   /**
-   * ファイルパスとタイトルから生成
+   * Create from file path and title
    */
   static from(filePath: string, title: string | null): DocRelationFileValue {
     const fileName = DocRelationFileValue.extractFileName(filePath)
@@ -46,14 +46,14 @@ export class DocRelationFileValue {
   }
 
   /**
-   * ファイルパスからファイル名を抽出（拡張子なし）
+   * Extract file name from file path (without extension)
    */
   private static extractFileName(filePath: string): string {
     return filePath.split("/").pop()?.replace(".md", "") || filePath
   }
 
   /**
-   * JSON形式に変換
+   * Convert to JSON format
    */
   toJson(): DocRelationFile {
     return { ...this.value }

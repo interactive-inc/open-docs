@@ -1,5 +1,5 @@
-import { zDocTreeFileNode } from "../models"
-import type { DocTreeFileNode } from "../types"
+import { zDocTreeFileNode } from "@/models"
+import type { DocTreeFileNode } from "@/types"
 
 type Props = {
   name: string
@@ -9,7 +9,7 @@ type Props = {
 }
 
 /**
- * ツリーファイルノード値オブジェクト
+ * Tree file node value object
  */
 export class DocTreeFileNodeValue {
   constructor(private readonly props: Props) {
@@ -37,7 +37,7 @@ export class DocTreeFileNodeValue {
   }
 
   /**
-   * プレーンオブジェクトに変換
+   * Convert to plain object
    */
   toJson(): DocTreeFileNode {
     return {
@@ -50,14 +50,14 @@ export class DocTreeFileNodeValue {
   }
 
   /**
-   * プロパティから作成
+   * Create from properties
    */
   static from(props: Props): DocTreeFileNodeValue {
     return new DocTreeFileNodeValue(props)
   }
 
   /**
-   * JSONオブジェクトから作成
+   * Create from JSON object
    */
   static fromJson(json: unknown): DocTreeFileNodeValue {
     const parsed = zDocTreeFileNode.parse(json)

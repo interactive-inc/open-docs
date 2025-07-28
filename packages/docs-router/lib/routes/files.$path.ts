@@ -1,6 +1,6 @@
 import { zValidator } from "@hono/zod-validator"
 import { HTTPException } from "hono/http-exception"
-import { z } from "zod/v4"
+import { z } from "zod"
 import { factory } from "../utils/factory"
 
 /**
@@ -108,15 +108,10 @@ export const PUT = factory.createHandlers(
           message: `Index file not found or error reading: ${indexFile.message}`,
         })
       }
-      let frontMatter = file.content.frontMatter
+      let updatedContent = file.content
       for (const [key, value] of Object.entries(body.properties)) {
-        frontMatter = frontMatter.withProperty(
-          key,
-          value,
-          indexFile.content.frontMatter.schema,
-        )
+        updatedContent = updatedContent.withMetaProperty(key, value as any)
       }
-      let updatedContent = file.content.withFrontMatter(frontMatter)
 
       // タイトルを更新
       if (body.title !== null) {

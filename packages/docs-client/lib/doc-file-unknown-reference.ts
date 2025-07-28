@@ -1,19 +1,19 @@
 import { DocDirectoryReference } from "./doc-directory-reference"
 import type { DocFileSystem } from "./doc-file-system"
 import type { DocPathSystem } from "./doc-path-system"
-import { DocFileMdEntity } from "./entities/doc-file-md-entity"
 import { DocFileUnknownEntity } from "./entities/doc-file-unknown-entity"
-import { DocFileContentMdValue } from "./values/doc-file-content-md-value"
+import type { DocClientConfig, DocCustomSchema } from "./types"
 import { DocFilePathValue } from "./values/doc-file-path-value"
 
 type Props = {
   path: string
   fileSystem: DocFileSystem
   pathSystem: DocPathSystem
+  config: DocClientConfig
 }
 
 /**
- * ファイルの参照
+ * File reference
  */
 export class DocFileUnknownReference {
   private readonly pathSystem: DocPathSystem
@@ -47,40 +47,36 @@ export class DocFileUnknownReference {
     return this.pathSystem.dirname(this.path)
   }
 
-  directory(): DocDirectoryReference {
+  directory<T extends DocCustomSchema>(
+    customSchema: T,
+  ): DocDirectoryReference<T>
+
+  directory(): DocDirectoryReference<DocCustomSchema>
+
+  directory<T extends DocCustomSchema>(customSchema?: T) {
     return new DocDirectoryReference({
-      archiveDirectoryName: "_",
-      indexFileName: "index.md",
+      archiveDirectoryName: this.props.config.archiveDirectoryName,
+      indexFileName: this.props.config.indexFileName,
       fileSystem: this.fileSystem,
       path: this.directoryPath,
       pathSystem: this.pathSystem,
+      customSchema: customSchema ?? {},
+      config: this.props.config,
     })
   }
 
-  async read(): Promise<Error | DocFileMdEntity | DocFileUnknownEntity> {
+  async read(): Promise<Error | DocFileUnknownEntity> {
     const content = await this.fileSystem.readFile(this.path)
 
     if (content === null) {
       return new Error(`File not found at ${this.path}.`)
     }
 
-    // アーカイブディレクトリにあるファイルかどうかをチェック
     const isInArchiveDir =
       this.path.includes("/_/") || this.path.startsWith("_/")
 
     if (this.path.endsWith(".md")) {
-      const contentValue = DocFileContentMdValue.fromMarkdown(content)
-      const pathValue = DocFilePathValue.fromPathWithSystem(
-        this.path,
-        this.pathSystem,
-        this.basePath,
-      )
-      return new DocFileMdEntity({
-        type: "markdown",
-        content: contentValue.value,
-        path: pathValue.value,
-        isArchived: isInArchiveDir,
-      })
+      throw new Error("Use DocFileMdReference to read Markdown files.")
     }
 
     const pathValue = DocFilePathValue.fromPathWithSystem(
@@ -88,7 +84,9 @@ export class DocFileUnknownReference {
       this.pathSystem,
       this.basePath,
     )
+
     const extension = this.pathSystem.extname(this.path).substring(1) // Remove dot
+
     return new DocFileUnknownEntity({
       type: "unknown",
       path: pathValue.value,
@@ -99,93 +97,92 @@ export class DocFileUnknownReference {
   }
 
   /**
-   * ファイルの内容を読み込む
+   * Read file content
    */
   async readContent(): Promise<Error | string> {
     const entity = await this.read()
     if (entity instanceof Error) {
       return entity
     }
-    if (typeof entity.value.content === "string") {
-      return entity.value.content
-    }
-    return entity.value.content.body
+    return entity.value.content
   }
 
   /**
-   * ファイルに内容を書き込む
+   * Write content to file
    */
   async writeContent(content: string): Promise<void> {
     await this.fileSystem.writeFile(this.path, content)
   }
 
   /**
-   * Entityを書き込む
+   * Write entity
    */
   async write(entity: DocFileUnknownEntity): Promise<void> {
     await this.fileSystem.writeFile(this.path, entity.value.content)
   }
 
   /**
-   * 生のコンテンツを書き込む
+   * Write raw content
    */
   async writeRaw(content: string): Promise<void> {
     await this.fileSystem.writeFile(this.path, content)
   }
 
   /**
-   * ファイルを削除
+   * Delete file
    */
   async delete(): Promise<Error | null> {
     return await this.fileSystem.deleteFile(this.path)
   }
 
   /**
-   * ファイルが存在するか確認
+   * Check if file exists
    */
   async exists(): Promise<boolean> {
     return this.fileSystem.exists(this.path)
   }
 
   /**
-   * ファイルをコピー
+   * Copy file
    */
   async copyTo(destinationPath: string): Promise<void> {
     await this.fileSystem.copyFile(this.path, destinationPath)
   }
 
   /**
-   * ファイルを移動
+   * Move file
    */
   async moveTo(destinationPath: string): Promise<void> {
     await this.fileSystem.moveFile(this.path, destinationPath)
   }
 
   /**
-   * ファイルのサイズを取得（バイト単位）
+   * Get file size in bytes
    */
   async size(): Promise<number> {
     return this.fileSystem.getFileSize(this.path)
   }
 
   /**
-   * ファイルの最終更新日時を取得
+   * Get file last modified time
    */
   async lastModified(): Promise<Date> {
     return this.fileSystem.getFileModifiedTime(this.path)
   }
 
   /**
-   * ファイルの作成日時を取得
+   * Get file creation time
    */
   async createdAt(): Promise<Date> {
     return this.fileSystem.getFileCreatedTime(this.path)
   }
 
   /**
-   * ファイルをアーカイブに移動し、新しい参照を返す
+   * Move file to archive and return new reference
    */
-  async archive(archiveDirectoryName = "_"): Promise<DocFileUnknownReference> {
+  async archive(
+    archiveDirectoryName = this.props.config.archiveDirectoryName,
+  ): Promise<DocFileUnknownReference> {
     const dirPath = this.pathSystem.dirname(this.path)
     const fileName = this.pathSystem.basename(this.path)
     const archivePath = this.pathSystem.join(
@@ -194,29 +191,27 @@ export class DocFileUnknownReference {
       fileName,
     )
 
-    // ファイルを移動
     await this.moveTo(archivePath)
 
-    // 新しいパスで参照を作成
     return new DocFileUnknownReference({
       path: archivePath,
       fileSystem: this.fileSystem,
       pathSystem: this.pathSystem,
+      config: this.props.config,
     })
   }
 
   /**
-   * ファイルをアーカイブから復元し、新しい参照を返す
+   * Restore file from archive and return new reference
    */
-  async restore(archiveDirectoryName = "_"): Promise<DocFileUnknownReference> {
+  async restore(
+    archiveDirectoryName = this.props.config.archiveDirectoryName,
+  ): Promise<DocFileUnknownReference> {
     const dirPath = this.pathSystem.dirname(this.path)
     const parentDirName = this.pathSystem.basename(dirPath)
 
-    // 親ディレクトリがアーカイブディレクトリでない場合はエラー
     if (parentDirName !== archiveDirectoryName) {
-      throw new Error(
-        `ファイルはアーカイブディレクトリにありません: ${this.path}`,
-      )
+      throw new Error(`File is not in archive directory: ${this.path}`)
     }
 
     const fileName = this.pathSystem.basename(this.path)
@@ -225,14 +220,14 @@ export class DocFileUnknownReference {
       fileName,
     )
 
-    // ファイルを移動
+    // Move file
     await this.moveTo(restorePath)
 
-    // 新しいパスで参照を作成
     return new DocFileUnknownReference({
       path: restorePath,
       fileSystem: this.fileSystem,
       pathSystem: this.pathSystem,
+      config: this.props.config,
     })
   }
 }

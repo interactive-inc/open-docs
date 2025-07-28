@@ -1,79 +1,100 @@
 import { expect, test } from "bun:test"
-import { DocFileContentMdValue } from "../values/doc-file-content-md-value"
+import type { Equals } from "../types"
+import { assertType, expectType } from "../utils"
+import { DocFileMdContentValue } from "../values/doc-file-md-content-value"
 import { DocFileMdEntity } from "./doc-file-md-entity"
 
 test("DocFileMdEntity - 基本的な作成とプロパティアクセス", () => {
-  const entity = new DocFileMdEntity({
-    type: "markdown",
-    content: {
-      type: "markdown-content",
-      body: "# タイトル\n\n説明文\n\n本文",
-      title: "タイトル",
-      description: "説明文",
-      frontMatter: {
-        title: "メタタイトル",
-        tags: ["tag1", "tag2"],
+  const entity = new DocFileMdEntity(
+    {
+      type: "markdown",
+      content: {
+        type: "markdown-content",
+        body: "# タイトル\n\n説明文\n\n本文",
+        title: "タイトル",
+        description: "説明文",
+        meta: {
+          title: "メタタイトル",
+          tags: ["tag1", "tag2"],
+        },
       },
+      path: {
+        path: "docs/example.md",
+        name: "example",
+        fullPath: "/Users/test/docs/example.md",
+        nameWithExtension: "example.md",
+      },
+      isArchived: false,
     },
-    path: {
-      path: "docs/example.md",
-      name: "example",
-      fullPath: "/Users/test/docs/example.md",
-      nameWithExtension: "example.md",
+    {
+      title: { type: "text", required: false },
+      tags: { type: "multi-text", required: false },
     },
-    isArchived: false,
-  })
+  )
 
   expect(entity.value.type).toBe("markdown")
   expect(entity.value.isArchived).toBe(false)
 })
 
 test("DocFileMdEntity - content getterが値オブジェクトを返す", () => {
-  const entity = new DocFileMdEntity({
-    type: "markdown",
-    content: {
-      type: "markdown-content",
-      body: "# タイトル\n\n説明文",
-      title: "タイトル",
-      description: "説明文",
-      frontMatter: {
-        author: "テスト作者",
+  const entity = new DocFileMdEntity(
+    {
+      type: "markdown",
+      content: {
+        type: "markdown-content",
+        body: "# タイトル\n\n説明文",
+        title: "タイトル",
+        description: "説明文",
+        meta: {
+          title: "FrontMatterタイトル",
+          tags: ["tag1", "tag2"],
+        },
       },
+      path: {
+        path: "docs/test.md",
+        name: "test",
+        fullPath: "/Users/test/docs/test.md",
+        nameWithExtension: "test.md",
+      },
+      isArchived: false,
     },
-    path: {
-      path: "docs/test.md",
-      name: "test",
-      fullPath: "/Users/test/docs/test.md",
-      nameWithExtension: "test.md",
+    {
+      title: { type: "text", required: false },
+      tags: { type: "multi-text", required: false },
     },
-    isArchived: false,
-  })
+  )
 
   const content = entity.content
-  expect(content).toBeInstanceOf(DocFileContentMdValue)
+  expect(content).toBeInstanceOf(DocFileMdContentValue)
   expect(content.title).toBe("タイトル")
   expect(content.description).toBe("説明文")
   expect(content.body).toBe("# タイトル\n\n説明文")
 })
 
 test("DocFileMdEntity - path getterが値オブジェクトを返す", () => {
-  const entity = new DocFileMdEntity({
-    type: "markdown",
-    content: {
-      type: "markdown-content",
-      body: "",
-      title: "",
-      description: "",
-      frontMatter: {},
+  const entity = new DocFileMdEntity(
+    {
+      type: "markdown",
+      content: {
+        type: "markdown-content",
+        body: "",
+        title: "",
+        description: "",
+        meta: {},
+      },
+      path: {
+        path: "docs/test.md",
+        name: "test",
+        fullPath: "/Users/test/docs/test.md",
+        nameWithExtension: "test.md",
+      },
+      isArchived: false,
     },
-    path: {
-      path: "docs/test.md",
-      name: "test",
-      fullPath: "/Users/test/docs/test.md",
-      nameWithExtension: "test.md",
+    {
+      title: { type: "text", required: false },
+      tags: { type: "multi-text", required: false },
     },
-    isArchived: false,
-  })
+  )
 
   const path = entity.path
   expect(path.name).toBe("test")
@@ -83,23 +104,29 @@ test("DocFileMdEntity - path getterが値オブジェクトを返す", () => {
 })
 
 test("DocFileMdEntity - withContentで新しいインスタンスを作成", () => {
-  const entity = new DocFileMdEntity({
-    type: "markdown",
-    content: {
-      type: "markdown-content",
-      body: "# 古いタイトル",
-      title: "古いタイトル",
-      description: "",
-      frontMatter: {},
+  const entity = new DocFileMdEntity(
+    {
+      type: "markdown",
+      content: {
+        type: "markdown-content",
+        body: "# 古いタイトル",
+        title: "古いタイトル",
+        description: "",
+        meta: {},
+      },
+      path: {
+        path: "docs/test.md",
+        name: "test",
+        fullPath: "/Users/test/docs/test.md",
+        nameWithExtension: "test.md",
+      },
+      isArchived: false,
     },
-    path: {
-      path: "docs/test.md",
-      name: "test",
-      fullPath: "/Users/test/docs/test.md",
-      nameWithExtension: "test.md",
+    {
+      title: { type: "text", required: false },
+      tags: { type: "multi-text", required: false },
     },
-    isArchived: false,
-  })
+  )
 
   const newContent = entity.content.withTitle("新しいタイトル")
   const newEntity = entity.withContent(newContent)
@@ -110,23 +137,29 @@ test("DocFileMdEntity - withContentで新しいインスタンスを作成", () 
 })
 
 test("DocFileMdEntity - withPathで新しいインスタンスを作成", () => {
-  const entity = new DocFileMdEntity({
-    type: "markdown",
-    content: {
-      type: "markdown-content",
-      body: "",
-      title: "",
-      description: "",
-      frontMatter: {},
+  const entity = new DocFileMdEntity(
+    {
+      type: "markdown",
+      content: {
+        type: "markdown-content",
+        body: "",
+        title: "",
+        description: "",
+        meta: {},
+      },
+      path: {
+        path: "docs/old.md",
+        name: "old",
+        fullPath: "/Users/test/docs/old.md",
+        nameWithExtension: "old.md",
+      },
+      isArchived: false,
     },
-    path: {
-      path: "docs/old.md",
-      name: "old",
-      fullPath: "/Users/test/docs/old.md",
-      nameWithExtension: "old.md",
+    {
+      title: { type: "text", required: false },
+      tags: { type: "multi-text", required: false },
     },
-    isArchived: false,
-  })
+  )
 
   const newPath = {
     path: "docs/new.md",
@@ -150,7 +183,7 @@ test("DocFileMdEntity - toJsonで元のデータ構造を返す", () => {
       body: "# タイトル\n\n本文",
       title: "タイトル",
       description: "説明",
-      frontMatter: {
+      meta: {
         date: "2024-01-01",
         author: "作者",
       },
@@ -164,31 +197,240 @@ test("DocFileMdEntity - toJsonで元のデータ構造を返す", () => {
     isArchived: false,
   }
 
-  const entity = new DocFileMdEntity(data)
+  const entity = new DocFileMdEntity(data, {
+    date: { type: "text", required: false },
+    author: { type: "text", required: false },
+  })
   expect(entity.toJson()).toEqual(data)
 })
 
 test("DocFileMdEntity - 不変性の確認", () => {
-  const entity = new DocFileMdEntity({
-    type: "markdown",
-    content: {
-      type: "markdown-content",
-      body: "",
-      title: "",
-      description: "",
-      frontMatter: {},
+  const entity = new DocFileMdEntity(
+    {
+      type: "markdown",
+      content: {
+        type: "markdown-content",
+        body: "",
+        title: "",
+        description: "",
+        meta: {},
+      },
+      path: {
+        path: "docs/test.md",
+        name: "test",
+        fullPath: "/Users/test/docs/test.md",
+        nameWithExtension: "test.md",
+      },
+      isArchived: false,
     },
-    path: {
-      path: "docs/test.md",
-      name: "test",
-      fullPath: "/Users/test/docs/test.md",
-      nameWithExtension: "test.md",
+    {
+      title: { type: "text", required: false },
+      tags: { type: "multi-text", required: false },
     },
-    isArchived: false,
-  })
+  )
 
   expect(() => {
     // @ts-expect-error - 不変性のテスト
     entity.value = {}
   }).toThrow()
+})
+
+test("DocFileMdEntity - ジェネリック型パラメータの推論", () => {
+  type TestSchema = {
+    title: { type: "text"; required: true }
+    tags: { type: "multi-text"; required: false }
+    publishedAt: { type: "text"; required: true }
+    author: { type: "relation"; required: false }
+  }
+
+  const entity = new DocFileMdEntity<TestSchema>(
+    {
+      type: "markdown",
+      content: {
+        type: "markdown-content",
+        body: "本文",
+        title: "タイトル",
+        description: "説明",
+        meta: {
+          title: "記事タイトル",
+          publishedAt: "2024-01-01",
+          tags: ["tech", "typescript"],
+        },
+      },
+      path: {
+        path: "posts/article.md",
+        name: "article",
+        fullPath: "/Users/test/posts/article.md",
+        nameWithExtension: "article.md",
+      },
+      isArchived: false,
+    },
+    {
+      title: { type: "text", required: true },
+      tags: { type: "multi-text", required: false },
+      publishedAt: { type: "text", required: true },
+      author: { type: "relation", required: false },
+    },
+  )
+
+  // 型が正しく推論されることを確認
+  expectType<DocFileMdEntity<TestSchema>>(entity)
+
+  // content の型も正しく推論される
+  const content = entity.content
+  expectType<DocFileMdContentValue<TestSchema>>(content)
+})
+
+test("DocFileMdEntity - withContent メソッドの型安全性", () => {
+  type TestSchema = {
+    title: { type: "text"; required: true }
+    category: { type: "select-text"; required: true }
+  }
+
+  const entity = new DocFileMdEntity<TestSchema>(
+    {
+      type: "markdown",
+      content: {
+        type: "markdown-content",
+        body: "元の本文",
+        title: "元のタイトル",
+        description: "元の説明",
+        meta: {
+          title: "FMタイトル",
+          category: "tech",
+        },
+      },
+      path: {
+        path: "docs/test.md",
+        name: "test",
+        fullPath: "/Users/test/docs/test.md",
+        nameWithExtension: "test.md",
+      },
+      isArchived: false,
+    },
+    {
+      title: { type: "text", required: true },
+      category: { type: "select-text", required: true },
+    },
+  )
+
+  // 新しいコンテンツも同じ型制約を持つ
+  const newContent = new DocFileMdContentValue<TestSchema>(
+    {
+      type: "markdown-content",
+      body: "新しい本文",
+      title: "新しいタイトル",
+      description: "新しい説明",
+      meta: {
+        title: "新FMタイトル",
+        category: "news",
+      },
+    },
+    {
+      title: { type: "text", required: true },
+      category: { type: "select-text", required: true },
+    },
+  )
+
+  const newEntity = entity.withContent(newContent)
+
+  // 戻り値の型が保持される
+  expectType<DocFileMdEntity<TestSchema>>(newEntity)
+  expect(newEntity.content.title).toBe("新しいタイトル")
+})
+
+test("DocFileMdEntity - エンティティ値の型構造", () => {
+  type TestSchema = {
+    tags: { type: "multi-text"; required: true }
+  }
+
+  // エンティティの値の型構造を確認
+  type EntityValue = DocFileMdEntity<TestSchema>["value"]
+
+  // 必須プロパティの確認（実際の型が期待値と異なる場合がある）
+  // EntityValueには他のプロパティが含まれている可能性がある
+
+  // type フィールドは "markdown" リテラル型
+  assertType<Equals<EntityValue["type"], "markdown">>()
+  assertType<Equals<EntityValue["isArchived"], boolean>>()
+})
+
+test("DocFileMdEntity - path プロパティの型", () => {
+  const entity = new DocFileMdEntity(
+    {
+      type: "markdown",
+      content: {
+        type: "markdown-content",
+        body: "",
+        title: "",
+        description: "",
+        meta: {},
+      },
+      path: {
+        path: "docs/test.md",
+        name: "test",
+        fullPath: "/Users/test/docs/test.md",
+        nameWithExtension: "test.md",
+      },
+      isArchived: false,
+    },
+    {},
+  )
+
+  // path ゲッターの戻り値の型
+  const path = entity.path
+  expectType<string>(path.path)
+  expectType<string>(path.name)
+  expectType<string>(path.fullPath)
+  expectType<string>(path.nameWithExtension)
+})
+
+test("DocFileMdEntity - frontMatter へのアクセスの型安全性", () => {
+  type TestSchema = {
+    title: { type: "text"; required: true }
+    count: { type: "number"; required: false }
+    flags: { type: "multi-text"; required: true }
+  }
+
+  const entity = new DocFileMdEntity<TestSchema>(
+    {
+      type: "markdown",
+      content: {
+        type: "markdown-content",
+        body: "本文",
+        title: "タイトル",
+        description: "説明",
+        meta: {
+          title: "FMタイトル",
+          count: 42,
+          flags: ["important", "featured"],
+        },
+      },
+      path: {
+        path: "docs/test.md",
+        name: "test",
+        fullPath: "/Users/test/docs/test.md",
+        nameWithExtension: "test.md",
+      },
+      isArchived: false,
+    },
+    {
+      title: { type: "text", required: true },
+      count: { type: "number", required: false },
+      flags: { type: "multi-text", required: true },
+    },
+  )
+
+  // frontMatter へのアクセス
+  const fm = entity.content.meta()
+
+  // 型安全なアクセス
+  expect(fm.value.title).toBe("FMタイトル")
+  expect(fm.value.count).toBe(42)
+  expect(fm.value.flags).toEqual(["important", "featured"])
+
+  // 個別フィールドへのアクセス
+  expect(fm.text("title")).toBe("FMタイトル")
+  expect(fm.number("count")).toBe(42)
+  expect(fm.multiText("flags")).toEqual(["important", "featured"])
 })

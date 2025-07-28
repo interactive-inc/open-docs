@@ -1,13 +1,13 @@
-import fs from "node:fs/promises"
-import type { DocPathSystem } from "./doc-path-system"
+import * as fs from "node:fs/promises"
+import { DocPathSystem } from "./doc-path-system"
 
 type Props = {
   basePath: string
-  pathSystem: DocPathSystem
+  pathSystem?: DocPathSystem
 }
 
 /**
- * ファイルシステム
+ * File system wrapper
  */
 export class DocFileSystem {
   private readonly basePath: string
@@ -15,11 +15,11 @@ export class DocFileSystem {
 
   constructor(props: Props) {
     this.basePath = props.basePath
-    this.pathSystem = props.pathSystem
+    this.pathSystem = props.pathSystem ?? new DocPathSystem()
   }
 
   /**
-   * 指定されたパスのファイルの内容を読み込む
+   * Read file content at the specified path
    */
   async readFile(relativePath: string): Promise<string | null> {
     const exists = await this.exists(relativePath)
@@ -36,14 +36,13 @@ export class DocFileSystem {
   }
 
   /**
-   * 指定されたパスのファイルに内容を書き込む（必要に応じてディレクトリも作成）
+   * Write content to file at the specified path (creates directory if needed)
    */
   async writeFile(relativePath: string, content: string): Promise<void> {
     const fullPath = this.pathSystem.join(this.basePath, relativePath)
     const dirPath = this.pathSystem.dirname(fullPath)
 
     try {
-      // ディレクトリが存在しない場合は作成
       await fs.mkdir(dirPath, { recursive: true })
       await fs.writeFile(fullPath, content, "utf-8")
     } catch (error) {
@@ -55,7 +54,7 @@ export class DocFileSystem {
   }
 
   /**
-   * 指定されたパスのファイルを削除
+   * Delete file at the specified path
    */
   async deleteFile(relativePath: string): Promise<Error | null> {
     try {
@@ -68,28 +67,28 @@ export class DocFileSystem {
   }
 
   /**
-   * 指定されたパスのファイル名を取得
+   * Get file name from path
    */
   readFileName(relativePath: string): string {
     return this.pathSystem.basename(relativePath)
   }
 
   /**
-   * 指定されたパスのファイル拡張子を取得
+   * Get file extension from path
    */
   readFileExtension(relativePath: string): string {
     return this.pathSystem.extname(relativePath)
   }
 
   /**
-   * 指定されたパスのファイルが存在するディレクトリパスを取得
+   * Get directory path where the file exists
    */
   readFileDirectory(relativePath: string): string {
     return this.pathSystem.dirname(relativePath)
   }
 
   /**
-   * ディレクトリ内のエントリ一覧を取得
+   * Get list of entries in directory
    */
   async readDirectoryFileNames(relativePath = ""): Promise<string[]> {
     const fullPath = this.pathSystem.join(this.basePath, relativePath)
@@ -110,7 +109,7 @@ export class DocFileSystem {
   }
 
   /**
-   * 指定パスがディレクトリかチェック
+   * Check if path is a directory
    */
   async isDirectory(relativePath: string): Promise<boolean> {
     try {
@@ -123,7 +122,7 @@ export class DocFileSystem {
   }
 
   /**
-   * 指定パスがファイルかチェック
+   * Check if path is a file
    */
   async isFile(relativePath: string): Promise<boolean> {
     try {
@@ -136,7 +135,7 @@ export class DocFileSystem {
   }
 
   /**
-   * ファイルまたはディレクトリが存在するかチェック
+   * Check if file or directory exists
    */
   async exists(relativePath: string): Promise<boolean> {
     try {
@@ -149,35 +148,35 @@ export class DocFileSystem {
   }
 
   /**
-   * ディレクトリが存在するかチェック
+   * Check if directory exists
    */
   async directoryExists(relativePath: string): Promise<boolean> {
     return this.isDirectory(relativePath)
   }
 
   /**
-   * ファイルが存在するかチェック
+   * Check if file exists
    */
   async fileExists(relativePath: string): Promise<boolean> {
     return this.isFile(relativePath)
   }
 
   /**
-   * ベースパスを取得
+   * Get base path
    */
   getBasePath(): string {
     return this.basePath
   }
 
   /**
-   * 相対パスを絶対パスに変換
+   * Convert relative path to absolute path
    */
   resolve(relativePath: string): string {
     return this.pathSystem.join(this.basePath, relativePath)
   }
 
   /**
-   * ディレクトリを作成する
+   * Create directory
    */
   async createDirectory(relativePath: string): Promise<void> {
     const fullPath = this.pathSystem.join(this.basePath, relativePath)
@@ -185,7 +184,7 @@ export class DocFileSystem {
   }
 
   /**
-   * ファイルのサイズを取得（バイト単位）
+   * Get file size in bytes
    */
   async getFileSize(relativePath: string): Promise<number> {
     const fullPath = this.pathSystem.join(this.basePath, relativePath)
@@ -194,7 +193,7 @@ export class DocFileSystem {
   }
 
   /**
-   * ディレクトリが存在しない場合は作成する
+   * Create directory if it doesn't exist
    */
   async ensureDirectoryExists(relativePath: string): Promise<void> {
     if (!(await this.exists(relativePath))) {
@@ -203,7 +202,7 @@ export class DocFileSystem {
   }
 
   /**
-   * ファイルをコピー
+   * Copy file
    */
   async copyFile(sourcePath: string, destinationPath: string): Promise<void> {
     const sourceFullPath = this.pathSystem.join(this.basePath, sourcePath)
@@ -212,7 +211,7 @@ export class DocFileSystem {
   }
 
   /**
-   * ファイルを移動
+   * Move file
    */
   async moveFile(sourcePath: string, destinationPath: string): Promise<void> {
     const sourceFullPath = this.pathSystem.join(this.basePath, sourcePath)
@@ -221,7 +220,7 @@ export class DocFileSystem {
   }
 
   /**
-   * ファイルの最終更新日時を取得
+   * Get file last modified time
    */
   async getFileModifiedTime(relativePath: string): Promise<Date> {
     const fullPath = this.pathSystem.join(this.basePath, relativePath)
@@ -230,7 +229,7 @@ export class DocFileSystem {
   }
 
   /**
-   * ファイルの作成日時を取得
+   * Get file creation time
    */
   async getFileCreatedTime(relativePath: string): Promise<Date> {
     const fullPath = this.pathSystem.join(this.basePath, relativePath)

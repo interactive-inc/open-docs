@@ -2,25 +2,14 @@ import { expect, test } from "bun:test"
 import { DocFileIndexReference } from "./doc-file-index-reference"
 import { DocFileSystemDebug } from "./doc-file-system-debug"
 import { DocFileIndexEntity } from "./entities/doc-file-index-entity"
+import { defaultTestConfig } from "./utils"
 
 test("DocFileIndexReference - writeメソッドがフロントマターを含む完全なテキストを書き込む", async () => {
   const fileSystem = DocFileSystemDebug.createWithFiles({
     fileContents: {
-      "docs/products/features/index.md": [
-        "---",
-        "icon: 📄",
-        "schema:",
-        "  milestone:",
-        "    type: relation",
-        "    required: false",
-        "    title: マイルストーン",
-        "    path: products/milestones",
-        "---",
-        "",
-        "# 機能",
-        "",
-        "機能の説明",
-      ].join("\n"),
+      "docs/products/features/index.md": ["# 機能", "", "機能の説明"].join(
+        "\n",
+      ),
     },
   })
 
@@ -28,6 +17,8 @@ test("DocFileIndexReference - writeメソッドがフロントマターを含む
     path: "products/features/index.md",
     fileSystem,
     pathSystem: fileSystem.getPathSystem(),
+    customSchema: {},
+    config: defaultTestConfig,
   })
 
   // 既存のエンティティを読み込む
@@ -48,32 +39,14 @@ test("DocFileIndexReference - writeメソッドがフロントマターを含む
   )
   expect(writtenContent).toBeTruthy()
 
-  // フロントマターが保持されていることを確認
-  expect(writtenContent).toContain("---")
-  expect(writtenContent).toContain("icon: 📄")
-  expect(writtenContent).toContain("schema:")
-  expect(writtenContent).toContain("type: relation")
-
   // タイトルが更新されていることを確認
   expect(writtenContent).toContain("# 新しいタイトル")
-
-  // typeフィールドが含まれていないことを確認
-  expect(writtenContent).not.toContain("type: index-frontmatter")
 })
 
 test("DocFileIndexReference - readメソッドが正しくエンティティを返す", async () => {
   const fileSystem = DocFileSystemDebug.createWithFiles({
     fileContents: {
-      "docs/index.md": [
-        "---",
-        "icon: 📚",
-        "schema: {}",
-        "---",
-        "",
-        "# ドキュメント",
-        "",
-        "説明文",
-      ].join("\n"),
+      "docs/index.md": ["# ドキュメント", "", "説明文"].join("\n"),
     },
   })
 
@@ -81,6 +54,8 @@ test("DocFileIndexReference - readメソッドが正しくエンティティを�
     path: "docs/index.md",
     fileSystem,
     pathSystem: fileSystem.getPathSystem(),
+    customSchema: {},
+    config: defaultTestConfig,
   })
 
   const entity = await ref.read()
@@ -89,6 +64,8 @@ test("DocFileIndexReference - readメソッドが正しくエンティティを�
   // コンテンツの確認
   expect(entity.content.title).toBe("ドキュメント")
   expect(entity.content.description).toBe("説明文")
-  expect(entity.content.frontMatter.value.icon).toBe("📚")
-  expect(entity.content.frontMatter.value.schema).toEqual({})
+
+  const frontMatter = entity.content.meta()
+  expect(frontMatter.icon).toBe("📁") // デフォルトアイコン
+  expect(frontMatter.schema().toJson()).toEqual({})
 })

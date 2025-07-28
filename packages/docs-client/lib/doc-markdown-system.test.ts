@@ -15,9 +15,7 @@ title: "Test"
 
   const system = new DocMarkdownSystem()
 
-  expect(system.extractFrontMatter(markdown)).toBe(`---
-title: "Test"
----`)
+  expect(system.extractFrontMatter(markdown)).toBe(`title: "Test"`)
   expect(system.extractBody(markdown)).toBe(`# タイトル
 
 これは説明文です。
@@ -51,9 +49,7 @@ title: "Test"
 
   const system = new DocMarkdownSystem()
 
-  expect(system.extractFrontMatter(markdown)).toBe(`-----
-title: "Test"
------`)
+  expect(system.extractFrontMatter(markdown)).toBe(`title: "Test"`)
   expect(system.extractBody(markdown)).toBe("# タイトル")
 })
 
@@ -134,10 +130,8 @@ description: "Test Description"
   const system = new DocMarkdownSystem()
   const updated = system.updateTitle(markdown, "新しいタイトル")
 
-  expect(system.extractFrontMatter(updated)).toBe(`---
-title: "Test"
-description: "Test Description"
----`)
+  expect(system.extractFrontMatter(updated)).toBe(`title: "Test"
+description: "Test Description"`)
   expect(updated).toContain('---\ntitle: "Test"')
   expect(updated).toContain("# 新しいタイトル")
 })

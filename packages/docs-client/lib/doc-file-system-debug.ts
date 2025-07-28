@@ -9,7 +9,7 @@ type FileData = {
 }
 
 /**
- * テスト用のインメモリファイルシステム
+ * In-memory file system for testing
  */
 export class DocFileSystemDebug extends DocFileSystem {
   private files: Map<string, FileData> = new Map()
@@ -22,14 +22,14 @@ export class DocFileSystemDebug extends DocFileSystem {
   }
 
   /**
-   * PathSystemへのアクセサ（テスト用）
+   * PathSystem accessor (for testing)
    */
   getPathSystem() {
     return this._pathSystem
   }
 
   /**
-   * テスト用のファクトリメソッド
+   * Factory method for testing
    */
   static createWithFiles(props: {
     basePath?: string
@@ -96,12 +96,10 @@ export class DocFileSystemDebug extends DocFileSystem {
       ? filePath
       : `docs/${filePath}`
 
-    // ファイルが存在するか確認
     if (this.files.has(normalizedPath)) {
       return true
     }
 
-    // ディレクトリとして存在するか確認
     const dirPath = normalizedPath.endsWith("/")
       ? normalizedPath
       : `${normalizedPath}/`
@@ -204,10 +202,7 @@ export class DocFileSystemDebug extends DocFileSystem {
     return files.sort()
   }
 
-  override async createDirectory(_directoryPath: string): Promise<void> {
-    // インメモリファイルシステムではディレクトリの作成は不要
-    // ファイルを作成する際に暗黙的にディレクトリが作成される
-  }
+  override async createDirectory(_directoryPath: string): Promise<void> {}
 
   async deleteDirectory(directoryPath: string): Promise<void> {
     const dirPath = directoryPath.endsWith("/")
@@ -279,7 +274,7 @@ export class DocFileSystemDebug extends DocFileSystem {
   }
 
   /**
-   * ディレクトリ内のエントリ一覧を取得
+   * Get list of entries in directory
    */
   override async readDirectoryFileNames(directoryPath = ""): Promise<string[]> {
     // Normalize path
@@ -308,63 +303,63 @@ export class DocFileSystemDebug extends DocFileSystem {
   }
 
   /**
-   * ディレクトリが存在するかチェック
+   * Check if directory exists
    */
   override async directoryExists(relativePath: string): Promise<boolean> {
     return this.isDirectory(relativePath)
   }
 
   /**
-   * ファイルが存在するかチェック
+   * Check if file exists
    */
   override async fileExists(relativePath: string): Promise<boolean> {
     return this.isFile(relativePath)
   }
 
   /**
-   * ディレクトリが存在しない場合は作成する
+   * Create directory if it doesn't exist
    */
   override async ensureDirectoryExists(_relativePath: string): Promise<void> {
-    // インメモリファイルシステムではディレクトリの作成は不要
+    // No directory creation needed in in-memory file system
   }
 
   /**
-   * すべてのファイルをクリア
+   * Clear all files
    */
   clear(): void {
     this.files.clear()
   }
 
   /**
-   * ファイルの存在を確認（テスト用）
+   * Check file existence (for testing)
    */
   hasFile(filePath: string): boolean {
     return this.files.has(filePath)
   }
 
   /**
-   * ファイルの内容を取得（同期版、テスト用）
+   * Get file content (sync version, for testing)
    */
   getFileContent(filePath: string): string | undefined {
     return this.files.get(filePath)?.content
   }
 
   /**
-   * すべてのファイルパスを取得（テスト用）
+   * Get all file paths (for testing)
    */
   getAllFilePaths(): string[] {
     return Array.from(this.files.keys()).sort()
   }
 
   /**
-   * ファイル数を取得（テスト用）
+   * Get file count (for testing)
    */
   getFileCount(): number {
     return this.files.size
   }
 
   /**
-   * テストデータをセットアップ
+   * Setup test data
    */
   setupTestFiles(files: Record<string, string>): void {
     const now = new Date()

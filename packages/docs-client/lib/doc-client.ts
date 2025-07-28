@@ -6,7 +6,12 @@ import { DocFileTreeSystem } from "./doc-file-tree-system"
 import { DocFileUnknownReference } from "./doc-file-unknown-reference"
 import { DocMarkdownSystem } from "./doc-markdown-system"
 import { DocPathSystem } from "./doc-path-system"
-import type { DocTreeDirectoryNode, DocTreeFileNode } from "./types"
+import type {
+  DocClientConfig,
+  DocCustomSchema,
+  DocTreeDirectoryNode,
+  DocTreeNode,
+} from "./types"
 
 type Props = {
   fileSystem: DocFileSystem
@@ -14,13 +19,9 @@ type Props = {
   markdownSystem?: DocMarkdownSystem
   fileTreeSystem?: DocFileTreeSystem
   /**
-   * default: "index.md"
+   * Configuration
    */
-  indexFileName?: string
-  /**
-   * default: "_"
-   */
-  archiveDirectoryName?: string
+  config?: DocClientConfig
 }
 
 export class DocClient {
@@ -28,23 +29,29 @@ export class DocClient {
   readonly pathSystem: DocPathSystem
   readonly markdownSystem: DocMarkdownSystem
   readonly fileTreeSystem: DocFileTreeSystem
-  readonly indexFileName: string
-  readonly archiveDirectoryName: string
+  readonly config: DocClientConfig
 
   constructor(props: Props) {
     this.fileSystem = props.fileSystem
     this.pathSystem = props.pathSystem ?? new DocPathSystem()
     this.markdownSystem = props.markdownSystem ?? new DocMarkdownSystem()
-    this.indexFileName = props.indexFileName ?? "index.md"
-    this.archiveDirectoryName = props.archiveDirectoryName ?? "_"
+    this.config = props.config ?? {
+      defaultIndexIcon: "📃",
+      indexFileName: "index.md",
+      archiveDirectoryName: "_",
+      defaultDirectoryName: "Directory",
+      indexMetaIncludes: [],
+      directoryExcludes: [".vitepress"],
+    }
 
     this.fileTreeSystem =
       props.fileTreeSystem ??
       new DocFileTreeSystem({
         fileSystem: this.fileSystem,
         pathSystem: this.pathSystem,
-        indexFileName: this.indexFileName,
-        archiveDirectoryName: this.archiveDirectoryName,
+        indexFileName: this.config.indexFileName,
+        archiveDirectoryName: this.config.archiveDirectoryName,
+        config: this.config,
       })
   }
 
@@ -52,78 +59,143 @@ export class DocClient {
     return this.fileSystem.getBasePath()
   }
 
+  file(
+    relativePath: string,
+  ): DocFileMdReference<DocCustomSchema> | DocFileUnknownReference
+
+  file<T extends DocCustomSchema>(
+    relativePath: string,
+    customSchema: T,
+  ): DocFileMdReference<T> | DocFileUnknownReference
+
   /**
-   * ファイル参照を取得
+   * Get file reference
    */
-  file(relativePath: string): DocFileMdReference | DocFileUnknownReference {
-    if (relativePath.endsWith(".md")) {
+  file<T extends DocCustomSchema>(relativePath: string, customSchema?: T) {
+    if (relativePath.endsWith(".md") && customSchema === undefined) {
       return this.mdFile(relativePath)
+    }
+
+    if (relativePath.endsWith(".md") && customSchema !== undefined) {
+      return this.mdFile<T>(relativePath, customSchema)
     }
 
     return new DocFileUnknownReference({
       path: relativePath,
       fileSystem: this.fileSystem,
       pathSystem: this.pathSystem,
+      config: this.config,
     })
   }
 
+  mdFile(relativePath: string): DocFileMdReference<DocCustomSchema>
+
+  mdFile<T extends DocCustomSchema>(
+    relativePath: string,
+    customSchema: T,
+  ): DocFileMdReference<T>
+
   /**
-   * Markdownファイル参照を取得
+   * Markdown file reference
    */
-  mdFile(relativePath: string): DocFileMdReference {
+  mdFile<T extends DocCustomSchema>(relativePath: string, customSchema?: T) {
     const normalizedPath = relativePath.endsWith(".md")
       ? relativePath
       : `${relativePath}.md`
+
+    if (customSchema === undefined) {
+      return new DocFileMdReference<DocCustomSchema>({
+        path: normalizedPath,
+        fileSystem: this.fileSystem,
+        pathSystem: this.pathSystem,
+        customSchema: {},
+        config: this.config,
+      })
+    }
 
     return new DocFileMdReference({
       path: normalizedPath,
       fileSystem: this.fileSystem,
       pathSystem: this.pathSystem,
+      customSchema: customSchema,
+      config: this.config,
     })
   }
 
-  /**
-   * インデックスファイル参照を取得
-   */
-  indexFile(directoryPath: string): DocFileIndexReference {
-    const indexPath =
-      directoryPath === ""
-        ? this.indexFileName
-        : `${directoryPath}/${this.indexFileName}`
+  indexFile(relativePath: string): DocFileIndexReference<DocCustomSchema>
 
-    return new DocFileIndexReference({
+  indexFile<T extends DocCustomSchema>(
+    relativePath: string,
+    customSchema: T,
+  ): DocFileIndexReference<T>
+
+  /**
+   * Index file reference
+   */
+  indexFile<T extends DocCustomSchema>(relativePath: string, customSchema?: T) {
+    const indexPath =
+      relativePath === ""
+        ? this.config.indexFileName
+        : `${relativePath}/${this.config.indexFileName}`
+
+    if (customSchema === undefined) {
+      return new DocFileIndexReference<DocCustomSchema>({
+        path: indexPath,
+        fileSystem: this.fileSystem,
+        pathSystem: this.pathSystem,
+        customSchema: {},
+        config: this.config,
+      })
+    }
+
+    return new DocFileIndexReference<T>({
       path: indexPath,
       fileSystem: this.fileSystem,
       pathSystem: this.pathSystem,
+      customSchema: customSchema,
+      config: this.config,
     })
   }
 
+  directory(relativePath: string): DocDirectoryReference<DocCustomSchema>
+
+  directory<T extends DocCustomSchema>(
+    relativePath: string,
+    customSchema: T,
+  ): DocDirectoryReference<T>
+
   /**
-   * ディレクトリ参照を取得
+   * Directory reference
    */
-  directory(relativePath: string): DocDirectoryReference {
-    return new DocDirectoryReference({
+  directory<T extends DocCustomSchema>(relativePath: string, customSchema?: T) {
+    if (customSchema === undefined) {
+      return new DocDirectoryReference<DocCustomSchema>({
+        customSchema: {},
+        path: relativePath,
+        indexFileName: this.config.indexFileName,
+        archiveDirectoryName: this.config.archiveDirectoryName,
+        fileSystem: this.fileSystem,
+        pathSystem: this.pathSystem,
+        config: this.config,
+      })
+    }
+
+    return new DocDirectoryReference<T>({
+      customSchema: customSchema,
       path: relativePath,
-      indexFileName: this.indexFileName,
-      archiveDirectoryName: this.archiveDirectoryName,
+      indexFileName: this.config.indexFileName,
+      archiveDirectoryName: this.config.archiveDirectoryName,
       fileSystem: this.fileSystem,
       pathSystem: this.pathSystem,
+      config: this.config,
     })
   }
 
-  /**
-   * ファイルツリーを取得
-   */
-  async fileTree(
-    directoryPath = "",
-  ): Promise<(DocTreeFileNode | DocTreeDirectoryNode)[]> {
+  async fileTree(directoryPath = ""): Promise<DocTreeNode[]> {
     const results = await this.fileTreeSystem.buildFileTree(directoryPath)
     return results.map((node) => node.toJson())
   }
 
-  /**
-   * ディレクトリツリーを取得（ディレクトリのみ）
-   */
   async directoryTree(directoryPath = ""): Promise<DocTreeDirectoryNode[]> {
     const results = await this.fileTreeSystem.buildDirectoryTree(directoryPath)
     return results.map((node) => node.toJson())

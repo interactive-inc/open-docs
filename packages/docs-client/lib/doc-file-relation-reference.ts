@@ -2,7 +2,7 @@ import type { DocFileSystem } from "./doc-file-system"
 import type { DocPathSystem } from "./doc-path-system"
 import { DocFileMdEntity } from "./entities/doc-file-md-entity"
 import type { DocRelation } from "./types"
-import { DocFileContentMdValue } from "./values/doc-file-content-md-value"
+import { DocFileMdContentValue } from "./values/doc-file-md-content-value"
 import { DocFilePathValue } from "./values/doc-file-path-value"
 import { DocRelationFileValue } from "./values/doc-relation-file-value"
 import { DocRelationValue } from "./values/doc-relation-value"
@@ -14,7 +14,7 @@ type Props = {
 }
 
 /**
- * リレーションファイルの参照
+ * Relation file reference
  */
 export class DocFileRelationReference {
   private readonly pathSystem: DocPathSystem
@@ -33,14 +33,14 @@ export class DocFileRelationReference {
   }
 
   /**
-   * リレーションパス
+   * Relation path
    */
   get path(): string {
     return this.props.filePath
   }
 
   /**
-   * フルパス
+   * Full path
    */
   get fullPath(): string {
     return this.pathSystem.join(
@@ -59,7 +59,7 @@ export class DocFileRelationReference {
   }
 
   /**
-   * リレーションファイルの一覧を読み込む
+   * Read list of relation files
    */
   async readFiles(): Promise<DocRelationFileValue[]> {
     const exists = await this.fileSystem.exists(this.path)
@@ -82,7 +82,7 @@ export class DocFileRelationReference {
   }
 
   /**
-   * 単一のリレーションファイルを読み込む
+   * Read single relation file
    */
   async readFile(filePath: string): Promise<DocRelationFileValue | null> {
     if (filePath.includes("index.md")) {
@@ -95,24 +95,29 @@ export class DocFileRelationReference {
       return null
     }
 
-    const contentValue = DocFileContentMdValue.fromMarkdown(content)
+    const contentValue = DocFileMdContentValue.fromMarkdown(content, {})
+
     const pathValue = DocFilePathValue.fromPathWithSystem(
       filePath,
       this.pathSystem,
       this.basePath,
     )
-    const fileEntity = new DocFileMdEntity({
-      type: "markdown",
-      content: contentValue.value,
-      path: pathValue.value,
-      isArchived: false,
-    })
+
+    const fileEntity = new DocFileMdEntity(
+      {
+        type: "markdown",
+        content: contentValue.value,
+        path: pathValue.value,
+        isArchived: false,
+      },
+      {},
+    )
 
     return DocRelationFileValue.from(filePath, fileEntity.value.content.title)
   }
 
   /**
-   * ファイルの存在確認
+   * Check if file exists
    */
   async exists(slug: string): Promise<boolean> {
     const filePath = `${this.path}/${slug}.md`
@@ -120,26 +125,29 @@ export class DocFileRelationReference {
   }
 
   /**
-   * ファイル名の一覧を取得（拡張子なし）
+   * Get list of file names (without extension)
    */
   async readSlugs(): Promise<string[]> {
     const files = await this.readFiles()
+
     return files.map((file) => file.id)
   }
 
   /**
-   * ファイル数を取得
+   * Get file count
    */
   async count(): Promise<number> {
     const files = await this.readFiles()
+
     return files.length
   }
 
   /**
-   * 空かどうかを確認
+   * Check if empty
    */
   async isEmpty(): Promise<boolean> {
     const count = await this.count()
+
     return count === 0
   }
 }

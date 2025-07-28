@@ -2,42 +2,48 @@ import { DocFileIndexReference } from "./doc-file-index-reference"
 import { DocFileMdReference } from "./doc-file-md-reference"
 import type { DocFileSystem } from "./doc-file-system"
 import type { DocPathSystem } from "./doc-path-system"
-import { DocFrontMatterIndexValue } from "./values/doc-front-matter-index-value"
+import type { DocClientConfig, DocCustomSchema } from "./types"
 import { DocTreeDirectoryNodeValue } from "./values/doc-tree-directory-node-value"
 import { DocTreeFileNodeValue } from "./values/doc-tree-file-node-value"
+import type { DocTreeNodeValue } from "./values/doc-tree-node-value"
 
 type Props = {
   fileSystem: DocFileSystem
   pathSystem: DocPathSystem
   indexFileName: string
   archiveDirectoryName: string
+  config: DocClientConfig
 }
 
 /**
- * ファイルツリー構築システム
+ * File tree building system
  */
 export class DocFileTreeSystem {
+  private readonly config: DocClientConfig
+
   constructor(private readonly props: Props) {
+    this.config = props.config
     Object.freeze(this)
   }
 
   /**
-   * ファイルツリーを再帰的に構築
+   * Build file tree recursively
    */
-  async buildFileTree(
-    directoryPath = "",
-  ): Promise<(DocTreeFileNodeValue | DocTreeDirectoryNodeValue)[]> {
+  async buildFileTree(directoryPath = ""): Promise<DocTreeNodeValue[]> {
     const fileNames =
       await this.props.fileSystem.readDirectoryFileNames(directoryPath)
-    const results: (DocTreeFileNodeValue | DocTreeDirectoryNodeValue)[] = []
+    const results: DocTreeNodeValue[] = []
 
     for (const fileName of fileNames) {
-      // アーカイブディレクトリ（「_」で始まる）は除外
-      if (fileName.startsWith("_")) continue
+      if (fileName === this.props.archiveDirectoryName) continue
+
+      // Skip directories in exclusion list
+      if (this.config.directoryExcludes.includes(fileName)) continue
 
       const filePath = directoryPath
         ? this.props.pathSystem.join(directoryPath, fileName)
         : fileName
+
       const isDirectory = await this.props.fileSystem.isDirectory(filePath)
 
       if (!isDirectory) {
@@ -46,7 +52,6 @@ export class DocFileTreeSystem {
         continue
       }
 
-      // ディレクトリの場合
       const directoryNode = await this.createDirectoryNode(fileName, filePath)
       results.push(directoryNode)
     }
@@ -55,7 +60,7 @@ export class DocFileTreeSystem {
   }
 
   /**
-   * ファイルノードを作成
+   * Create file node
    */
   private async createFileNode(
     fileName: string,
@@ -64,7 +69,6 @@ export class DocFileTreeSystem {
     let title = fileName
     let icon = ""
 
-    // マークダウンファイルの場合はタイトルを取得
     if (fileName.endsWith(".md")) {
       const mdFile = this.createMdFileReference(filePath)
       if (await mdFile.exists()) {
@@ -87,25 +91,24 @@ export class DocFileTreeSystem {
   }
 
   /**
-   * ディレクトリノードを作成
+   * Create directory node
    */
   private async createDirectoryNode(
     fileName: string,
     filePath: string,
   ): Promise<DocTreeDirectoryNodeValue> {
     let title = fileName
-    let icon = "📁"
+    let icon = this.config.defaultIndexIcon
 
     const indexFile = this.createIndexFileReference(filePath)
+
     if (await indexFile.exists()) {
       const entity = await indexFile.read()
       title = entity.value.content.title || fileName
       const content = entity.content
-      const frontMatter = content.frontMatter
-      // frontMatterはDocFrontMatterIndexValueインスタンスで、iconはメソッド
-      if (frontMatter instanceof DocFrontMatterIndexValue) {
-        const iconValue = frontMatter.icon()
-        icon = iconValue || "📁"
+      const frontMatter = content.meta()
+      if (frontMatter) {
+        icon = frontMatter.icon || this.config.defaultIndexIcon
       }
     }
 
@@ -121,36 +124,42 @@ export class DocFileTreeSystem {
   }
 
   /**
-   * インデックスファイル参照を作成
+   * Create index file reference
    */
   private createIndexFileReference(
     directoryPath: string,
-  ): DocFileIndexReference {
+  ): DocFileIndexReference<DocCustomSchema> {
     const indexPath =
       directoryPath === ""
         ? this.props.indexFileName
         : `${directoryPath}/${this.props.indexFileName}`
 
-    return new DocFileIndexReference({
+    return new DocFileIndexReference<DocCustomSchema>({
       path: indexPath,
       fileSystem: this.props.fileSystem,
       pathSystem: this.props.pathSystem,
+      customSchema: {},
+      config: this.config,
     })
   }
 
   /**
-   * MDファイル参照を作成
+   * Create MD file reference
    */
-  private createMdFileReference(path: string): DocFileMdReference {
+  private createMdFileReference(
+    path: string,
+  ): DocFileMdReference<DocCustomSchema> {
     return new DocFileMdReference({
       path,
       fileSystem: this.props.fileSystem,
       pathSystem: this.props.pathSystem,
+      customSchema: {},
+      config: this.config,
     })
   }
 
   /**
-   * ディレクトリツリーを再帰的に構築（ディレクトリのみ）
+   * Build directory tree recursively (directories only)
    */
   async buildDirectoryTree(
     directoryPath = "",
@@ -160,17 +169,16 @@ export class DocFileTreeSystem {
     const results: DocTreeDirectoryNodeValue[] = []
 
     for (const fileName of fileNames) {
-      // アーカイブディレクトリ（「_」で始まる）は除外
-      if (fileName.startsWith("_")) continue
+      if (fileName === this.props.archiveDirectoryName) continue
+
+      // Skip directories in exclusion list
+      if (this.config.directoryExcludes.includes(fileName)) continue
 
       const filePath = directoryPath
         ? this.props.pathSystem.join(directoryPath, fileName)
         : fileName
       const isDirectory = await this.props.fileSystem.isDirectory(filePath)
-
-      // ファイルは無視
       if (!isDirectory) continue
-
       const directoryNode = await this.createDirectoryNodeForTree(
         fileName,
         filePath,
@@ -182,25 +190,28 @@ export class DocFileTreeSystem {
   }
 
   /**
-   * ディレクトリツリー用のディレクトリノードを作成
+   * Create directory node for directory tree
    */
   private async createDirectoryNodeForTree(
     fileName: string,
     filePath: string,
   ): Promise<DocTreeDirectoryNodeValue> {
     let title = fileName
-    let icon = "📁"
+    let icon = this.config.defaultIndexIcon
 
     const indexFile = this.createIndexFileReference(filePath)
+
     if (await indexFile.exists()) {
       const entity = await indexFile.read()
       title = entity.value.content.title || fileName
       const content = entity.content
-      const frontMatter = content.frontMatter
-      // frontMatterはDocFrontMatterIndexValueインスタンスで、iconはメソッド
-      if (frontMatter instanceof DocFrontMatterIndexValue) {
-        const iconValue = frontMatter.icon()
-        icon = iconValue || "📁"
+      const frontMatter = content.meta()
+      if (
+        frontMatter &&
+        typeof frontMatter === "object" &&
+        "icon" in frontMatter
+      ) {
+        icon = frontMatter.icon || this.config.defaultIndexIcon
       }
     }
 

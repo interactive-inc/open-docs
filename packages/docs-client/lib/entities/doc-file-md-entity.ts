@@ -1,54 +1,94 @@
-import { zDocFileMd } from "../models"
-import type { DocFileMd, DocFilePath } from "../types"
-import { DocFileContentMdValue } from "../values/doc-file-content-md-value"
+import { zDocFileMd } from "@/models"
+import type { DocCustomSchema, DocFileMd, DocFilePath } from "@/types"
+import type { DocFileMdMetaValue } from "@/values/doc-file-md-meta-value"
+import { DocFileMdContentValue } from "../values/doc-file-md-content-value"
 
 /**
- * ドキュメントのファイル
+ * Markdown file entity
  */
-export class DocFileMdEntity {
-  constructor(readonly value: DocFileMd) {
+export class DocFileMdEntity<T extends DocCustomSchema> {
+  constructor(
+    readonly value: DocFileMd<T>,
+    private readonly customSchema: T,
+  ) {
     zDocFileMd.parse(value)
     Object.freeze(this)
   }
 
   /**
-   * コンテンツ
+   * Content
    */
-  get content(): DocFileContentMdValue {
-    return new DocFileContentMdValue(this.value.content)
+  get content(): DocFileMdContentValue<T> {
+    return new DocFileMdContentValue<T>(this.value.content, this.customSchema)
   }
 
   /**
-   * パス情報
+   * Path information
    */
   get path(): DocFilePath {
     return this.value.path
   }
 
   /**
-   * コンテンツを更新
+   * Update content
    */
-  withContent(content: DocFileContentMdValue): DocFileMdEntity {
-    return new DocFileMdEntity({
-      ...this.value,
-      content: content.value,
-    })
+  withContent(content: DocFileMdContentValue<T>): DocFileMdEntity<T> {
+    return new DocFileMdEntity<T>(
+      { ...this.value, content: content.value },
+      this.customSchema,
+    )
   }
 
   /**
-   * パスを更新
+   * Update path
    */
-  withPath(path: DocFilePath): DocFileMdEntity {
-    return new DocFileMdEntity({
-      ...this.value,
-      path: path,
-    })
+  withPath(path: DocFilePath): DocFileMdEntity<T> {
+    return new DocFileMdEntity<T>(
+      { ...this.value, path: path },
+      this.customSchema,
+    )
+  }
+
+  withMeta(meta: DocFileMdMetaValue<T>): DocFileMdEntity<T> {
+    const draft = this.content.withMeta(meta)
+    return new DocFileMdEntity<T>(
+      {
+        ...this.value,
+        content: draft.value,
+      },
+      this.customSchema,
+    )
+  }
+
+  withTitle(title: string): DocFileMdEntity<T> {
+    const draft = this.content.withTitle(title)
+    return new DocFileMdEntity<T>(
+      {
+        ...this.value,
+        content: draft.value,
+      },
+      this.customSchema,
+    )
+  }
+
+  withDescription(
+    description: string,
+    defaultTitle?: string,
+  ): DocFileMdEntity<T> {
+    const draft = this.content.withDescription(description, defaultTitle)
+    return new DocFileMdEntity<T>(
+      {
+        ...this.value,
+        content: draft.value,
+      },
+      this.customSchema,
+    )
   }
 
   /**
-   * JSON形式に変換
+   * Convert to JSON format
    */
-  toJson(): DocFileMd {
+  toJson(): DocFileMd<T> {
     return this.value
   }
 }

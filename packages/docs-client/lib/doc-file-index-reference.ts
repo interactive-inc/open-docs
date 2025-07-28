@@ -2,24 +2,30 @@ import { DocFileRelationReference } from "./doc-file-relation-reference"
 import type { DocFileSystem } from "./doc-file-system"
 import type { DocPathSystem } from "./doc-path-system"
 import { DocFileIndexEntity } from "./entities/doc-file-index-entity"
-import { DocFileContentIndexValue } from "./values/doc-file-content-index-value"
+import type { DocClientConfig, DocCustomSchema } from "./types"
+import { DocFileIndexContentValue } from "./values/doc-file-index-content-value"
 import { DocFilePathValue } from "./values/doc-file-path-value"
 import type { DocRelationValue } from "./values/doc-relation-value"
 
-type Props = {
+type Props<T extends DocCustomSchema> = {
+  customSchema: T
   path: string
   fileSystem: DocFileSystem
   pathSystem: DocPathSystem
+  config: DocClientConfig
 }
 
 /**
- * ファイルを表すクラス
+ * File reference class
  */
-export class DocFileIndexReference {
+export class DocFileIndexReference<T extends DocCustomSchema> {
   private readonly pathSystem: DocPathSystem
 
-  constructor(private readonly props: Props) {
+  private readonly customSchema: T
+
+  constructor(private readonly props: Props<T>) {
     this.pathSystem = props.pathSystem
+    this.customSchema = props.customSchema
     Object.freeze(this)
   }
 
@@ -43,23 +49,31 @@ export class DocFileIndexReference {
     return this.pathSystem.dirname(this.filePath)
   }
 
-  async read(): Promise<DocFileIndexEntity> {
+  async read(): Promise<DocFileIndexEntity<T>> {
     const content = await this.fileSystem.readFile(this.filePath)
     if (content === null) {
-      const dirName = this.filePath.split("/").pop() || "directory"
+      // Get directory name for index.md
+      const dirPath = this.pathSystem.dirname(this.filePath)
+      const dirName = this.pathSystem.basename(dirPath)
       const pathValue = DocFilePathValue.fromPathWithSystem(
         this.filePath,
         this.pathSystem,
         this.fileSystem.getBasePath(),
       )
-      const contentValue = DocFileContentIndexValue.empty(dirName)
-
-      return new DocFileIndexEntity({
-        type: "index",
-        path: pathValue.toJson(),
-        content: contentValue.toJson(),
-        isArchived: false,
-      })
+      const contentValue = DocFileIndexContentValue.empty(
+        dirName,
+        this.customSchema,
+        this.props.config,
+      )
+      return new DocFileIndexEntity(
+        {
+          type: "index",
+          path: pathValue.toJson(),
+          content: contentValue.toJson(),
+          isArchived: false,
+        },
+        this.customSchema,
+      )
     }
 
     const pathValue = DocFilePathValue.fromPathWithSystem(
@@ -67,65 +81,83 @@ export class DocFileIndexReference {
       this.pathSystem,
       this.fileSystem.getBasePath(),
     )
-    const contentValue = DocFileContentIndexValue.fromMarkdown(content)
 
-    return new DocFileIndexEntity({
-      type: "index",
-      path: pathValue.toJson(),
-      content: contentValue.toJson(),
-      isArchived: false,
-    })
+    const contentValue = DocFileIndexContentValue.fromMarkdown(
+      content,
+      this.customSchema,
+      this.props.config,
+    )
+
+    return new DocFileIndexEntity(
+      {
+        type: "index",
+        path: pathValue.toJson(),
+        content: contentValue.toJson(),
+        isArchived: false,
+      },
+      this.customSchema,
+    )
   }
 
   /**
-   * ファイルの内容を読み込む
+   * Read file content
    */
   async readContent(): Promise<Error | string> {
     const entity = await this.read()
+
     if (entity instanceof Error) {
       return entity
     }
+
     return entity.value.content.body
   }
 
   /**
-   * ファイルに内容を書き込む
+   * Write content to file
    */
   async writeContent(content: string): Promise<void> {
     await this.fileSystem.writeFile(this.filePath, content)
   }
 
   /**
-   * Entityを書き込む
+   * Write entity
    */
-  async write(entity: DocFileIndexEntity): Promise<void> {
+  async write(entity: DocFileIndexEntity<T>): Promise<void> {
     const content = entity.content.toText()
+
     await this.fileSystem.writeFile(this.filePath, content)
   }
 
   /**
-   * 新しいファイルをデフォルトコンテンツで作成
+   * Create new file with default content
    */
-  async writeDefault(): Promise<void> {
+  async writeDefault(): Promise<null> {
     const dirPath = this.pathSystem.dirname(this.filePath)
-    const dirName = this.pathSystem.basename(dirPath) || "ディレクトリ"
+
+    const dirName =
+      this.pathSystem.basename(dirPath) ||
+      this.props.config.defaultDirectoryName
+
     const defaultContent = [
       `# ${dirName}`,
       "",
-      `${dirName}に関する概要をここに記載してください。`,
+      `Please describe the overview of ${dirName} here.`,
     ].join("\n")
+
     await this.fileSystem.writeFile(this.filePath, defaultContent)
+
+    return null
   }
 
   /**
-   * ファイルを削除
+   * Delete file
    */
   async delete(): Promise<Error | null> {
     return await this.fileSystem.deleteFile(this.filePath)
   }
 
   /**
-   * ファイルが存在するか確認
+   * Check if file exists
    */
   async exists(): Promise<boolean> {
     return this.fileSystem.exists(this.filePath)
@@ -134,31 +166,36 @@ export class DocFileIndexReference {
   async relations(): Promise<DocFileRelationReference[]> {
     const indexFile = await this.read()
 
-    if (indexFile instanceof Error) {
-      return []
-    }
+    const schema = indexFile.content.meta().schema()
 
-    const schema = indexFile.content.frontMatter.value.schema
     if (!schema) {
       return []
     }
-    const relationFields = Object.entries(schema).filter(([_key, field]) => {
-      return field.type === "relation" || field.type === "multi-relation"
-    })
 
-    return relationFields.map(([, field]) => {
+    const refs: DocFileRelationReference[] = []
+
+    const fieldKeys = Object.keys(schema) as Array<keyof T>
+
+    for (const key of fieldKeys) {
+      const fieldValue = schema.value[key]
+      if (fieldValue === undefined) continue
       if (
-        (field.type === "relation" || field.type === "multi-relation") &&
-        field.path
+        fieldValue.type !== "relation" &&
+        fieldValue.type !== "multi-relation"
       ) {
-        return new DocFileRelationReference({
-          filePath: field.path,
-          fileSystem: this.fileSystem,
-          pathSystem: this.pathSystem,
-        })
+        continue
       }
-      throw new Error("Unexpected field type or missing path")
-    })
+      const field = schema.field(key)
+      // field should be DocSchemaFieldRelationSingleValue or DocSchemaFieldMultiRelationValue
+      const fileRef = new DocFileRelationReference({
+        filePath: (field as unknown as { path: string }).path,
+        fileSystem: this.fileSystem,
+        pathSystem: this.pathSystem,
+      })
+      refs.push(fileRef)
+    }
+
+    return refs
   }
 
   async readRelations(): Promise<DocRelationValue[]> {
@@ -176,77 +213,85 @@ export class DocFileIndexReference {
   }
 
   /**
-   * ファイルのサイズを取得（バイト単位）
+   * Get file size in bytes
    */
   async size(): Promise<number> {
     return this.fileSystem.getFileSize(this.filePath)
   }
 
   /**
-   * ファイルの最終更新日時を取得
+   * Get last modified date
    */
   async lastModified(): Promise<Date> {
     return this.fileSystem.getFileModifiedTime(this.filePath)
   }
 
   /**
-   * ファイルの作成日時を取得
+   * Get file creation date
    */
   async createdAt(): Promise<Date> {
     return this.fileSystem.getFileCreatedTime(this.filePath)
   }
 
   /**
-   * ファイルをアーカイブに移動し、新しい参照を返す
+   * Move file to archive and return new reference
    */
-  async archive(archiveDirectoryName = "_"): Promise<DocFileIndexReference> {
+  async archive(
+    archiveDirectoryName = this.props.config.archiveDirectoryName,
+  ): Promise<DocFileIndexReference<T>> {
     const dirPath = this.pathSystem.dirname(this.filePath)
+
     const fileName = this.pathSystem.basename(this.filePath)
+
     const archivePath = this.pathSystem.join(
       dirPath,
       archiveDirectoryName,
       fileName,
     )
 
-    // ファイルを移動
     await this.fileSystem.moveFile(this.filePath, archivePath)
 
-    // 新しいパスで参照を作成
-    return new DocFileIndexReference({
+    return new DocFileIndexReference<T>({
       path: archivePath,
       fileSystem: this.fileSystem,
       pathSystem: this.pathSystem,
+      customSchema: this.customSchema,
+      config: this.props.config,
     })
   }
 
   /**
-   * ファイルをアーカイブから復元し、新しい参照を返す
+   * Restore file from archive and return new reference
    */
-  async restore(archiveDirectoryName = "_"): Promise<DocFileIndexReference> {
+  async restore(
+    archiveDirectoryName = this.props.config.archiveDirectoryName,
+  ): Promise<DocFileIndexReference<T>> {
     const dirPath = this.pathSystem.dirname(this.filePath)
+
     const parentDirName = this.pathSystem.basename(dirPath)
 
-    // 親ディレクトリがアーカイブディレクトリでない場合はエラー
+    // Error if parent directory is not archive directory
     if (parentDirName !== archiveDirectoryName) {
-      throw new Error(
-        `ファイルはアーカイブディレクトリにありません: ${this.filePath}`,
-      )
+      throw new Error(`File is not in archive directory: ${this.filePath}`)
     }
 
     const fileName = this.pathSystem.basename(this.filePath)
+
     const restorePath = this.pathSystem.join(
       this.pathSystem.dirname(dirPath),
       fileName,
     )
 
-    // ファイルを移動
+    // Move file
     await this.fileSystem.moveFile(this.filePath, restorePath)
 
-    // 新しいパスで参照を作成
-    return new DocFileIndexReference({
+    // Create reference with new path
+    return new DocFileIndexReference<T>({
       path: restorePath,
       fileSystem: this.fileSystem,
       pathSystem: this.pathSystem,
+      customSchema: this.customSchema,
+      config: this.props.config,
     })
   }
 }

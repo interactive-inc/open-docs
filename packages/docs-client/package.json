@@ -1,6 +1,6 @@
 {
   "name": "@interactive-inc/docs-client",
-  "version": "0.0.9",
+  "version": "0.0.11",
   "type": "module",
   "scripts": {
     "check": "tsgo --noEmit",
@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "yaml": "^2.8.0",
-    "zod": "^3.25.74"
+    "zod": "^4.0.10"
   },
   "publishConfig": {
     "access": "public"

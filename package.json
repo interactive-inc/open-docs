@@ -4,9 +4,13 @@
   "private": true,
   "scripts": {
     "format": "biome check . --fix --unsafe",
-    "claude": "claude --continue --dangerously-skip-permissions",
+    "claude": "claude --dangerously-skip-permissions",
+    "claude:continue": "claude --continue --dangerously-skip-permissions",
     "start": "bun run --cwd packages/docs-client -p 4044",
-    "dev": "bun run index.dev"
+    "dev": "bun run index.dev",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "workspaces": [
     "packages/docs-client",
@@ -15,15 +19,15 @@
     "packages/docs"
   ],
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.13.0"
+    "@modelcontextprotocol/sdk": "^1.17.0",
+    "vitepress": "^1.6.3",
+    "zod": "^4.0.10"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.0.6",
-    "@types/bun": "^1.2.16",
-    "@types/node": "^24.0.7",
-    "@typescript/native-preview": "^7.0.0-dev.20250617.1",
-    "concurrently": "^9.1.2",
-    "esbuild": "^0.25.5",
+    "@biomejs/biome": "^2.1.2",
+    "@types/bun": "^1.2.19",
+    "@types/node": "^24.1.0",
+    "@typescript/native-preview": "^7.0.0-dev.20250727.1",
     "tsup": "^8.5.0",
     "typescript": "^5.8.3"
   }

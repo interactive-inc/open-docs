@@ -2,6 +2,7 @@ import { expect, test } from "bun:test"
 import type { DocFileSystem } from "./doc-file-system"
 import { DocFileTreeSystem } from "./doc-file-tree-system"
 import { DocPathSystem } from "./doc-path-system"
+import { defaultTestConfig } from "./utils"
 
 test("FileTreeSystem - ファイルツリーを構築できる", async () => {
   const mockFileSystem = {
@@ -12,7 +13,7 @@ test("FileTreeSystem - ファイルツリーを構築できる", async () => {
       return []
     },
     isDirectory: async (path: string) => {
-      return path === "dir1"
+      return path === "dir1" || path === "_archive"
     },
     readFile: async (path: string) => {
       if (path === "file1.md") {
@@ -22,7 +23,9 @@ test("FileTreeSystem - ファイルツリーを構築できる", async () => {
         return `# File 2\n\nContent`
       }
       if (path === "dir1/index.md") {
-        return `---\nicon: 🎯\n---\n# Directory 1\n\nContent`
+        return `# Directory 1
+
+Content`
       }
       return ""
     },
@@ -37,6 +40,7 @@ test("FileTreeSystem - ファイルツリーを構築できる", async () => {
     pathSystem,
     indexFileName: "index.md",
     archiveDirectoryName: "_archive",
+    config: defaultTestConfig,
   })
 
   const tree = await fileTreeSystem.buildFileTree()
@@ -55,7 +59,7 @@ test("FileTreeSystem - ファイルツリーを構築できる", async () => {
   expect(dirNode.name).toBe("dir1")
   expect(dirNode.type).toBe("directory")
   expect(dirNode.title).toBe("Directory 1")
-  expect(dirNode.icon).toBe("🎯")
+  expect(dirNode.icon).toBe("📁")
 
   if (dirNode.type === "directory") {
     expect(dirNode.children.length).toBe(2) // file2.md と index.md
@@ -77,7 +81,13 @@ test("FileTreeSystem - ディレクトリツリーを構築できる（ディレ
     },
     readFile: async (path: string) => {
       if (path === "dir2/index.md") {
-        return `---\nicon: 📁\n---\n# Directory 2\n\nContent`
+        return `---
+icon: 📁
+---
+
+# Directory 2
+
+Content`
       }
       return ""
     },
@@ -92,6 +102,7 @@ test("FileTreeSystem - ディレクトリツリーを構築できる（ディレ
     pathSystem,
     indexFileName: "index.md",
     archiveDirectoryName: "_archive",
+    config: defaultTestConfig,
   })
 
   const tree = await fileTreeSystem.buildDirectoryTree()
@@ -111,4 +122,57 @@ test("FileTreeSystem - ディレクトリツリーを構築できる（ディレ
     expect(dir1.children.length).toBe(1) // subdir1のみ
     expect(dir1.children[0].name).toBe("subdir1")
   }
+})
+
+test("FileTreeSystem - directoryExcludesで指定されたディレクトリが除外される", async () => {
+  const mockFileSystem = {
+    getBasePath: () => "/test",
+    readDirectoryFileNames: async (path: string) => {
+      if (path === "") {
+        return ["docs", ".vitepress", "node_modules", "_archive"]
+      }
+      if (path === "docs") {
+        return ["index.md"]
+      }
+      return []
+    },
+    isDirectory: async (path: string) => {
+      return ["docs", ".vitepress", "node_modules", "_archive"].includes(path)
+    },
+    exists: async (path: string) => {
+      return path === "docs/index.md"
+    },
+    readFile: async (path: string) => {
+      if (path === "docs/index.md") {
+        return "# Docs\n\nDocumentation"
+      }
+      return null
+    },
+  } as unknown as DocFileSystem
+
+  const pathSystem = new DocPathSystem()
+
+  // .vitepressとnode_modulesを除外する設定
+  const config = {
+    ...defaultTestConfig,
+    directoryExcludes: [".vitepress", "node_modules"],
+  }
+
+  const fileTreeSystem = new DocFileTreeSystem({
+    fileSystem: mockFileSystem,
+    pathSystem,
+    indexFileName: "index.md",
+    archiveDirectoryName: "_archive",
+    config,
+  })
+
+  const tree = await fileTreeSystem.buildFileTree()
+
+  // .vitepress、node_modules、_archiveが除外され、docsのみが残る
+  expect(tree.length).toBe(1)
+  expect(tree[0].name).toBe("docs")
+
+  const directoryTree = await fileTreeSystem.buildDirectoryTree()
+  expect(directoryTree.length).toBe(1)
+  expect(directoryTree[0].name).toBe("docs")
 })

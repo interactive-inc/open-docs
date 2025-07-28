@@ -1,9 +1,9 @@
+import { zDocFilePath } from "@/models"
+import type { DocFilePath } from "@/types"
 import type { DocPathSystem } from "../doc-path-system"
-import { zDocFilePath } from "../models"
-import type { DocFilePath } from "../types"
 
 /**
- * ファイルパス情報の値オブジェクト
+ * Value object for file path information
  */
 export class DocFilePathValue {
   private readonly pathSystem: DocPathSystem
@@ -18,56 +18,56 @@ export class DocFilePathValue {
   }
 
   /**
-   * ファイル名（拡張子なし）
+   * File name without extension
    */
   get name(): string {
     return this.value.name
   }
 
   /**
-   * ファイルパス（相対パス）
+   * File path (relative path)
    */
   get path(): string {
     return this.value.path
   }
 
   /**
-   * ファイル名（拡張子付き）
+   * File name with extension
    */
   get nameWithExtension(): string {
     return this.value.nameWithExtension
   }
 
   /**
-   * フルパス（絶対パス）
+   * Full path (absolute path)
    */
   get fullPath(): string {
     return this.value.fullPath
   }
 
   /**
-   * ディレクトリパス
+   * Directory path
    */
   get directoryPath(): string {
     return this.pathSystem.dirname(this.path)
   }
 
   /**
-   * 拡張子
+   * Extension
    */
   get extension(): string {
     return this.pathSystem.extname(this.nameWithExtension)
   }
 
   /**
-   * アーカイブされているかどうか
+   * Whether the file is archived
    */
   get isArchived(): boolean {
     return this.path.includes("/.archive/")
   }
 
   /**
-   * 相対パスからインスタンスを生成（DI対応）
+   * Create instance from relative path (DI support)
    */
   static fromPathWithSystem(
     filePath: string,
@@ -77,7 +77,6 @@ export class DocFilePathValue {
     const nameWithExtension = pathSystem.basename(filePath)
     let name = pathSystem.basename(filePath, pathSystem.extname(filePath))
 
-    // index.mdの場合は親ディレクトリ名を使用
     if (name === "index" && filePath.includes("/")) {
       const parentDir = pathSystem.dirname(filePath)
       name = pathSystem.basename(parentDir)
@@ -99,7 +98,7 @@ export class DocFilePathValue {
   }
 
   /**
-   * JSON形式で出力
+   * Export as JSON format
    */
   toJson(): DocFilePath {
     return this.value

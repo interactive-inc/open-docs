@@ -1,9 +1,9 @@
-import { zDocRelation } from "../models"
-import type { DocRelation } from "../types"
+import { zDocRelation } from "@/models"
+import type { DocRelation } from "@/types"
 import { DocRelationFileValue } from "./doc-relation-file-value"
 
 /**
- * リレーション情報を管理する
+ * Manages relation information
  */
 export class DocRelationValue {
   constructor(readonly value: DocRelation) {
@@ -13,35 +13,35 @@ export class DocRelationValue {
   }
 
   /**
-   * リレーションパス
+   * Relation path
    */
   get path(): string {
     return this.value.path
   }
 
   /**
-   * リレーション対象ファイル一覧（値オブジェクト）
+   * List of related files (value objects)
    */
   get files(): DocRelationFileValue[] {
     return this.value.files.map((file) => new DocRelationFileValue(file))
   }
 
   /**
-   * ファイル数を取得
+   * Get file count
    */
   get fileCount(): number {
     return this.files.length
   }
 
   /**
-   * 空かどうか
+   * Whether it's empty
    */
   get isEmpty(): boolean {
     return this.files.length === 0
   }
 
   /**
-   * 空のリレーションエンティティを作成
+   * Create empty relation entity
    */
   static empty(path: string): DocRelationValue {
     return new DocRelationValue({
@@ -51,7 +51,7 @@ export class DocRelationValue {
   }
 
   /**
-   * JSON形式で出力
+   * Export as JSON format
    */
   toJson(): DocRelation {
     return {

@@ -1,5 +1,5 @@
 /**
- * Markdownの解析と処理システム
+ * Markdown parsing and processing system
  */
 export class DocMarkdownSystem {
   private readonly frontMatterSeparator = "---"
@@ -9,7 +9,7 @@ export class DocMarkdownSystem {
   }
 
   /**
-   * FrontMatterの区切り線を検出
+   * Detect FrontMatter separator line
    */
   private detectFrontMatterSeparator(text: string): string {
     const firstLine = text.split("\n")[0]
@@ -22,36 +22,48 @@ export class DocMarkdownSystem {
   }
 
   /**
-   * FrontMatterを抽出
+   * Extract FrontMatter
    */
   extractFrontMatter(text: string): string | null {
     const separator = this.detectFrontMatterSeparator(text)
+
     if (!text.startsWith(separator)) {
       return null
     }
 
     const endIndex = text.indexOf(`\n${separator}`, separator.length)
+
     if (endIndex === -1) {
       return null
     }
 
-    return text.slice(0, endIndex + separator.length + 1)
+    return text
+      .slice(0, endIndex + separator.length + 1)
+      .replaceAll(separator, "")
+      .trim()
   }
 
   /**
-   * FrontMatterを除去したbody（titleとdescriptionを含む）
+   * Extract body without FrontMatter (includes title and description)
    */
   extractBody(text: string): string {
-    const frontMatter = this.extractFrontMatter(text)
-    if (!frontMatter) {
+    const separator = this.detectFrontMatterSeparator(text)
+
+    if (!text.startsWith(separator)) {
       return text
     }
 
-    return text.slice(frontMatter.length).trim()
+    const endIndex = text.indexOf(`\n${separator}`, separator.length)
+
+    if (endIndex === -1) {
+      return text
+    }
+
+    return text.slice(endIndex + separator.length + 2).trim()
   }
 
   /**
-   * タイトル
+   * Extract title
    */
   extractTitle(text: string): string | null {
     const body = this.extractBody(text)
@@ -60,7 +72,7 @@ export class DocMarkdownSystem {
   }
 
   /**
-   * 説明（タイトルの後の最初の段落）
+   * Extract description (first paragraph after title)
    */
   extractDescription(text: string): string | null {
     const title = this.extractTitle(text)
@@ -84,27 +96,33 @@ export class DocMarkdownSystem {
   }
 
   /**
-   * body内のタイトルを更新
+   * Update title in body
    */
   updateTitle(text: string, newTitle: string): string {
     const body = this.extractBody(text)
+
     const lines = body.split("\n")
+
     const titleIndex = lines.findIndex((line) => line.match(/^#\s+/))
 
     if (titleIndex !== -1) {
       lines[titleIndex] = `# ${newTitle}`
     } else {
-      // タイトルが存在しない場合は先頭に追加
       lines.unshift(`# ${newTitle}`, "")
     }
 
     const updatedBody = lines.join("\n")
+
     const frontMatter = this.extractFrontMatter(text)
-    return frontMatter ? `${frontMatter}\n${updatedBody}` : updatedBody
+    const separator = this.detectFrontMatterSeparator(text)
+
+    return frontMatter
+      ? `${separator}\n${frontMatter}\n${separator}\n\n${updatedBody}`
+      : updatedBody
   }
 
   /**
-   * body内の説明を更新
+   * Update description in body
    */
   updateDescription(
     text: string,
@@ -117,10 +135,8 @@ export class DocMarkdownSystem {
 
     let updatedBody: string
     if (titleIndex === -1) {
-      // タイトルがない場合はタイトルと説明を追加
       updatedBody = `# ${defaultTitle}\n\n${newDescription}\n\n${body}`.trim()
     } else {
-      // タイトルの後の説明を更新
       const descIndex = this.skipEmptyLines(lines, titleIndex + 1)
 
       if (
@@ -128,21 +144,22 @@ export class DocMarkdownSystem {
         lines[descIndex] &&
         !lines[descIndex].startsWith("#")
       ) {
-        // 既存の説明を置き換え
         lines[descIndex] = newDescription
       } else {
-        // 説明がない場合は挿入
         lines.splice(titleIndex + 1, 0, "", newDescription)
       }
       updatedBody = lines.join("\n")
     }
 
     const frontMatter = this.extractFrontMatter(text)
-    return frontMatter ? `${frontMatter}\n${updatedBody}` : updatedBody
+    const separator = this.detectFrontMatterSeparator(text)
+    return frontMatter
+      ? `${separator}\n${frontMatter}\n${separator}\n\n${updatedBody}`
+      : updatedBody
   }
 
   /**
-   * 空行をスキップ
+   * Skip empty lines
    */
   private skipEmptyLines(lines: string[], startIndex: number): number {
     let index = startIndex
@@ -157,7 +174,7 @@ export class DocMarkdownSystem {
   }
 
   /**
-   * Markdownテキストを生成（タイトル + 説明 + body）
+   * Generate Markdown text (title + description + body)
    */
   static from(title: string, description: string, body: string): string {
     const parts: string[] = []

@@ -1,8 +1,8 @@
-import { zDocFileUnknown } from "../models"
-import type { DocFilePath, DocFileUnknown } from "../types"
+import { zDocFileUnknown } from "@/models"
+import type { DocFilePath, DocFileUnknown } from "@/types"
 
 /**
- * ドキュメントのファイル
+ * Unknown file entity
  */
 export class DocFileUnknownEntity {
   constructor(readonly value: DocFileUnknown) {
@@ -11,21 +11,21 @@ export class DocFileUnknownEntity {
   }
 
   /**
-   * コンテンツ
+   * Content
    */
   get content(): string {
     return this.value.content
   }
 
   /**
-   * パス情報
+   * Path information
    */
   get path(): DocFilePath {
     return this.value.path
   }
 
   /**
-   * コンテンツを更新
+   * Update content
    */
   withContent(content: string): DocFileUnknownEntity {
     return new DocFileUnknownEntity({
@@ -35,7 +35,7 @@ export class DocFileUnknownEntity {
   }
 
   /**
-   * パスを更新
+   * Update path
    */
   withPath(path: DocFilePath): DocFileUnknownEntity {
     return new DocFileUnknownEntity({

@@ -3,9 +3,8 @@ import {
   zDocFileIndex,
   zDocRelation,
 } from "@interactive-inc/docs-client"
-import { z } from "zod/v4"
+import { z } from "zod"
 
-// serverパッケージ固有の定義
 export const zDirectoryJson = z.object({
   cwd: z.string(),
   indexFile: zDocFileIndex,

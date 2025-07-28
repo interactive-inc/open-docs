@@ -1,6 +1,6 @@
 import { zValidator } from "@hono/zod-validator"
 import { HTTPException } from "hono/http-exception"
-import { z } from "zod/v4"
+import { z } from "zod"
 import { zDirectoryJson } from "../models"
 import { cwd } from "../utils/cwd"
 import { factory } from "../utils/factory"
@@ -32,7 +32,7 @@ export const GET = factory.createHandlers(
     const json = zDirectoryJson.parse({
       cwd: cwd(),
       files: files.map((file) => {
-        return file.toJson()
+        return file.toJson() as any
       }),
       indexFile: indexFile.toJson(),
       relations: relations.map((relation) => {
@@ -95,17 +95,17 @@ export const PUT = factory.createHandlers(
     let content = indexFile.content
 
     if (body.icon !== null || body.schema !== null) {
-      let frontMatter = content.frontMatter
+      let meta = content.meta()
 
       if (body.icon !== null) {
-        frontMatter = frontMatter.withIcon(body.icon)
+        meta = meta.withIcon(body.icon)
       }
 
       if (body.schema !== null) {
-        frontMatter = frontMatter.withSchema(body.schema)
+        meta = meta.withSchema(body.schema as any)
       }
 
-      content = content.withFrontMatter(frontMatter)
+      content = content.withMeta(meta.value)
     }
 
     if (body.title !== null) {
@@ -127,7 +127,7 @@ export const PUT = factory.createHandlers(
     const json = zDirectoryJson.parse({
       cwd: cwd(),
       files: files.map((file) => {
-        return file.toJson()
+        return file.toJson() as any
       }),
       indexFile: indexFile.toJson(),
       relations: relations.map((relation) => {

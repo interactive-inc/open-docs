@@ -2,6 +2,7 @@ import { expect, test } from "bun:test"
 import { DocFileSystemDebug } from "./doc-file-system-debug"
 import { DocFileUnknownReference } from "./doc-file-unknown-reference"
 import { DocFileUnknownEntity } from "./entities/doc-file-unknown-entity"
+import { defaultTestConfig } from "./utils"
 import { DocFilePathValue } from "./values/doc-file-path-value"
 
 test("DocFileUnknownReference - readメソッドが正しくエンティティを返す", async () => {
@@ -17,6 +18,7 @@ test("DocFileUnknownReference - readメソッドが正しくエンティティ�
     path: "docs/assets/logo.png",
     fileSystem,
     pathSystem: fileSystem.getPathSystem(),
+    config: defaultTestConfig,
   })
 
   const pngEntity = await pngRef.read()
@@ -34,6 +36,7 @@ test("DocFileUnknownReference - readメソッドが正しくエンティティ�
     path: "docs/config.json",
     fileSystem,
     pathSystem: fileSystem.getPathSystem(),
+    config: defaultTestConfig,
   })
 
   const jsonEntity = await jsonRef.read()
@@ -53,6 +56,7 @@ test("DocFileUnknownReference - writeメソッドがファイルを書き込む"
     path: "docs/data/output.csv",
     fileSystem,
     pathSystem: fileSystem.getPathSystem(),
+    config: defaultTestConfig,
   })
 
   // 新しいエンティティを作成
@@ -83,6 +87,7 @@ test("DocFileUnknownReference - 存在しないファイルを読み込もうと
     path: "docs/nonexistent.txt",
     fileSystem,
     pathSystem: fileSystem.getPathSystem(),
+    config: defaultTestConfig,
   })
 
   const result = await ref.read()

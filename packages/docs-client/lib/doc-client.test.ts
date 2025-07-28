@@ -12,8 +12,8 @@ test("DocClient - デフォルト値でインスタンスを作成", () => {
   expect(client.fileSystem).toBe(fileSystem)
   expect(client.pathSystem).toBeInstanceOf(DocPathSystem)
   expect(client.markdownSystem).toBeInstanceOf(DocMarkdownSystem)
-  expect(client.indexFileName).toBe("index.md")
-  expect(client.archiveDirectoryName).toBe("_")
+  expect(client.config.indexFileName).toBe("index.md")
+  expect(client.config.archiveDirectoryName).toBe("_")
 })
 
 test("DocClient - カスタム値でインスタンスを作成", () => {
@@ -25,15 +25,21 @@ test("DocClient - カスタム値でインスタンスを作成", () => {
     fileSystem,
     pathSystem,
     markdownSystem,
-    indexFileName: "README.md",
-    archiveDirectoryName: ".archive",
+    config: {
+      defaultIndexIcon: "📃",
+      indexFileName: "README.md",
+      archiveDirectoryName: ".archive",
+      defaultDirectoryName: "Directory",
+      indexMetaIncludes: [],
+      directoryExcludes: [".vitepress"],
+    },
   })
 
   expect(client.fileSystem).toBe(fileSystem)
   expect(client.pathSystem).toBe(pathSystem)
   expect(client.markdownSystem).toBe(markdownSystem)
-  expect(client.indexFileName).toBe("README.md")
-  expect(client.archiveDirectoryName).toBe(".archive")
+  expect(client.config.indexFileName).toBe("README.md")
+  expect(client.config.archiveDirectoryName).toBe(".archive")
 })
 
 test("DocClient - basePathを取得", () => {

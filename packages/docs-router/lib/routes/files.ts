@@ -1,6 +1,6 @@
 import { zValidator } from "@hono/zod-validator"
 import { HTTPException } from "hono/http-exception"
-import { z } from "zod/v4"
+import { z } from "zod"
 import { factory } from "../utils/factory"
 
 /**

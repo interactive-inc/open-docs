@@ -1,26 +1,39 @@
 import { DocDirectoryReference } from "./doc-directory-reference"
+import { DocFileIndexReference } from "./doc-file-index-reference"
 import type { DocFileSystem } from "./doc-file-system"
 import type { DocPathSystem } from "./doc-path-system"
 import { DocFileMdEntity } from "./entities/doc-file-md-entity"
-import type { DocSchemaRecord } from "./types"
-import { DocFileContentMdValue } from "./values/doc-file-content-md-value"
+import type {
+  BaseFieldValueType,
+  DocClientConfig,
+  DocCustomSchema,
+  ExtractFieldType,
+  MultiRelationKeys,
+  RelationKeys,
+} from "./types"
+import { DocFileMdContentValue } from "./values/doc-file-md-content-value"
+import type { DocFileMdMetaValue } from "./values/doc-file-md-meta-value"
 import { DocFilePathValue } from "./values/doc-file-path-value"
-import { DocSchemaValue } from "./values/doc-schema-value"
 
-type Props = {
+type Props<T extends DocCustomSchema> = {
   path: string
   fileSystem: DocFileSystem
   pathSystem: DocPathSystem
+  customSchema: T
+  config: DocClientConfig
 }
 
 /**
- * ファイルの参照
+ * File reference
  */
-export class DocFileMdReference {
+export class DocFileMdReference<T extends DocCustomSchema> {
   private readonly pathSystem: DocPathSystem
 
-  constructor(private readonly props: Props) {
+  private readonly customSchema: T
+
+  constructor(private readonly props: Props<T>) {
     this.pathSystem = props.pathSystem
+    this.customSchema = props.customSchema
     Object.freeze(this)
   }
 
@@ -56,36 +69,46 @@ export class DocFileMdReference {
     return `${this.name}.md`
   }
 
-  directory(): DocDirectoryReference {
-    return new DocDirectoryReference({
-      archiveDirectoryName: "_",
-      indexFileName: "index.md",
-      fileSystem: this.fileSystem,
-      path: this.directoryPath,
-      pathSystem: this.pathSystem,
-    })
+  async exists(): Promise<boolean> {
+    if (await this.fileSystem.exists(this.path)) {
+      return true
+    }
+
+    const dirPath = this.pathSystem.dirname(this.path)
+
+    const fileName = this.pathSystem.basename(this.path)
+
+    const archivePath = this.pathSystem.join(dirPath, "_", fileName)
+
+    return this.fileSystem.exists(archivePath)
   }
 
-  async read(): Promise<Error | DocFileMdEntity> {
+  async read(): Promise<DocFileMdEntity<T> | Error> {
     const content = await this.fileSystem.readFile(this.path)
 
     const actualPath = this.path
 
     if (content === null) {
-      const content = await this.fileSystem.readFile(this.archivedPath)
-      if (content !== null) {
-        const contentValue = DocFileContentMdValue.fromMarkdown(content)
+      const archivedContent = await this.fileSystem.readFile(this.archivedPath)
+      if (archivedContent !== null) {
+        const contentValue = DocFileMdContentValue.fromMarkdown(
+          archivedContent,
+          this.customSchema,
+        )
         const pathValue = DocFilePathValue.fromPathWithSystem(
           actualPath,
           this.pathSystem,
           this.basePath,
         )
-        return new DocFileMdEntity({
-          type: "markdown",
-          content: contentValue.value,
-          path: pathValue.value,
-          isArchived: true,
-        })
+        return new DocFileMdEntity<T>(
+          {
+            type: "markdown",
+            content: contentValue.value,
+            path: pathValue.value,
+            isArchived: true,
+          },
+          this.customSchema,
+        )
       }
     }
 
@@ -93,29 +116,35 @@ export class DocFileMdReference {
       return new Error(`File not found at ${this.path} or in archive.`)
     }
 
-    const contentValue = DocFileContentMdValue.fromMarkdown(content)
+    const contentValue = DocFileMdContentValue.fromMarkdown(
+      content,
+      this.customSchema,
+    )
+
     const pathValue = DocFilePathValue.fromPathWithSystem(
       actualPath,
       this.pathSystem,
       this.basePath,
     )
 
-    // アーカイブディレクトリにあるファイルかどうかをチェック
     const isInArchiveDir =
       this.path.includes("/_/") || this.path.startsWith("_/")
 
-    return new DocFileMdEntity({
-      type: "markdown",
-      content: contentValue.value,
-      path: pathValue.value,
-      isArchived: isInArchiveDir,
-    })
+    return new DocFileMdEntity<T>(
+      {
+        type: "markdown",
+        content: contentValue.value,
+        path: pathValue.value,
+        isArchived: isInArchiveDir,
+      },
+      this.customSchema,
+    )
   }
 
   /**
-   * ファイルの内容を読み込む
+   * Read file content
    */
-  async readContent(): Promise<Error | string> {
+  async readText(): Promise<Error | string> {
     const entity = await this.read()
     if (entity instanceof Error) {
       return entity
@@ -124,96 +153,58 @@ export class DocFileMdReference {
   }
 
   /**
-   * ファイルに内容を書き込む
+   * Write entity
    */
-  async writeContent(content: string): Promise<void> {
-    return await this.fileSystem.writeFile(this.path, content)
-  }
-
-  /**
-   * Entityを書き込む
-   */
-  async write(entity: DocFileMdEntity): Promise<void> {
+  async write(entity: DocFileMdEntity<T>): Promise<null> {
     const content = entity.content.toText()
-    return await this.fileSystem.writeFile(this.path, content)
+    await this.fileSystem.writeFile(this.path, content)
+    return null
+  }
+
+  async writeText(text: string): Promise<void> {
+    return await this.fileSystem.writeFile(this.path, text)
   }
 
   /**
-   * 新しいファイルをデフォルトコンテンツで作成
+   * Create new file with default content
    */
   async writeDefault(): Promise<void> {
     const fileName = this.pathSystem.basename(this.path, ".md")
     const defaultContent = [
       `# ${fileName}`,
       "",
-      "ここに内容を記載してください。",
+      "Write your content here.",
     ].join("\n")
     return await this.fileSystem.writeFile(this.path, defaultContent)
   }
 
   /**
-   * ファイルを削除
+   * Delete file
    */
   async delete(): Promise<Error | null> {
     return await this.fileSystem.deleteFile(this.path)
   }
 
   /**
-   * ファイルが存在するか確認（アーカイブも含む）
-   */
-  async exists(): Promise<boolean> {
-    // まず通常のパスを確認
-    if (await this.fileSystem.exists(this.path)) {
-      return true
-    }
-
-    // アーカイブディレクトリを確認
-    const dirPath = this.pathSystem.dirname(this.path)
-    const fileName = this.pathSystem.basename(this.path)
-    const archivePath = this.pathSystem.join(dirPath, "_", fileName)
-
-    return this.fileSystem.exists(archivePath)
-  }
-
-  /**
-   * ファイルをコピー
+   * Copy file
    */
   async copyTo(destinationPath: string): Promise<void> {
     await this.fileSystem.copyFile(this.path, destinationPath)
   }
 
   /**
-   * ファイルを移動
+   * Move file
    */
   async moveTo(destinationPath: string): Promise<void> {
     await this.fileSystem.moveFile(this.path, destinationPath)
   }
 
   /**
-   * ファイルのサイズを取得（バイト単位）
+   * Move file to archive and return new reference
    */
-  async size(): Promise<number> {
-    return this.fileSystem.getFileSize(this.path)
-  }
-
-  /**
-   * ファイルの最終更新日時を取得
-   */
-  async lastModified(): Promise<Date> {
-    return this.fileSystem.getFileModifiedTime(this.path)
-  }
-
-  /**
-   * ファイルの作成日時を取得
-   */
-  async createdAt(): Promise<Date> {
-    return this.fileSystem.getFileCreatedTime(this.path)
-  }
-
-  /**
-   * ファイルをアーカイブに移動し、新しい参照を返す
-   */
-  async archive(archiveDirectoryName = "_"): Promise<DocFileMdReference> {
+  async archive(
+    archiveDirectoryName = this.props.config.archiveDirectoryName,
+  ): Promise<DocFileMdReference<T>> {
     const dirPath = this.pathSystem.dirname(this.path)
 
     const fileName = this.pathSystem.basename(this.path)
@@ -230,21 +221,23 @@ export class DocFileMdReference {
       path: archivePath,
       fileSystem: this.fileSystem,
       pathSystem: this.pathSystem,
+      customSchema: this.customSchema,
+      config: this.props.config,
     })
   }
 
   /**
-   * ファイルをアーカイブから復元し、新しい参照を返す
+   * Restore file from archive and return new reference
    */
-  async restore(archiveDirectoryName = "_"): Promise<DocFileMdReference> {
+  async restore(
+    archiveDirectoryName = this.props.config.archiveDirectoryName,
+  ): Promise<DocFileMdReference<T>> {
     const dirPath = this.pathSystem.dirname(this.path)
 
     const parentDirName = this.pathSystem.basename(dirPath)
 
     if (parentDirName !== archiveDirectoryName) {
-      throw new Error(
-        `ファイルはアーカイブディレクトリにありません: ${this.path}`,
-      )
+      throw new Error(`File is not in archive directory: ${this.path}`)
     }
 
     const fileName = this.pathSystem.basename(this.path)
@@ -260,130 +253,238 @@ export class DocFileMdReference {
       path: restorePath,
       fileSystem: this.fileSystem,
       pathSystem: this.pathSystem,
+      customSchema: this.customSchema,
+      config: this.props.config,
     })
   }
 
   /**
-   * スキーマに基づいてリレーションを取得する
+   * Get file size in bytes
    */
-  async relation(key: string): Promise<DocFileMdReference | Error | null> {
+  async size(): Promise<number> {
+    return this.fileSystem.getFileSize(this.path)
+  }
+
+  /**
+   * Get file last modified time
+   */
+  async lastModified(): Promise<Date> {
+    return this.fileSystem.getFileModifiedTime(this.path)
+  }
+
+  /**
+   * Get file creation time
+   */
+  async createdAt(): Promise<Date> {
+    return this.fileSystem.getFileCreatedTime(this.path)
+  }
+
+  directory(): DocDirectoryReference<T> {
+    return new DocDirectoryReference<T>({
+      archiveDirectoryName: this.props.config.archiveDirectoryName,
+      indexFileName: this.props.config.indexFileName,
+      fileSystem: this.fileSystem,
+      path: this.directoryPath,
+      pathSystem: this.pathSystem,
+      customSchema: this.customSchema,
+      config: this.props.config,
+    })
+  }
+
+  /**
+   * Get relation based on schema
+   */
+  async relation<U extends DocCustomSchema = DocCustomSchema>(
+    key: RelationKeys<T>,
+    targetSchema?: U,
+  ): Promise<DocFileMdReference<U> | Error | null> {
     const file = await this.read()
     if (file instanceof Error) {
       return file
     }
 
-    // FrontMatterからリレーション値を取得
-    const relationValue = file.content.frontMatter.relation(key)
+    const relationValue = file.content.meta().field(key as string)
+
     if (relationValue === null) {
       return null
     }
 
-    // 同じディレクトリのindex.mdを取得
-    const indexFile = await this.getDirectoryIndex()
-    if (!indexFile) {
+    const indexRef = await this.directoryIndex()
+
+    if (!indexRef) {
       return null
     }
-
-    const schemaData = indexFile.content.frontMatter.value.schema
-    if (
-      !schemaData ||
-      typeof schemaData !== "object" ||
-      Array.isArray(schemaData)
-    ) {
-      return null
-    }
-
-    const schema = new DocSchemaValue(schemaData as DocSchemaRecord)
-    const field = schema.field(key)
-
-    // リレーションフィールドでない場合はnull
-    if (!field || !("path" in field) || !field.path) {
-      return null
-    }
-
-    // スキーマで定義されたパスとリレーション値を組み合わせる
-    const fullPath = this.pathSystem.join(field.path, `${relationValue}.md`)
-
-    return new DocFileMdReference({
-      path: fullPath,
-      fileSystem: this.fileSystem,
-      pathSystem: this.pathSystem,
-    })
-  }
-
-  /**
-   * 同じディレクトリのindex.mdを取得する
-   */
-  async getDirectoryIndex(): Promise<DocFileMdEntity | null> {
-    const indexPath = this.pathSystem.join(this.directoryPath, "index.md")
-    const indexRef = new DocFileMdReference({
-      path: indexPath,
-      fileSystem: this.fileSystem,
-      pathSystem: this.pathSystem,
-    })
 
     const indexFile = await indexRef.read()
+
     if (indexFile instanceof Error) {
       return null
     }
 
-    return indexFile
+    const schemaValue = indexFile.content.meta().schema()
+
+    const fieldValue =
+      schemaValue.value[key as string as keyof typeof schemaValue.value]
+    if (!fieldValue || fieldValue.type !== "relation") {
+      return null
+    }
+
+    const schemaField = schemaValue.field(
+      key as string as keyof typeof schemaValue.customSchema,
+    )
+    const relationField = schemaField as unknown as { path: string }
+    let resolvedPath = relationField.path
+
+    if (relationField.path.startsWith("..")) {
+      resolvedPath = this.pathSystem.join(
+        this.directoryPath,
+        relationField.path,
+      )
+      resolvedPath = this.pathSystem.normalize(resolvedPath)
+    }
+
+    const fullPath = this.pathSystem.join(resolvedPath, `${relationValue}.md`)
+
+    return new DocFileMdReference<U>({
+      path: fullPath,
+      fileSystem: this.fileSystem,
+      pathSystem: this.pathSystem,
+      customSchema: targetSchema || ({} as U),
+      config: this.props.config,
+    })
   }
 
   /**
-   * 複数のリレーションを取得する
+   * Get index.md in the same directory
    */
-  async relations(key: string): Promise<DocFileMdReference[]> {
-    return this.multiRelation(key)
+  async directoryIndex(): Promise<DocFileIndexReference<T> | null> {
+    const indexPath = this.pathSystem.join(this.directoryPath, "index.md")
+
+    const exists = await this.fileSystem.exists(indexPath)
+
+    if (exists) {
+      return new DocFileIndexReference({
+        path: indexPath,
+        fileSystem: this.fileSystem,
+        pathSystem: this.pathSystem,
+        customSchema: this.customSchema,
+        config: this.props.config,
+      })
+    }
+
+    const archivedIndexPath = this.pathSystem.join(
+      this.directoryPath,
+      "_",
+      "index.md",
+    )
+
+    const archivedExists = await this.fileSystem.exists(archivedIndexPath)
+
+    if (archivedExists) {
+      return new DocFileIndexReference({
+        path: archivedIndexPath,
+        fileSystem: this.fileSystem,
+        pathSystem: this.pathSystem,
+        customSchema: this.customSchema,
+        config: this.props.config,
+      })
+    }
+
+    return null
   }
 
   /**
-   * スキーマに基づいて複数のリレーションを取得する
+   * Get multiple relations based on schema
    */
-  async multiRelation(key: string): Promise<DocFileMdReference[]> {
+  async relations<U extends DocCustomSchema = DocCustomSchema>(
+    key: MultiRelationKeys<T>,
+    customSchema?: U,
+  ): Promise<DocFileMdReference<U>[]> {
     const file = await this.read()
+
     if (file instanceof Error) {
       return []
     }
 
-    // FrontMatterから複数リレーション値を取得
-    const relationValues = file.content.frontMatter.multiRelation(key)
-    if (relationValues.length === 0) {
+    const meta = file.content.meta()
+
+    const schemaField = meta.schemaField(key)
+
+    if (schemaField.type !== "multi-relation") {
       return []
     }
 
-    // 同じディレクトリのindex.mdを取得
-    const indexFile = await this.getDirectoryIndex()
-    if (!indexFile) {
+    const fileNames = meta.multiRelation(key)
+
+    if (fileNames === null) {
       return []
     }
 
-    const schemaData = indexFile.content.frontMatter.value.schema
-    if (
-      !schemaData ||
-      typeof schemaData !== "object" ||
-      Array.isArray(schemaData)
-    ) {
+    const indexRef = await this.directoryIndex()
+
+    if (indexRef === null) {
       return []
     }
 
-    const schema = new DocSchemaValue(schemaData as DocSchemaRecord)
-    const field = schema.field(key)
+    const indexFile = await indexRef.read()
 
-    // リレーションフィールドでない場合は空配列
-    if (!field || !("path" in field) || !field.path) {
+    if (indexFile instanceof Error) {
       return []
     }
 
-    // 各リレーション値に対してDocFileMdReferenceを作成
-    return relationValues.map((relationValue) => {
-      const fullPath = this.pathSystem.join(field.path, `${relationValue}.md`)
+    const indexSchema = indexFile.content.meta().schema()
 
-      return new DocFileMdReference({
+    const indexSchemaField = indexSchema.multiRelation(key)
+
+    return fileNames.map((fileName: string) => {
+      const resolvedPath = indexSchemaField.path
+      const fullPath = this.pathSystem.join(resolvedPath, `${fileName}.md`)
+      return new DocFileMdReference<U>({
         path: fullPath,
         fileSystem: this.fileSystem,
         pathSystem: this.pathSystem,
+        customSchema: customSchema || ({} as U),
+        config: this.props.config,
       })
     })
+  }
+
+  /**
+   * File: Markdown > FrontMatter
+   */
+  async readFrontMatter(): Promise<DocFileMdMetaValue<T> | Error> {
+    const entity = await this.read()
+
+    if (entity instanceof Error) {
+      return entity
+    }
+
+    return entity.content.meta()
+  }
+
+  /**
+   * File: Markdown > FrontMatter
+   */
+  async updateFrontMatter<K extends keyof T>(
+    key: K,
+    value: BaseFieldValueType<ExtractFieldType<T[K]>>,
+  ): Promise<this | Error> {
+    const entity = await this.read()
+
+    if (entity instanceof Error) {
+      return entity
+    }
+
+    const frontMatter = entity.content.meta()
+
+    const draftFrontMatter = frontMatter.withProperty(key, value)
+
+    const draftContent = entity.content.withMeta(draftFrontMatter)
+
+    const draftEntity = entity.withContent(draftContent)
+
+    await this.write(draftEntity)
+
+    return this
   }
 }

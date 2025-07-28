@@ -2,6 +2,7 @@ import { expect, test } from "bun:test"
 import { DocDirectoryReference } from "./doc-directory-reference"
 import type { DocFileSystem } from "./doc-file-system"
 import { DocPathSystem } from "./doc-path-system"
+import { defaultTestConfig } from "./utils"
 
 test("DocDirectoryReference - directoryNames メソッドでサブディレクトリ名を取得できる", async () => {
   const mockFileSystem = {
@@ -24,6 +25,8 @@ test("DocDirectoryReference - directoryNames メソッドでサブディレク�
     archiveDirectoryName: "_",
     fileSystem: mockFileSystem,
     pathSystem,
+    customSchema: {},
+    config: defaultTestConfig,
   })
 
   const dirNames = await dirRef.directoryNames()
@@ -57,6 +60,8 @@ test("DocDirectoryReference - directories メソッドでサブディレクト�
     archiveDirectoryName: "_",
     fileSystem: mockFileSystem,
     pathSystem,
+    customSchema: {},
+    config: defaultTestConfig,
   })
 
   const directories = await dirRef.directories()
@@ -85,6 +90,8 @@ test("DocDirectoryReference - 空のディレクトリでも正常に動作す�
     archiveDirectoryName: "_",
     fileSystem: mockFileSystem,
     pathSystem,
+    customSchema: {},
+    config: defaultTestConfig,
   })
 
   const dirNames = await dirRef.directoryNames()
@@ -106,6 +113,8 @@ test("DocDirectoryReference - directory メソッドで単一のサブディレ�
     archiveDirectoryName: "_",
     fileSystem: mockFileSystem,
     pathSystem,
+    customSchema: {},
+    config: defaultTestConfig,
   })
 
   const subdir = dirRef.directory("guides")
@@ -114,4 +123,51 @@ test("DocDirectoryReference - directory メソッドで単一のサブディレ�
   expect(subdir.relativePath).toBe("docs/guides")
   expect(subdir.indexFileName).toBe("index.md")
   expect(subdir.archiveDirectoryName).toBe("_")
+})
+
+test("DocDirectoryReference - directoryExcludesで指定されたディレクトリが除外される", async () => {
+  const mockFileSystem = {
+    getBasePath: () => "/test",
+    readDirectoryFileNames: async (path: string) => {
+      if (path === "docs") {
+        return ["products", "terms", ".vitepress", "node_modules", "_archive"]
+      }
+      return []
+    },
+    isDirectory: async (path: string) => {
+      return [
+        "docs/products",
+        "docs/terms",
+        "docs/.vitepress",
+        "docs/node_modules",
+        "docs/_archive",
+      ].includes(path)
+    },
+  } as unknown as DocFileSystem
+
+  const pathSystem = new DocPathSystem()
+
+  // .vitepressとnode_modulesを除外する設定
+  const config = {
+    ...defaultTestConfig,
+    directoryExcludes: [".vitepress", "node_modules"],
+  }
+
+  const ref = new DocDirectoryReference({
+    path: "docs",
+    indexFileName: "index.md",
+    archiveDirectoryName: "_archive",
+    fileSystem: mockFileSystem,
+    pathSystem,
+    customSchema: {},
+    config,
+  })
+
+  const directoryNames = await ref.directoryNames()
+
+  // .vitepress、node_modules、_archiveが除外され、productsとtermsのみが残る
+  expect(directoryNames).toEqual(["products", "terms"])
+  expect(directoryNames).not.toContain(".vitepress")
+  expect(directoryNames).not.toContain("node_modules")
+  expect(directoryNames).not.toContain("_archive")
 })

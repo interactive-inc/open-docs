@@ -1,42 +1,39 @@
 import type { DocPathSystem } from "../doc-path-system"
 import { DocFilePathValue } from "./doc-file-path-value"
 
-type DocDirectoryPath = {
+type Value = {
   path: string
   name: string
   fullPath: string
 }
 
 /**
- * ディレクトリパスを表す値オブジェクト
+ * Value object representing a directory path
  */
 export class DocDirectoryPathValue {
-  private readonly pathSystem: DocPathSystem
-
   constructor(
-    private readonly value: DocDirectoryPath,
-    pathSystem: DocPathSystem,
+    private readonly value: Value,
+    private readonly pathSystem: DocPathSystem,
   ) {
-    this.pathSystem = pathSystem
     Object.freeze(this)
   }
 
   /**
-   * 相対ディレクトリパス
+   * Relative directory path
    */
   get path(): string {
     return this.value.path
   }
 
   /**
-   * ディレクトリ名
+   * Directory name
    */
   get name(): string {
     return this.value.name
   }
 
   /**
-   * 親ディレクトリパスを取得
+   * Get parent directory path
    */
   get parent(): DocDirectoryPathValue | null {
     if (this.path === "." || this.path === "") {
@@ -56,66 +53,66 @@ export class DocDirectoryPathValue {
   }
 
   /**
-   * 親ディレクトリパス
+   * Parent directory path
    */
   get parentPath(): string {
     return this.pathSystem.dirname(this.path)
   }
 
   /**
-   * 深さ（ディレクトリの階層数）
+   * Depth (number of directory levels)
    */
   get depth(): number {
     if (this.path === "." || this.path === "") {
       return 0
     }
-    return this.path.split(this.pathSystem.sep).filter(Boolean).length
+    return this.path.split(this.pathSystem.separator).filter(Boolean).length
   }
 
   /**
-   * パスセグメント（ディレクトリの配列）
+   * Path segments (array of directories)
    */
   get segments(): string[] {
-    return this.path.split(this.pathSystem.sep).filter(Boolean)
+    return this.path.split(this.pathSystem.separator).filter(Boolean)
   }
 
   /**
-   * ルートからの相対パス（先頭のスラッシュなし）
+   * Relative path from root (without leading slash)
    */
   get normalizedPath(): string {
     return this.path.replace(/^\/+/, "")
   }
 
   /**
-   * アーカイブディレクトリかどうか（ディレクトリ名が「_」の場合）
+   * Whether this is an archive directory (directory name is "_")
    */
   get isArchived(): boolean {
     return this.name === "_"
   }
 
   /**
-   * 隠しディレクトリかどうか
+   * Whether this is a hidden directory
    */
   get isHidden(): boolean {
     return this.name.startsWith(".")
   }
 
   /**
-   * ルートディレクトリかどうか
+   * Whether this is the root directory
    */
   get isRoot(): boolean {
     return this.path === "." || this.path === ""
   }
 
   /**
-   * 絶対パス
+   * Absolute path
    */
   get fullPath(): string {
     return this.value.fullPath
   }
 
   /**
-   * インデックスファイルのパスを取得
+   * Get index file path
    */
   get indexFile(): DocFilePathValue {
     return DocFilePathValue.fromPathWithSystem(
@@ -126,7 +123,7 @@ export class DocDirectoryPathValue {
   }
 
   /**
-   * ファイルパスを作成
+   * Create file path
    */
   file(fileName: string): DocFilePathValue {
     return DocFilePathValue.fromPathWithSystem(
@@ -137,7 +134,7 @@ export class DocDirectoryPathValue {
   }
 
   /**
-   * サブディレクトリのパスを作成
+   * Create subdirectory path
    */
   subdirectory(dirName: string): DocDirectoryPathValue {
     const subPath = this.pathSystem.join(this.path, dirName)
@@ -152,7 +149,7 @@ export class DocDirectoryPathValue {
   }
 
   /**
-   * 相対パスからインスタンスを生成（DI対応）
+   * Create instance from relative path (DI support)
    */
   static fromPathWithSystem(
     dirPath: string,
@@ -174,21 +171,21 @@ export class DocDirectoryPathValue {
   }
 
   /**
-   * JSON形式で出力
+   * Export as JSON format
    */
-  toJson(): DocDirectoryPath {
+  toJson(): Value {
     return this.value
   }
 
   /**
-   * パスが等しいかどうか
+   * Check if paths are equal
    */
   equals(other: DocDirectoryPathValue): boolean {
     return this.path === other.path
   }
 
   /**
-   * 指定されたディレクトリがこのディレクトリの子孫かどうか
+   * Check if specified directory is a descendant of this directory
    */
   contains(other: DocDirectoryPathValue): boolean {
     const relative = this.pathSystem.relative(this.path, other.path)

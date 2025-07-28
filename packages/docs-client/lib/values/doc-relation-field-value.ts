@@ -1,8 +1,8 @@
-import { zDocRelationField } from "../models"
-import type { DocRelationField } from "../types"
+import { zDocRelationField } from "@/models"
+import type { DocRelationField } from "@/types"
 
 /**
- * リレーションフィールド
+ * Relation field
  */
 export class DocRelationFieldValue {
   constructor(private readonly value: DocRelationField) {
@@ -11,42 +11,42 @@ export class DocRelationFieldValue {
   }
 
   /**
-   * フィールド名を取得
+   * Get field name
    */
   get fieldName() {
     return this.value.fieldName
   }
 
   /**
-   * リレーション先のパスを取得
+   * Get relation target path
    */
   get relationPath() {
     return this.value.filePath
   }
 
   /**
-   * 配列型かどうかを取得
+   * Get whether it's an array type
    */
   get isArray() {
     return this.value.isArray
   }
 
   /**
-   * 単一リレーションかどうかを判定
+   * Check if it's a single relation
    */
   get isSingle() {
     return !this.value.isArray
   }
 
   /**
-   * 複数リレーションかどうかを判定
+   * Check if it's a multiple relation
    */
   get isMultiple() {
     return this.value.isArray
   }
 
   /**
-   * リレーション先のディレクトリ名を取得
+   * Get target directory name
    */
   get targetDirectoryName() {
     const parts = this.value.filePath.split("/")
@@ -54,7 +54,7 @@ export class DocRelationFieldValue {
   }
 
   /**
-   * 完全なリレーションパスを生成
+   * Generate full relation path
    */
   getFullPath(basePath: string): string {
     if (this.value.filePath.startsWith("/")) {
@@ -64,7 +64,7 @@ export class DocRelationFieldValue {
   }
 
   /**
-   * 等価性の判定
+   * Check equality
    */
   equals(other: DocRelationFieldValue): boolean {
     return (
@@ -75,7 +75,7 @@ export class DocRelationFieldValue {
   }
 
   /**
-   * データから生成
+   * Create from data
    */
   static from(data: unknown): DocRelationFieldValue {
     const validated = zDocRelationField.parse(data)
@@ -83,7 +83,7 @@ export class DocRelationFieldValue {
   }
 
   /**
-   * プロパティから生成
+   * Create from properties
    */
   static fromProps(props: {
     fieldName: string
@@ -94,7 +94,7 @@ export class DocRelationFieldValue {
   }
 
   /**
-   * JSON形式に変換
+   * Convert to JSON format
    */
   toJson(): DocRelationField {
     return { ...this.value }

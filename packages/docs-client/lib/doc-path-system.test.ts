@@ -89,5 +89,5 @@ test("DocPathSystem - isAbsolute: 絶対パスかどうか", () => {
 test("DocPathSystem - sep: セパレータ", () => {
   const system = new DocPathSystem()
 
-  expect(system.sep).toBe("/")
+  expect(system.separator).toBe("/")
 })

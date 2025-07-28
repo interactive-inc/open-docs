@@ -1,54 +1,74 @@
-import { zDocFileIndex } from "../models"
-import type { DocFileIndex, DocFilePath } from "../types"
-import { DocFileContentIndexValue } from "../values/doc-file-content-index-value"
+import { zDocFileIndex } from "@/models"
+import type {
+  DocClientConfig,
+  DocCustomSchema,
+  DocFileIndex,
+  DocFilePath,
+} from "@/types"
+import { DocFileIndexContentValue } from "../values/doc-file-index-content-value"
 
 /**
- * ドキュメントのディレクトリ
+ * Document directory entity
  */
-export class DocFileIndexEntity {
-  constructor(readonly value: DocFileIndex) {
+export class DocFileIndexEntity<T extends DocCustomSchema> {
+  constructor(
+    readonly value: DocFileIndex<T>,
+    private readonly customSchema: T,
+    private readonly config: DocClientConfig = {
+      defaultIndexIcon: "📁",
+      indexFileName: "index.md",
+      archiveDirectoryName: "_",
+      defaultDirectoryName: "Directory",
+      indexMetaIncludes: [],
+      directoryExcludes: [".vitepress"],
+    },
+  ) {
     zDocFileIndex.parse(value)
     Object.freeze(this)
   }
 
   /**
-   * コンテンツ
+   * Content
    */
-  get content(): DocFileContentIndexValue {
-    return new DocFileContentIndexValue(this.value.content)
+  get content(): DocFileIndexContentValue<T> {
+    return new DocFileIndexContentValue<T>(
+      this.value.content,
+      this.customSchema,
+      this.config,
+    )
   }
 
   /**
-   * パス情報
+   * Path information
    */
   get path(): DocFilePath {
     return this.value.path
   }
 
   /**
-   * コンテンツを更新
+   * Update content
    */
-  withContent(content: DocFileContentIndexValue): DocFileIndexEntity {
-    return new DocFileIndexEntity({
-      ...this.value,
-      content: content.value,
-    })
+  withContent(content: DocFileIndexContentValue<T>): DocFileIndexEntity<T> {
+    return new DocFileIndexEntity<T>(
+      { ...this.value, content: content.value },
+      this.customSchema,
+    )
   }
 
   /**
-   * パスを更新
+   * Update path
    */
-  withPath(path: DocFilePath): DocFileIndexEntity {
-    return new DocFileIndexEntity({
-      ...this.value,
-      path: path,
-    })
+  withPath(path: DocFilePath): DocFileIndexEntity<T> {
+    return new DocFileIndexEntity<T>(
+      { ...this.value, path: path },
+      this.customSchema,
+    )
   }
 
   /**
-   * indexFileSchemaの形式に変換
+   * Convert to index file schema format
    */
-  toJson(): DocFileIndex {
+  toJson(): DocFileIndex<T> {
     return this.value
   }
 }

@@ -11,7 +11,8 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "esnext",
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "paths": { "@/*": ["./lib/*"] }
   },
-  "include": ["lib/**/*.ts"]
+  "include": ["lib/**/*.ts", "debug/**/*.ts"]
 }
