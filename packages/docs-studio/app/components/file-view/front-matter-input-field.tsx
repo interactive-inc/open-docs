@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { DocRelationFile, DocSchemaField } from "@/lib/types"
+import type { DocFileIndexSchemaField, DocRelationFile } from "@/lib/types"
 import { MultiRelationSelect } from "./multi-relation-select"
 import { SingleRelationSelect } from "./single-relation-select"
 
@@ -17,7 +17,7 @@ type Props = {
   originalValue: unknown
   onValueChange: (key: string, value: string) => void
   onBlur: (key: string, value: string) => void
-  schemaField?: DocSchemaField
+  schemaField?: DocFileIndexSchemaField
   relationOptions?: DocRelationFile[]
 }
 

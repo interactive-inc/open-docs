@@ -81,6 +81,28 @@ export class DocFileIndexMetaValue<T extends DocCustomSchema> {
   }
 
   /**
+   * Return a new instance with an unknown schema
+   * Allows accepting Record<string, unknown> schemas from external sources
+   */
+  withUnknownSchema(
+    draft: Record<string, unknown>,
+  ): DocFileIndexMetaValue<DocCustomSchema> {
+    // Cast the unknown schema to the expected type
+    const typedSchema = draft as DocFileIndexSchema<string>
+
+    return new DocFileIndexMetaValue<DocCustomSchema>(
+      {
+        type: "index-meta" as const,
+        icon: this.value.icon,
+        schema: typedSchema,
+      },
+      {} as DocCustomSchema,
+      this.config,
+      this.additionalProperties,
+    )
+  }
+
+  /**
    * Output in JSON format
    */
   toJson(): DocFileIndexMeta<T> {

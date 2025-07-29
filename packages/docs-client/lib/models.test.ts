@@ -285,13 +285,17 @@ test("zDocFile - ファイル全体の構造", () => {
 test("zDocClientConfig - クライアント設定の構造", () => {
   const validConfig = {
     defaultIndexIcon: "📂",
+    indexFileName: "index.md",
+    archiveDirectoryName: "_",
+    defaultDirectoryName: "Directory",
+    indexMetaIncludes: [],
+    directoryExcludes: [".vitepress"],
   }
 
   expect(() => zDocClientConfig.parse(validConfig)).not.toThrow()
 
-  // 空のオブジェクトでもOK（デフォルト値がある）
-  const parsed = zDocClientConfig.parse({})
-  expect(parsed.defaultIndexIcon).toBe("📃") // デフォルト値は📃
+  // 必須フィールドが足りない場合はエラー
+  expect(() => zDocClientConfig.parse({})).toThrow()
 
   // 型推論のテスト
   type ConfigType = z.infer<typeof zDocClientConfig>

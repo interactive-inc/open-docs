@@ -1,16 +1,17 @@
 import { Card } from "@/components/ui/card"
 import type {
-  DocFileMdFrontMatter,
+  DocFileIndexSchema,
+  DocFileMdMeta,
   DocRelation,
-  DocSchemaRecord,
+  RecordKey,
 } from "@/lib/types"
 import { cn } from "@/lib/utils"
 import { FrontMatterInputField } from "./front-matter-input-field"
 
 type Props = {
-  frontMatter: DocFileMdFrontMatter | null
+  meta: DocFileMdMeta<RecordKey> | null
   onUpdate?: (key: string, value: unknown) => void
-  schema?: DocSchemaRecord
+  schema?: DocFileIndexSchema<string>
   relations?: DocRelation[]
 }
 
@@ -18,7 +19,7 @@ type Props = {
  * Front-matterを編集可能に表示するコンポーネント
  */
 export function EditableFrontMatterView(props: Props) {
-  const frontMatter = props.frontMatter
+  const frontMatter = props.meta
   // front-matterが空の場合は表示しない
   if (!frontMatter || Object.keys(frontMatter).length === 0) {
     return null

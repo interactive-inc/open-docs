@@ -1,6 +1,7 @@
 import { parse, stringify } from "yaml"
 import {
   zDocFileMdMeta,
+  zDocFileMdMetaInput,
   zDocMetaFieldBoolean,
   zDocMetaFieldMultiBoolean,
   zDocMetaFieldMultiNumber,
@@ -13,7 +14,6 @@ import {
 import type {
   BaseFieldValueType,
   DocCustomSchema,
-  DocFileMdMeta,
   DocMetaFieldBoolean,
   DocMetaFieldMultiBoolean,
   DocMetaFieldMultiNumber,
@@ -98,6 +98,34 @@ export class DocFileMdMetaValue<T extends DocCustomSchema> {
     return new DocFileMdMetaValue<T>(
       { ...this.value, [key]: field.value } as SchemaToValueType<T>,
       this.customSchema,
+    )
+  }
+
+  /**
+   * Return a new instance with an unknown schema
+   * Allows accepting Record<string, unknown> schemas from external sources
+   */
+  withUnknownSchema(
+    draft: Record<string, unknown>,
+  ): DocFileMdMetaValue<DocCustomSchema> {
+    // Cast the unknown schema to DocCustomSchema
+    const typedSchema = draft as DocCustomSchema
+
+    // Convert current value to match new schema
+    const newValue = {} as Record<string, unknown>
+
+    // Copy existing values that exist in the new schema
+    for (const key in typedSchema) {
+      if (key in this.value) {
+        const unknownValue = this.value as Record<string, unknown>
+        newValue[key] = unknownValue[key]
+      }
+    }
+
+    // Validate and create new instance with new schema
+    return new DocFileMdMetaValue<DocCustomSchema>(
+      newValue as SchemaToValueType<DocCustomSchema>,
+      typedSchema,
     )
   }
 
@@ -230,7 +258,16 @@ export class DocFileMdMetaValue<T extends DocCustomSchema> {
   ): DocFileMdMetaValue<T> {
     const yamlRecord = parse(yamlText)
 
-    const record = zDocFileMdMeta.parse(yamlRecord) as DocFileMdMeta<keyof T>
+    // Use input schema which transforms undefined to null
+    const record = zDocFileMdMetaInput
+      .transform((meta) => {
+        const result: Record<string, unknown> = {}
+        for (const [key, value] of Object.entries(meta)) {
+          result[key] = value === undefined ? null : value
+        }
+        return zDocFileMdMeta.parse(result)
+      })
+      .parse(yamlRecord)
 
     const schemaFieldKeys = Object.keys(customSchema) as Array<keyof T>
 

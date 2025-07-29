@@ -2,14 +2,14 @@ import { Card } from "@/components/ui/card"
 import { RenderFrontMatterValue } from "./render-front-matter-value"
 
 type Props = {
-  frontMatter: Record<string, string | string[]> | null
+  meta: Record<string, string | string[]> | null
 }
 
 /**
  * Front-matterをより見やすく表示するコンポーネント（表示のみ）
  */
 export function FrontMatterView(props: Props) {
-  const frontMatter = props.frontMatter
+  const frontMatter = props.meta
   // front-matterが空の場合は表示しない
   if (!frontMatter || Object.keys(frontMatter).length === 0) {
     return null

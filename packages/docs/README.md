@@ -2,6 +2,11 @@
 
 技術仕様書、製品資料など、Markdownで記述された資料をリポジトリで管理する際に、それらを効率的に読み書きするためのAPIを提供します。
 
+## パッケージ構成
+
+- `@interactive-inc/docs-client` - ドキュメント操作のクライアントライブラリ
+- `@interactive-inc/docs-server` - サーバー側のドキュメント処理エンジン
+
 ```ts
 import { DocClient, DocFileSystem, DocPathSystem } from "@interactive-inc/docs-client"
 
@@ -12,11 +17,11 @@ const docClient = new DocClient({
   }),
 })
 
-const ref = docClient
-  .directory("products/product-1/features")
-  .file("login.md")
+const directory = docClient.directory("products/product-1/features")
 
-const entity = await ref.read()
+const fileRef = directory.mdFile("login.md")
+
+const entity = await fileRef.read()
 
 if (entity instanceof Error) throw entity
 
@@ -26,7 +31,7 @@ console.log(entity.content.title)
 ## インストール
 
 ```bash
-bun add @interactive-inc/docs
+bun i @interactive-inc/docs
 # または
 npm install @interactive-inc/docs
 ```
@@ -56,20 +61,6 @@ docs/                   # ドキュメントルート（任意の名前）
 
 ## 機能
 
-### アーカイブシステム
-
-ファイルを削除する代わりに、`_`ディレクトリに移動することで論理削除を表現できます。
-
-- `features/login.md` → `features/_/login.md` （アーカイブ）
-- アーカイブされたファイルも読み取り可能
-- 必要に応じて復元可能
-
-```ts
-// ファイルをアーカイブする
-const fileRef = docClient.directory("specs/v1").mdFile("deprecated-api.md")
-await fileRef.archive()
-```
-
 ### メタデータ管理
 
 各Markdownファイルの先頭にYAML形式でメタデータを記述：
@@ -95,7 +86,7 @@ is-done: false
 このように操作できます。
 
 ```ts
-// FrontMatterの読み取り
+// メタデータの読み取り
 const fileRef = docClient.directory("features").mdFile("login.md")
 
 const file = await fileRef.read()
@@ -103,10 +94,10 @@ const file = await fileRef.read()
 if (file instanceof Error) throw file
 
 // "ログイン機能"
-console.log(file.content.frontMatter.title)
+console.log(file.content.title)
 
 // ["authentication", "security"]
-console.log(file.content.frontMatter.features)
+console.log(file.content.meta.features)
 ```
 
 ### ファイル間のリレーション
@@ -160,6 +151,20 @@ for (const tagRef of relatedTags) {
 }
 ```
 
+### アーカイブシステム
+
+ファイルを削除する代わりに、`_`ディレクトリに移動することで論理削除を表現できます。
+
+- `features/login.md` → `features/_/login.md` （アーカイブ）
+- アーカイブされたファイルも読み取り可能
+- 必要に応じて復元可能
+
+```ts
+// ファイルをアーカイブする
+const fileRef = docClient.directory("specs/v1").mdFile("deprecated-api.md")
+await fileRef.archive()
+```
+
 ## 使い方
 
 ### 初期設定
@@ -172,6 +177,14 @@ const docClient = new DocClient({
     basePath: "/path/to/your-repo/docs",
     pathSystem: new DocPathSystem(),
   }),
+  config: {
+    defaultIndexIcon: "📃",
+    indexFileName: "index.md",
+    archiveDirectoryName: "_",
+    defaultDirectoryName: "Directory",
+    indexMetaIncludes: [],
+    directoryExcludes: [".vitepress"],
+  },
 })
 ```
 
@@ -187,18 +200,16 @@ const entity = await fileRef.read()
 if (entity instanceof Error) throw entity
 
 console.log(entity.content.body)
-console.log(entity.content.frontMatter.value)
+console.log(entity.content.meta)
 
 // ファイル作成・更新
-await fileRef.writeContent(`---
-title: 認証API仕様
-version: 2.0.0
----
+const newEntity = await fileRef.create({
+  title: "認証API仕様",
+  version: "2.0.0",
+  body: `# 認証API仕様
 
-# 認証API仕様
-
-POST /api/v2/auth/login
-`)
+POST /api/v2/auth/login`,
+})
 ```
 
 ### FrontMatterの操作
@@ -208,13 +219,12 @@ const entity = await fileRef.read()
 if (entity instanceof Error) throw entity
 
 // メタデータ更新
-const newFrontMatter = new DocFrontMatterMdValue({
-  ...entity.content.frontMatter.value,
+const updatedEntity = entity.withMeta({
+  ...entity.content.meta,
   milestone: "2025.02",
 })
 
-const newContent = entity.content.withFrontMatter(newFrontMatter)
-await fileRef.writeContent(newContent.toText())
+await fileRef.write(updatedEntity)
 ```
 
 ### アーカイブ操作
@@ -225,4 +235,56 @@ const fileRef = docClient
   .directory("specifications/api/v1")
   .mdFile("legacy-endpoints.md")
 await fileRef.archive()
+
+// アーカイブされたファイルも読み取り可能
+const archivedRef = docClient
+  .directory("specifications/api/v1/_")
+  .mdFile("legacy-endpoints.md")
+const archivedEntity = await archivedRef.read()
+```
+
+### ファイルツリーの取得
+
+```ts
+// ディレクトリツリーの取得
+const directoryTree = await docClient.directoryTree("products")
+console.log(directoryTree)
+
+// ファイルツリーの取得（ファイルとディレクトリの両方）
+const fileTree = await docClient.fileTree("products")
+console.log(fileTree)
+```
+
+### カスタムスキーマの使用
+
+型安全なメタデータ操作のためにカスタムスキーマを定義できます：
+
+```ts
+import type { DocCustomSchema } from "@interactive-inc/docs-client"
+
+// スキーマ定義
+type FeatureSchema = DocCustomSchema<{
+  milestone: { type: "text"; required: true }
+  priority: { type: "select-text"; required: true }
+  is_done: { type: "boolean"; required: false }
+  tags: { type: "multi-relation"; required: false }
+}>
+
+// 型安全なファイル操作
+const featureRef = docClient
+  .directory("features")
+  .mdFile<FeatureSchema>("login.md", {
+    milestone: { type: "text", required: true },
+    priority: { type: "select-text", required: true },
+    is_done: { type: "boolean", required: false },
+    tags: { type: "multi-relation", required: false },
+  })
+
+const entity = await featureRef.read()
+if (entity instanceof Error) throw entity
+
+// 型安全なアクセス
+console.log(entity.content.meta.milestone) // string
+console.log(entity.content.meta.priority) // string
+console.log(entity.content.meta.is_done) // boolean | undefined
 ```

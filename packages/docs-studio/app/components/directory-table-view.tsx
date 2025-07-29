@@ -16,10 +16,11 @@ import {
 import { apiClient } from "@/lib/api-client"
 import { normalizePath } from "@/lib/path-utils"
 import type {
+  DocCustomSchema,
   DocFile,
   DocFileMd,
+  DocMetaFieldType,
   DocRelation,
-  DocSchemaFieldType,
 } from "@/lib/types"
 
 /**
@@ -28,12 +29,12 @@ import type {
 type DocTableColumn = {
   key: string
   label: string
-  type: DocSchemaFieldType
+  type: DocMetaFieldType
   path: string
   options: string[] | number[]
 }
 
-function isDocFileMd(file: DocFile): file is DocFileMd {
+function isDocFileMd(file: DocFile): file is DocFileMd<DocCustomSchema> {
   return file.type === "markdown"
 }
 
@@ -291,7 +292,7 @@ export function DirectoryTableView(props: Props) {
                     (rel) => rel.path === column.path,
                   )
 
-                  const cellValue = fileData.content.frontMatter?.[column.key]
+                  const cellValue = fileData.content.meta?.[column.key]
 
                   return (
                     <TableCell key={column.key} className="p-1">

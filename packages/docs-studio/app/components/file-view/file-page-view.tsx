@@ -21,7 +21,7 @@ export function FilePageView(props: Props) {
   const fileData = fileQuery.data
 
   const directorySchemaValue =
-    directoryQuery.data?.indexFile?.content?.frontMatter?.schema
+    directoryQuery.data?.indexFile?.content?.meta?.schema
   const directorySchema = directorySchemaValue || {}
 
   const relations = directoryQuery.data?.relations || []
@@ -92,9 +92,9 @@ export function FilePageView(props: Props) {
           cwd={directoryQuery.data.cwd}
           content={currentContent}
           onChange={onChange}
-          frontMatter={(() => {
-            // frontMatterはcontent内にある
-            const fm = fileData.content.frontMatter || {}
+          meta={(() => {
+            // metaはcontent内にある
+            const fm = fileData.content.meta || {}
             // スキーマやアイコンなどの複雑なオブジェクトを除外し、プリミティブ値のみを返す
             const filtered: Record<
               string,

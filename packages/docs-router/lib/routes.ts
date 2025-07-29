@@ -47,9 +47,7 @@ export function routes(props: Props) {
         basePath: props.basePath,
         pathSystem,
       })
-      const client = new DocClient({
-        fileSystem,
-      })
+      const client = new DocClient({ fileSystem })
       c.set("client", client)
       return next()
     })

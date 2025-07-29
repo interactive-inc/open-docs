@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { apiClient } from "@/lib/api-client"
 import { normalizePath } from "@/lib/path-utils"
-import type { DocFile, DocFileMd } from "@/lib/types"
+import type { DocCustomSchema, DocFile, DocFileMd } from "@/lib/types"
 
-function isDocFileMd(file: DocFile): file is DocFileMd {
-  return "frontMatter" in file && "title" in file
+function isDocFileMd(file: DocFile): file is DocFileMd<DocCustomSchema> {
+  return file.type === "markdown"
 }
 
 type Props = {

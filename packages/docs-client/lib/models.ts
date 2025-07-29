@@ -233,13 +233,21 @@ export const zDocMetaField = z.union([
   zDocMetaFieldMultiSelectNumber,
   zDocMetaFieldMultiRelation,
   z.null(),
-  z.undefined(),
 ])
 
 /**
- * FrontMatter schema
+ * FrontMatter schema (internal use - only nullable)
  */
 export const zDocFileMdMeta = z.record(z.string(), zDocMetaField)
+
+/**
+ * FrontMatter input schema (allows undefined for external APIs)
+ * Transforms undefined to null for internal consistency
+ */
+export const zDocFileMdMetaInput = z.record(
+  z.string(),
+  zDocMetaField.or(z.undefined()),
+)
 
 /**
  * Schema definition
@@ -248,6 +256,14 @@ export const zDocFileMdMeta = z.record(z.string(), zDocMetaField)
 export const zDocFileIndexSchema = z.record(
   z.string(),
   zDocFileIndexSchemaField,
+)
+
+/**
+ * Schema definition input (allows undefined for external APIs)
+ */
+export const zDocFileIndexSchemaInput = z.record(
+  z.string(),
+  zDocFileIndexSchemaField.or(z.undefined()),
 )
 
 export const zDocCustomSchemaFieldText = z.object({
@@ -339,6 +355,15 @@ export const zDocFileIndexMeta = z.object({
 })
 
 /**
+ * FrontMatter input schema for index.md files (allows undefined for external APIs)
+ */
+export const zDocFileIndexMetaInput = z.object({
+  type: z.literal("index-meta"),
+  icon: z.string().nullable().or(z.undefined()),
+  schema: zDocFileIndexSchemaInput,
+})
+
+/**
  * Relation field
  */
 export const zDocRelationField = z.object({
@@ -366,7 +391,7 @@ export const zDocRelation = z.object({
 })
 
 /**
- * Markdown content information (for regular MD files)
+ * Markdown content information (for regular MD files) - internal use
  */
 export const zDocFileMdContent = z.object({
   type: z.literal("markdown-content"),
@@ -374,6 +399,17 @@ export const zDocFileMdContent = z.object({
   title: z.string(),
   description: z.string(),
   meta: zDocFileMdMeta,
+})
+
+/**
+ * Markdown content input (allows undefined in meta) - for external APIs
+ */
+export const zDocFileMdContentInput = z.object({
+  type: z.literal("markdown-content"),
+  body: z.string(),
+  title: z.string(),
+  description: z.string(),
+  meta: zDocFileMdMetaInput,
 })
 
 /**
@@ -409,12 +445,22 @@ export const zDocFileUnknown = z.object({
 })
 
 /**
- * Markdown file (excluding index.md)
+ * Markdown file (excluding index.md) - internal use
  */
 export const zDocFileMd = z.object({
   type: z.literal("markdown"),
   path: zDocFilePath,
   content: zDocFileMdContent,
+  isArchived: z.boolean(),
+})
+
+/**
+ * Markdown file input (allows undefined in meta) - for external APIs
+ */
+export const zDocFileMdInput = z.object({
+  type: z.literal("markdown"),
+  path: zDocFilePath,
+  content: zDocFileMdContentInput,
   isArchived: z.boolean(),
 })
 
@@ -456,20 +502,11 @@ export const zDocTreeNode = z.union([zDocTreeFileNode, zDocTreeDirectoryNode])
 /**
  * DocClient configuration
  */
-export const zDocClientConfig = z
-  .object({
-    defaultIndexIcon: z.string().optional(),
-    indexFileName: z.string().optional(),
-    archiveDirectoryName: z.string().optional(),
-    defaultDirectoryName: z.string().optional(),
-    indexMetaIncludes: z.array(z.string()).optional(),
-    directoryExcludes: z.array(z.string()).optional(),
-  })
-  .transform((data) => ({
-    defaultIndexIcon: data.defaultIndexIcon ?? "📃",
-    indexFileName: data.indexFileName ?? "index.md",
-    archiveDirectoryName: data.archiveDirectoryName ?? "_",
-    defaultDirectoryName: data.defaultDirectoryName ?? "Directory",
-    indexMetaIncludes: data.indexMetaIncludes ?? [],
-    directoryExcludes: data.directoryExcludes ?? [".vitepress"],
-  }))
+export const zDocClientConfig = z.object({
+  defaultIndexIcon: z.string(),
+  indexFileName: z.string(),
+  archiveDirectoryName: z.string(),
+  defaultDirectoryName: z.string(),
+  indexMetaIncludes: z.array(z.string()),
+  directoryExcludes: z.array(z.string()),
+})

@@ -6,18 +6,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { DocFile, DocFileMd, DocRelationFile } from "@/lib/types"
+import type {
+  DocCustomSchema,
+  DocFile,
+  DocFileMd,
+  DocRelationFile,
+  FeatureCustomSchema,
+  PageCustomSchema,
+} from "@/lib/types"
 import { FeatureItem } from "./feature-item"
 
-function isDocFileMd(file: DocFile): file is DocFileMd {
+function _isMarkdownFile<T extends DocCustomSchema>(
+  file: DocFile<T>,
+): file is DocFileMd<T> {
   return file.type === "markdown"
 }
 
 type Priority = "high" | "medium" | "low"
 
 type PageGroup = {
-  page: DocFile
-  features: DocFile[]
+  page: DocFileMd<PageCustomSchema>
+  features: DocFileMd<FeatureCustomSchema>[]
 }
 
 type Props = {
@@ -29,34 +38,32 @@ type Props = {
     field: string,
     value: unknown,
   ) => void
-  allFeatures?: DocFile[]
+  allFeatures?: DocFileMd<FeatureCustomSchema>[]
   onFeatureAdd?: (pagePath: string, featurePath: string) => void
   onFeatureRemove?: (pagePath: string, featurePath: string) => void
 }
 
 export function ProjectPageGroup(props: Props) {
-  const sortedFeatures = props.group.features
-    .filter(isDocFileMd)
-    .sort((a, b) => {
-      const priorityOrder: Record<Priority, number> = {
-        high: 0,
-        medium: 1,
-        low: 2,
-      }
-      const aPriority =
-        ((a.content.frontMatter as Record<string, unknown>)
-          ?.priority as Priority) || "low"
-      const bPriority =
-        ((b.content.frontMatter as Record<string, unknown>)
-          ?.priority as Priority) || "low"
-      return (priorityOrder[aPriority] || 2) - (priorityOrder[bPriority] || 2)
-    })
+  const sortedFeatures = props.group.features.sort((a, b) => {
+    const priorityOrder: Record<Priority, number> = {
+      high: 0,
+      medium: 1,
+      low: 2,
+    }
+    const aPriorityValue = a.content.meta.priority ?? 0
+    const bPriorityValue = b.content.meta.priority ?? 0
+    const aPriority =
+      aPriorityValue === 2 ? "high" : aPriorityValue === 1 ? "medium" : "low"
+    const bPriority =
+      bPriorityValue === 2 ? "high" : bPriorityValue === 1 ? "medium" : "low"
+    return (priorityOrder[aPriority] || 2) - (priorityOrder[bPriority] || 2)
+  })
 
   // このページに関連付けられていない機能を取得
   const linkedFeaturePaths = props.group.features.map((f) => f.path.path)
-  const availableFeatures = (props.allFeatures || [])
-    .filter(isDocFileMd)
-    .filter((feature) => !linkedFeaturePaths.includes(feature.path.path))
+  const availableFeatures = (props.allFeatures || []).filter(
+    (feature) => !linkedFeaturePaths.includes(feature.path.path),
+  )
 
   const handleFeatureAdd = (featureValue: string) => {
     if (featureValue && props.onFeatureAdd) {
@@ -70,17 +77,14 @@ export function ProjectPageGroup(props: Props) {
         {/* 左側: ページ情報 */}
         <div className="space-y-2 lg:w-1/3">
           <h2 className="font-semibold text-lg">
-            {isDocFileMd(props.group.page)
-              ? props.group.page.content.title || props.group.page.path.name
-              : props.group.page.path.name}
+            {props.group.page.content.title || props.group.page.path.name}
           </h2>
           <div className="text-xs opacity-50">{props.group.page.path.name}</div>
-          {isDocFileMd(props.group.page) &&
-            props.group.page.content.description && (
-              <p className="text-sm opacity-50">
-                {props.group.page.content.description}
-              </p>
-            )}
+          {props.group.page.content.description && (
+            <p className="text-sm opacity-50">
+              {props.group.page.content.description}
+            </p>
+          )}
         </div>
         {/* 右側: 関連機能一覧 */}
         <div className="flex-1">

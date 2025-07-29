@@ -10,8 +10,8 @@
     "rootDir": "lib",
     "skipLibCheck": true,
     "strict": true,
-    "target": "esnext"
+    "target": "esnext",
+    "paths": { "@/*": ["./lib/*"] }
   },
-  "include": ["lib/**/*.ts"],
-  "references": [{ "path": "../docs-client" }]
+  "include": ["lib/**/*.ts"]
 }

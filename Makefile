@@ -1,5 +1,17 @@
 .PHONY: deploy deploy-client deploy-studio deploy-router check test
 
+check-client:
+	bun run --cwd packages/docs-client check
+	bun test
+
+check-router:
+	bun run --cwd packages/docs-router check
+	bun test
+
+check-studio:
+	bun run --cwd packages/docs-studio check
+	bun test
+
 # Deploy docs package
 deploy:
 	bun biome check . --fix --unsafe
@@ -36,3 +48,23 @@ check:
 	bun --cwd packages/docs-router check
 	bun --cwd packages/docs-studio check
 	bun test
+
+build:
+	bun run --cwd packages/docs build
+	bun run --cwd packages/docs-client build
+	bun run --cwd packages/docs-router build
+	bun run --cwd packages/docs-studio build
+
+build-client:
+	bun run --cwd packages/docs-client build
+
+build-router:
+	bun run --cwd packages/docs-router build
+
+install:
+	rm -rf packages/docs/node_modules
+	rm -rf packages/docs-client/node_modules
+	rm -rf packages/docs-router/node_modules
+	rm -rf packages/docs-studio/node_modules
+	bun i --cwd packages/docs-router @interactive-inc/docs-client@latest
+	bun i

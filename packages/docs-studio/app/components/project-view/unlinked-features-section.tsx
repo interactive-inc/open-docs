@@ -1,16 +1,24 @@
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
-import type { DocFile, DocFileMd, DocRelationFile } from "@/lib/types"
+import type {
+  DocCustomSchema,
+  DocFile,
+  DocFileMd,
+  DocRelationFile,
+  FeatureCustomSchema,
+} from "@/lib/types"
 import { FeatureItem } from "./feature-item"
 
-function isDocFileMd(file: DocFile): file is DocFileMd {
+function _isMarkdownFile<T extends DocCustomSchema>(
+  file: DocFile<T>,
+): file is DocFileMd<T> {
   return file.type === "markdown"
 }
 
 type Priority = "high" | "medium" | "low"
 
 type Props = {
-  unlinkedFeatures: DocFile[]
+  unlinkedFeatures: DocFileMd<FeatureCustomSchema>[]
   milestoneOptions?: DocRelationFile[]
   onMilestoneUpdate?: (featurePath: string, milestone: string) => void
   onPropertyUpdate?: (
@@ -25,22 +33,20 @@ export function UnlinkedFeaturesSection(props: Props) {
     return null
   }
 
-  const sortedFeatures = props.unlinkedFeatures
-    .filter(isDocFileMd)
-    .sort((a, b) => {
-      const priorityOrder: Record<Priority, number> = {
-        high: 0,
-        medium: 1,
-        low: 2,
-      }
-      const aPriority =
-        ((a.content.frontMatter as Record<string, unknown>)
-          ?.priority as Priority) || "low"
-      const bPriority =
-        ((b.content.frontMatter as Record<string, unknown>)
-          ?.priority as Priority) || "low"
-      return (priorityOrder[aPriority] || 2) - (priorityOrder[bPriority] || 2)
-    })
+  const sortedFeatures = props.unlinkedFeatures.sort((a, b) => {
+    const priorityOrder: Record<Priority, number> = {
+      high: 0,
+      medium: 1,
+      low: 2,
+    }
+    const aPriorityValue = a.content.meta.priority ?? 0
+    const bPriorityValue = b.content.meta.priority ?? 0
+    const aPriority =
+      aPriorityValue === 2 ? "high" : aPriorityValue === 1 ? "medium" : "low"
+    const bPriority =
+      bPriorityValue === 2 ? "high" : bPriorityValue === 1 ? "medium" : "low"
+    return (priorityOrder[aPriority] || 2) - (priorityOrder[bPriority] || 2)
+  })
 
   return (
     <Card className="w-full p-2">

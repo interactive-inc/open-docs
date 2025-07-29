@@ -1,18 +1,6 @@
 import type { z } from "zod"
 import type {
   zDocClientConfig,
-  zDocCustomSchemaField,
-  zDocCustomSchemaFieldBoolean,
-  zDocCustomSchemaFieldMultiNumber,
-  zDocCustomSchemaFieldMultiRelation,
-  zDocCustomSchemaFieldMultiSelectNumber,
-  zDocCustomSchemaFieldMultiSelectText,
-  zDocCustomSchemaFieldMultiText,
-  zDocCustomSchemaFieldNumber,
-  zDocCustomSchemaFieldRelation,
-  zDocCustomSchemaFieldSelectNumber,
-  zDocCustomSchemaFieldSelectText,
-  zDocCustomSchemaFieldText,
   zDocFileIndexSchemaField,
   zDocFilePath,
   zDocFileUnknown,
@@ -183,47 +171,60 @@ export type DocMetaFieldTypeRelation = z.infer<typeof zDocMetaFieldTypeRelation>
  */
 export type DocMetaFieldType = z.infer<typeof zDocMetaFieldType>
 
-export type DocCustomSchemaFieldText = z.infer<typeof zDocCustomSchemaFieldText>
+export type DocCustomSchemaFieldText = {
+  type: "text"
+  required: boolean
+}
 
-export type DocCustomSchemaFieldNumber = z.infer<
-  typeof zDocCustomSchemaFieldNumber
->
+export type DocCustomSchemaFieldNumber = {
+  type: "number"
+  required: boolean
+}
 
-export type DocCustomSchemaFieldBoolean = z.infer<
-  typeof zDocCustomSchemaFieldBoolean
->
+export type DocCustomSchemaFieldBoolean = {
+  type: "boolean"
+  required: boolean
+}
 
-export type DocCustomSchemaFieldRelation = z.infer<
-  typeof zDocCustomSchemaFieldRelation
->
+export type DocCustomSchemaFieldRelation = {
+  type: "relation"
+  required: boolean
+}
 
-export type DocCustomSchemaFieldSelectText = z.infer<
-  typeof zDocCustomSchemaFieldSelectText
->
+export type DocCustomSchemaFieldSelectText = {
+  type: "select-text"
+  required: boolean
+}
 
-export type DocCustomSchemaFieldSelectNumber = z.infer<
-  typeof zDocCustomSchemaFieldSelectNumber
->
+export type DocCustomSchemaFieldSelectNumber = {
+  type: "select-number"
+  required: boolean
+}
 
-export type DocCustomSchemaFieldMultiText = z.infer<
-  typeof zDocCustomSchemaFieldMultiText
->
+export type DocCustomSchemaFieldMultiText = {
+  type: "multi-text"
+  required: boolean
+}
 
-export type DocCustomSchemaFieldMultiNumber = z.infer<
-  typeof zDocCustomSchemaFieldMultiNumber
->
+export type DocCustomSchemaFieldMultiNumber = {
+  type: "multi-number"
+  required: boolean
+}
 
-export type DocCustomSchemaFieldMultiRelation = z.infer<
-  typeof zDocCustomSchemaFieldMultiRelation
->
+export type DocCustomSchemaFieldMultiRelation = {
+  type: "multi-relation"
+  required: boolean
+}
 
-export type DocCustomSchemaFieldMultiSelectText = z.infer<
-  typeof zDocCustomSchemaFieldMultiSelectText
->
+export type DocCustomSchemaFieldMultiSelectText = {
+  type: "multi-select-text"
+  required: boolean
+}
 
-export type DocCustomSchemaFieldMultiSelectNumber = z.infer<
-  typeof zDocCustomSchemaFieldMultiSelectNumber
->
+export type DocCustomSchemaFieldMultiSelectNumber = {
+  type: "multi-select-number"
+  required: boolean
+}
 
 /**
  * Schema field type
@@ -242,7 +243,34 @@ export type DocFileIndexSchema<T extends RecordKey> = Record<
  * Schema field to override
  * ex: { xxx: { type: "text", required: true } }
  */
-export type DocCustomSchemaField = z.infer<typeof zDocCustomSchemaField>
+export type DocCustomSchemaField =
+  | DocCustomSchemaFieldText
+  | DocCustomSchemaFieldNumber
+  | DocCustomSchemaFieldBoolean
+  | DocCustomSchemaFieldRelation
+  | DocCustomSchemaFieldSelectText
+  | DocCustomSchemaFieldSelectNumber
+  | DocCustomSchemaFieldMultiText
+  | DocCustomSchemaFieldMultiNumber
+  | DocCustomSchemaFieldMultiRelation
+  | DocCustomSchemaFieldMultiSelectText
+  | DocCustomSchemaFieldMultiSelectNumber
+
+/**
+ * Type literal for field types
+ */
+export type DocFieldTypeLiteral =
+  | "text"
+  | "number"
+  | "boolean"
+  | "relation"
+  | "multi-text"
+  | "multi-number"
+  | "multi-relation"
+  | "select-text"
+  | "select-number"
+  | "multi-select-text"
+  | "multi-select-number"
 
 /**
  * Minimal schema definition type
@@ -290,7 +318,7 @@ export type DocTreeNode = DocTreeFileNode | DocTreeDirectoryNode
 /**
  * Index file type
  */
-export type DocFileIndex<T extends DocCustomSchema> = {
+export type DocFileIndex<T extends DocCustomSchema = DocCustomSchema> = {
   type: "index"
   path: DocFilePath
   isArchived: boolean
@@ -338,7 +366,7 @@ export type DocFileUnknown = z.infer<typeof zDocFileUnknown>
 /**
  * File union type (index.md, regular md, other)
  */
-export type DocFile<T extends DocCustomSchema> =
+export type DocFile<T extends DocCustomSchema = DocCustomSchema> =
   | DocFileIndex<T>
   | DocFileMd<T>
   | DocFileUnknown
@@ -346,7 +374,7 @@ export type DocFile<T extends DocCustomSchema> =
 /**
  * Directory FrontMatter type
  */
-export type DocFileIndexMeta<T extends DocCustomSchema> = {
+export type DocFileIndexMeta<T extends DocCustomSchema = DocCustomSchema> = {
   type: "index-meta"
   icon: string | null
   schema: DocFileIndexSchema<keyof T>
@@ -375,7 +403,7 @@ export type DocFilePath = z.infer<typeof zDocFilePath>
 /**
  * Markdown content information type
  */
-export type DocFileMdContent<T extends DocCustomSchema> = {
+export type DocFileMdContent<T extends DocCustomSchema = DocCustomSchema> = {
   type: "markdown-content"
   body: string
   title: string
@@ -386,7 +414,7 @@ export type DocFileMdContent<T extends DocCustomSchema> = {
 /**
  * Index file content information type
  */
-export type DocFileIndexContent<T extends DocCustomSchema> = {
+export type DocFileIndexContent<T extends DocCustomSchema = DocCustomSchema> = {
   type: "markdown-index"
   body: string
   title: string
@@ -471,7 +499,9 @@ export type SchemaToValueType<T extends DocCustomSchema> =
   // Required fields
   {
     [K in RequiredKeys<T>]: BaseFieldValueType<ExtractFieldType<T[K]>>
-  } & { [K in OptionalKeys<T>]?: BaseFieldValueType<ExtractFieldType<T[K]>> } // Optional fields
+  } & {
+    [K in OptionalKeys<T>]?: BaseFieldValueType<ExtractFieldType<T[K]>> | null
+  } // Optional fields
 
 /**
  * Helper type for type-safe property access
@@ -481,7 +511,7 @@ export type GetValueType<
   K extends keyof T,
 > = K extends RequiredKeys<T>
   ? BaseFieldValueType<ExtractFieldType<T[K]>>
-  : BaseFieldValueType<ExtractFieldType<T[K]>> | undefined
+  : BaseFieldValueType<ExtractFieldType<T[K]>> | undefined | null
 
 /**
  * Type definitions for DocFileIndexSchema
@@ -524,3 +554,8 @@ export type GetIndexFieldValueType<
                         ? DocSchemaFieldMultiSelectNumberValue<K>
                         : never
   : never
+
+/**
+ * Infers DocFileMd type from the result of defineSchema
+ */
+export type InferDocFileMd<T> = T extends DocCustomSchema ? DocFileMd<T> : never

@@ -3,7 +3,16 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { useFilePropertiesMutation } from "@/hooks/use-file-properties-mutation"
 import { apiClient } from "@/lib/api-client"
-import type { DocFile, DocFileMd, DocRelationFile } from "@/lib/types"
+import type {
+  DocCustomSchema,
+  DocFile,
+  DocFileMd,
+  DocRelationFile,
+  FeatureCustomSchema,
+  FeatureFile,
+  PageCustomSchema,
+  PageFile,
+} from "@/lib/types"
 import { ProjectPageGroup } from "./project-page-group"
 import { UnlinkedFeaturesSection } from "./unlinked-features-section"
 
@@ -12,8 +21,8 @@ type Props = {
 }
 
 type PageGroup = {
-  page: DocFile
-  features: DocFile[]
+  page: DocFileMd<PageCustomSchema>
+  features: DocFileMd<FeatureCustomSchema>[]
 }
 
 const directoryEndpoint = apiClient.api.directories[":path{.+}"]
@@ -43,9 +52,9 @@ export function ProjectView(props: Props) {
     },
   })
 
-  const pages: DocFile[] = pagesQuery.data.files || []
+  const pages = (pagesQuery.data.files || []) as PageFile[]
 
-  const features: DocFile[] = featuresQuery.data.files || []
+  const features = (featuresQuery.data.files || []) as FeatureFile[]
 
   const milestoneRelation = featuresQuery.data.relations?.find((rel) => {
     return rel.path === `${props.project}/milestones`
@@ -88,15 +97,13 @@ export function ProjectView(props: Props) {
 
   const handleFeatureAdd = async (pagePath: string, featurePath: string) => {
     // ページのfeaturesフィールドに新しい機能を追加
-    const page = pages.find((p: DocFile) => p.path.path === pagePath)
-    if (!page) return
+    const page = pages.find((p) => p.path.path === pagePath)
+    if (!page || !isMarkdownFile(page)) return
 
-    const currentFeatures =
-      (page.type === "markdown"
-        ? ((page.content.frontMatter as Record<string, unknown>)
-            ?.features as string[])
-        : []) || []
-    const updatedFeatures = [...currentFeatures, featurePath]
+    const currentFeatures = page.content.meta.features || []
+    const updatedFeatures = Array.isArray(currentFeatures)
+      ? [...currentFeatures, featurePath]
+      : [featurePath]
 
     await updatePropertiesMutation.mutateAsync({
       path: pagePath,
@@ -110,17 +117,15 @@ export function ProjectView(props: Props) {
 
   const handleFeatureRemove = async (pagePath: string, featurePath: string) => {
     try {
-      const page = pages.find((p: DocFile) => p.path.path === pagePath)
-      if (!page) return
+      const page = pages.find((p) => p.path.path === pagePath)
+      if (!page || !isMarkdownFile(page)) return
 
-      const currentFeatures =
-        (page.type === "markdown"
-          ? ((page.content.frontMatter as Record<string, unknown>)
-              ?.features as string[])
-          : []) || []
+      const currentFeatures = page.content.meta.features || []
 
       // フィーチャーを削除
-      const updatedFeatures = currentFeatures.filter((f) => f !== featurePath)
+      const updatedFeatures = Array.isArray(currentFeatures)
+        ? currentFeatures.filter((f) => f !== featurePath)
+        : []
 
       await updatePropertiesMutation.mutateAsync({
         path: pagePath,
@@ -135,39 +140,58 @@ export function ProjectView(props: Props) {
   }
 
   // フィルタリング関数
-  const filterFeaturesByMilestone = (features: DocFile[]) => {
-    if (!currentMilestone) return features
-    return features.filter((feature) => {
-      if (feature.type !== "markdown") return false
-      const milestone = (feature.content.frontMatter as Record<string, unknown>)
-        ?.milestone as string
-      return milestone === currentMilestone
-    })
+  const filterFeaturesByMilestone = (
+    features: FeatureFile[],
+  ): DocFileMd<FeatureCustomSchema>[] => {
+    if (!currentMilestone) {
+      return features.filter(
+        (feature): feature is DocFileMd<FeatureCustomSchema> =>
+          isMarkdownFile(feature),
+      )
+    }
+    return features
+      .filter((feature): feature is DocFileMd<FeatureCustomSchema> =>
+        isMarkdownFile(feature),
+      )
+      .filter((feature) => {
+        const milestone = feature.content.meta.milestone ?? ""
+        return milestone === currentMilestone
+      })
   }
 
-  function isDocFileMdWithFeatures(file: DocFile): file is DocFileMd {
+  function isMarkdownFile<T extends DocCustomSchema>(
+    file: DocFile<T>,
+  ): file is DocFileMd<T> {
     return file.type === "markdown"
+  }
+
+  function _hasFeaturesMeta<T extends DocFile<DocCustomSchema>>(
+    file: T,
+  ): file is Extract<T, { type: "markdown" }> & {
+    content: { meta: { features?: unknown } }
+  } {
+    return (
+      file.type === "markdown" &&
+      "meta" in file.content &&
+      "features" in file.content.meta
+    )
   }
 
   // ページと関連機能をグループ化
   const pageGroups: PageGroup[] = pages
-    .filter(isDocFileMdWithFeatures)
-    .map((page: DocFileMd) => {
-      const pageFeatures = isDocFileMdWithFeatures(page)
-        ? ((page.content.frontMatter as Record<string, unknown>)
-            ?.features as string[]) || []
-        : []
-      const relatedFeatures = features.filter((feature: DocFile) => {
-        return pageFeatures.includes(feature.path.path)
+    .filter((page): page is DocFileMd<PageCustomSchema> => isMarkdownFile(page))
+    .map((page) => {
+      const pageFeatures = page.content.meta.features || []
+      const relatedFeatures = features.filter((feature) => {
+        if (!Array.isArray(pageFeatures)) return false
+        return (pageFeatures as string[]).includes(feature.path.path)
       })
 
       // フィルタリング適用
-      const filteredFeatures = filterFeaturesByMilestone(
-        relatedFeatures,
-      ).filter((feature): feature is DocFileMd => feature.type === "markdown")
+      const filteredFeatures = filterFeaturesByMilestone(relatedFeatures)
 
       return {
-        page,
+        page: page,
         features: filteredFeatures,
       }
     })
@@ -179,7 +203,7 @@ export function ProjectView(props: Props) {
 
   const unlinkedFeatures = filterFeaturesByMilestone(
     features.filter(
-      (feature: DocFile) => !allLinkedFeatures.includes(feature.path.path),
+      (feature) => !allLinkedFeatures.includes(feature.path.path),
     ),
   )
 
@@ -217,16 +241,15 @@ export function ProjectView(props: Props) {
             milestoneOptions={milestoneOptions}
             onMilestoneUpdate={handleMilestoneUpdate}
             onPropertyUpdate={handlePropertyUpdate}
-            allFeatures={features}
+            allFeatures={features.filter(
+              (f): f is DocFileMd<FeatureCustomSchema> => isMarkdownFile(f),
+            )}
             onFeatureAdd={handleFeatureAdd}
             onFeatureRemove={handleFeatureRemove}
           />
         ))}
         <UnlinkedFeaturesSection
-          unlinkedFeatures={unlinkedFeatures.filter(
-            (feature): feature is DocFileMd =>
-              "frontMatter" in feature && "title" in feature,
-          )}
+          unlinkedFeatures={unlinkedFeatures}
           milestoneOptions={milestoneOptions}
           onMilestoneUpdate={handleMilestoneUpdate}
           onPropertyUpdate={handlePropertyUpdate}

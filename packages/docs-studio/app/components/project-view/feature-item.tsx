@@ -1,17 +1,17 @@
 import { CheckCircle, X } from "lucide-react"
 import { SingleRelationSelect } from "@/components/file-view/single-relation-select"
 import { Button } from "@/components/ui/button"
-import type { DocFile, DocFileMd, DocRelationFile } from "@/lib/types"
+import type {
+  DocFileMd,
+  DocRelationFile,
+  FeatureCustomSchema,
+} from "@/lib/types"
 import { cn } from "@/lib/utils"
-
-function isDocFileMd(file: DocFile): file is DocFileMd {
-  return file.type === "markdown"
-}
 
 type Priority = "high" | "medium" | "low"
 
 type Props = {
-  feature: DocFile
+  feature: DocFileMd<FeatureCustomSchema>
   milestoneOptions?: DocRelationFile[]
   onMilestoneUpdate?: (featurePath: string, milestone: string) => void
   onPropertyUpdate?: (
@@ -23,23 +23,16 @@ type Props = {
 }
 
 export function FeatureItem(props: Props) {
-  if (!isDocFileMd(props.feature)) {
-    return null
-  }
+  const meta = props.feature.content.meta
 
-  const frontMatter = props.feature.content.frontMatter as Record<
-    string,
-    unknown
-  >
+  const isDone = meta["is-done"] === true
 
-  const isDone = (frontMatter?.["is-done"] as boolean) === true
-
-  const priorityNumber = (frontMatter?.priority as number) || 0
+  const priorityNumber = meta.priority ?? 0
 
   const priority =
     priorityNumber === 2 ? "high" : priorityNumber === 1 ? "medium" : "low"
 
-  const milestone = frontMatter?.milestone as string
+  const milestone = meta.milestone ?? ""
 
   const getCurrentValue = () => {
     const matchingOption = props.milestoneOptions?.find(
@@ -66,7 +59,7 @@ export function FeatureItem(props: Props) {
   }
 
   const handlePriorityClick = () => {
-    const currentValue = (frontMatter?.priority as number) || 0
+    const currentValue = typeof meta.priority === "number" ? meta.priority : 0
     const nextValue = (currentValue + 1) % 3
     props.onPropertyUpdate?.(props.feature.path.path, "priority", nextValue)
   }

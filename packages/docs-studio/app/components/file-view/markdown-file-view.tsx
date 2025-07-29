@@ -5,9 +5,10 @@ import { EditableFrontMatterView } from "@/components/file-view/editable-front-m
 import { FileHeader } from "@/components/file-view/file-header"
 import { Card } from "@/components/ui/card"
 import type {
-  DocFileMdFrontMatter,
+  DocFileIndexSchema,
+  DocFileMdMeta,
   DocRelation,
-  DocSchemaRecord,
+  RecordKey,
 } from "@/lib/types"
 
 import "github-markdown-css"
@@ -21,16 +22,16 @@ type Props = {
   cwd: string
   content: string
   onChange(content: string): void
-  frontMatter: DocFileMdFrontMatter
+  meta: DocFileMdMeta<RecordKey>
   onFrontMatterUpdate: (key: string, value: unknown) => void
   onReload: () => void
   isLoading: boolean
-  schema?: DocSchemaRecord
+  schema?: DocFileIndexSchema<string>
   relations?: DocRelation[]
 }
 
 export function MarkdownFileView(props: Props): ReactNode {
-  const frontMatter = props.frontMatter
+  const frontMatter = props.meta
 
   const hasFrontMatter =
     frontMatter !== null && Object.keys(frontMatter || {}).length > 0
@@ -57,7 +58,7 @@ export function MarkdownFileView(props: Props): ReactNode {
       />
       {hasFrontMatter && (
         <EditableFrontMatterView
-          frontMatter={frontMatter}
+          meta={frontMatter}
           onUpdate={props.onFrontMatterUpdate}
           schema={props.schema}
           relations={props.relations}

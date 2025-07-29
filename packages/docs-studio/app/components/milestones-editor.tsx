@@ -1,7 +1,13 @@
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { Card } from "@/components/ui/card"
 import { apiClient } from "@/lib/api-client"
-import type { DocFile, DocFileMd } from "@/lib/types"
+import type {
+  DocCustomSchema,
+  DocFile,
+  DocFileMd,
+  FeatureFile,
+  FeatureFileMd,
+} from "@/lib/types"
 
 type Props = {
   project: string
@@ -34,7 +40,11 @@ export function MilestonesEditor(props: Props) {
     },
   })
 
-  function isDocFileMd(file: DocFile): file is DocFileMd {
+  function isDocFileMd(file: DocFile): file is DocFileMd<DocCustomSchema> {
+    return file.type === "markdown"
+  }
+
+  function isFeatureFileMd(file: DocFile): file is FeatureFileMd {
     return file.type === "markdown"
   }
 
@@ -42,29 +52,27 @@ export function MilestonesEditor(props: Props) {
     content: {
       title: string
       description: string
-      frontMatter: Record<string, unknown>
+      meta: Record<string, unknown>
     }
   } {
     return (
       typeof file.content === "object" &&
       file.content !== null &&
-      "frontMatter" in file.content
+      "meta" in file.content
     )
   }
 
-  const milestones = (milestonesData.files || []).filter(isDocFileMd)
-  const features = (featuresData.files || []).filter(isDocFileMd)
+  const milestones = (milestonesData.files || []).filter((file) =>
+    isDocFileMd(file as DocFile),
+  )
+  const features = (featuresData.files || [])
+    .map((file) => file as FeatureFile)
+    .filter(isFeatureFileMd)
 
   function getFeaturesByMilestone(milestoneId: string) {
     return features.filter((feature) => {
-      if (!hasMarkdownContent(feature)) return false
-      const frontMatter = feature.content.frontMatter
-      return (
-        typeof frontMatter === "object" &&
-        frontMatter !== null &&
-        "milestone" in frontMatter &&
-        frontMatter.milestone === milestoneId
-      )
+      const milestone = feature.content.meta.milestone ?? ""
+      return milestone === milestoneId
     })
   }
 
@@ -91,14 +99,18 @@ export function MilestonesEditor(props: Props) {
                 {milestoneFeatures.map((feature) => (
                   <div key={feature.path.name} className="rounded border p-2">
                     <h3 className="font-medium">
-                      {hasMarkdownContent(feature)
-                        ? feature.content.title || feature.path.name
-                        : feature.path.name}
+                      {(feature.content &&
+                      typeof feature.content === "object" &&
+                      "title" in feature.content
+                        ? feature.content.title
+                        : null) || feature.path.name}
                     </h3>
                     <p className="text-muted-foreground text-sm">
-                      {hasMarkdownContent(feature)
+                      {(feature.content &&
+                      typeof feature.content === "object" &&
+                      "description" in feature.content
                         ? feature.content.description
-                        : ""}
+                        : null) || ""}
                     </p>
                   </div>
                 ))}

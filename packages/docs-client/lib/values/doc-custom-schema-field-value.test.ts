@@ -135,7 +135,8 @@ test("DocCustomSchemaFieldValue - 複数値フィールドの作成と検証", (
 
   // 無効な値
   expect(multiTextField.validate("tag1,tag2")).toEqual([]) // 文字列はエラーになるのでデフォルト値
-  expect(multiTextField.validate(null)).toEqual([]) // nullはエラーになるのでデフォルト値
+  expect(multiTextField.validate(null)).toEqual([]) // nullはエラーになるのでデフォルト値（空配列）
+  expect(multiTextField.validate(undefined)).toEqual([]) // undefinedはエラーになるのでデフォルト値
 
   const multiNumberField = new DocCustomSchemaFieldValue({
     type: "multi-number",

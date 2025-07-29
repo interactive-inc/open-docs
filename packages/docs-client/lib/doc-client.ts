@@ -6,6 +6,7 @@ import { DocFileTreeSystem } from "./doc-file-tree-system"
 import { DocFileUnknownReference } from "./doc-file-unknown-reference"
 import { DocMarkdownSystem } from "./doc-markdown-system"
 import { DocPathSystem } from "./doc-path-system"
+import { zDocClientConfig } from "./models"
 import type {
   DocClientConfig,
   DocCustomSchema,
@@ -35,7 +36,9 @@ export class DocClient {
     this.fileSystem = props.fileSystem
     this.pathSystem = props.pathSystem ?? new DocPathSystem()
     this.markdownSystem = props.markdownSystem ?? new DocMarkdownSystem()
-    this.config = props.config ?? {
+
+    // Apply defaults to config
+    const defaultConfig: DocClientConfig = {
       defaultIndexIcon: "📃",
       indexFileName: "index.md",
       archiveDirectoryName: "_",
@@ -43,6 +46,10 @@ export class DocClient {
       indexMetaIncludes: [],
       directoryExcludes: [".vitepress"],
     }
+
+    this.config = props.config
+      ? zDocClientConfig.parse(props.config)
+      : defaultConfig
 
     this.fileTreeSystem =
       props.fileTreeSystem ??

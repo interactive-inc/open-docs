@@ -9,10 +9,11 @@ import { VscodeButton } from "@/components/vscode-button"
 import { useDirectoryQuery } from "@/hooks/use-directory-query"
 import { apiClient } from "@/lib/api-client"
 import type {
+  DocCustomSchema,
   DocFile,
   DocFileMd,
   DocFileUnknown,
-  DocSchemaFieldType,
+  DocMetaFieldType,
 } from "@/lib/types"
 
 /**
@@ -21,12 +22,12 @@ import type {
 type DocTableColumn = {
   key: string
   label: string
-  type: DocSchemaFieldType
+  type: DocMetaFieldType
   path: string
   options: string[] | number[]
 }
 
-function isDocFileMd(file: DocFile): file is DocFileMd {
+function isDocFileMd(file: DocFile): file is DocFileMd<DocCustomSchema> {
   return file.type === "markdown"
 }
 
@@ -34,7 +35,9 @@ function isDocFileUnknown(file: DocFile): file is DocFileUnknown {
   return file.type === "unknown"
 }
 
-function hasIsArchived(file: DocFile): file is DocFileMd | DocFileUnknown {
+function hasIsArchived(
+  file: DocFile,
+): file is DocFileMd<DocCustomSchema> | DocFileUnknown {
   return file.type === "markdown" || file.type === "unknown"
 }
 
@@ -51,24 +54,26 @@ export function DirectoryPageView(props: Props) {
   const [showArchived, setShowArchived] = useState(false)
 
   // ファイルをタイプ別にフィルタリング
-  const allMdFiles = directoryData.files.filter((file: DocFile) =>
-    isDocFileMd(file),
+  const allMdFiles = directoryData.files.filter((file) =>
+    isDocFileMd(file as DocFile),
   )
 
-  const activeMdFiles = allMdFiles.filter((file: DocFile) => {
-    return !hasIsArchived(file) || !file.isArchived
+  const activeMdFiles = allMdFiles.filter((file) => {
+    return !hasIsArchived(file as DocFile) || !file.isArchived
   })
 
-  const archivedMdFiles = allMdFiles.filter((file: DocFile) => {
-    return hasIsArchived(file) && file.isArchived
+  const archivedMdFiles = allMdFiles.filter((file) => {
+    return hasIsArchived(file as DocFile) && file.isArchived
   })
 
   // 表示するファイルを決定
   const mdFiles = showArchived ? allMdFiles : activeMdFiles
 
-  const otherFiles = directoryData.files.filter((file: DocFile) => {
+  const otherFiles = directoryData.files.filter((file) => {
+    const docFile = file as DocFile
     return (
-      isDocFileUnknown(file) && (hasIsArchived(file) ? !file.isArchived : true)
+      isDocFileUnknown(docFile) &&
+      (hasIsArchived(docFile) ? !docFile.isArchived : true)
     )
   })
 
@@ -80,7 +85,7 @@ export function DirectoryPageView(props: Props) {
     if (directoryData?.indexFile) {
       setTitle(directoryData.indexFile.content.title || "")
       setDescription(directoryData.indexFile.content.description || "")
-      setIcon(directoryData.indexFile.content.frontMatter?.icon || "📁")
+      setIcon(directoryData.indexFile.content.meta?.icon || "📁")
     }
   }, [directoryData])
 
@@ -181,9 +186,9 @@ export function DirectoryPageView(props: Props) {
           rows={2}
         />
         <DirectoryTableView
-          files={mdFiles}
+          files={mdFiles as DocFile[]}
           columns={(() => {
-            const schema = directoryData.indexFile?.content.frontMatter?.schema
+            const schema = directoryData.indexFile?.content.meta?.schema
             if (!schema) return []
 
             const columns = Object.entries(schema)
@@ -222,7 +227,7 @@ export function DirectoryPageView(props: Props) {
           onToggleArchived={() => setShowArchived(!showArchived)}
         />
         <DirectoryFileListView
-          files={otherFiles}
+          files={otherFiles as DocFile[]}
           onDataChanged={() => query.refetch()}
         />
       </div>

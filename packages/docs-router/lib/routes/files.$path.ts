@@ -110,7 +110,7 @@ export const PUT = factory.createHandlers(
       }
       let updatedContent = file.content
       for (const [key, value] of Object.entries(body.properties)) {
-        updatedContent = updatedContent.withMetaProperty(key, value as any)
+        updatedContent = updatedContent.withMetaProperty(key, value as never)
       }
 
       // タイトルを更新

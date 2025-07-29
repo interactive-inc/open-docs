@@ -159,7 +159,7 @@ test("GetValueType - スキーマフィールドから値の型を取得", () =>
   assertType<Equals<GetValueType<Schema, "title">, string>>()
 
   // オプショナル数値フィールド
-  assertType<Equals<GetValueType<Schema, "price">, number | undefined>>()
+  assertType<Equals<GetValueType<Schema, "price">, number | undefined | null>>()
 
   // 必須複数選択フィールド
   assertType<Equals<GetValueType<Schema, "categories">, string[]>>()

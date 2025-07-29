@@ -1,9 +1,9 @@
 import { zValidator } from "@hono/zod-validator"
 import { HTTPException } from "hono/http-exception"
 import { z } from "zod"
-import { zDirectoryJson } from "../models"
-import { cwd } from "../utils/cwd"
-import { factory } from "../utils/factory"
+import { zDirectoryJson } from "@/models"
+import { cwd } from "@/utils/cwd"
+import { factory } from "@/utils/factory"
 
 /**
  * GET /api/directories/:path - ディレクトリデータ取得（ディレクトリ専用）
@@ -31,9 +31,7 @@ export const GET = factory.createHandlers(
 
     const json = zDirectoryJson.parse({
       cwd: cwd(),
-      files: files.map((file) => {
-        return file.toJson() as any
-      }),
+      files: files.map((file) => file.toJson()) as never,
       indexFile: indexFile.toJson(),
       relations: relations.map((relation) => {
         return relation.toJson()
@@ -102,7 +100,7 @@ export const PUT = factory.createHandlers(
       }
 
       if (body.schema !== null) {
-        meta = meta.withSchema(body.schema as any)
+        meta = meta.withUnknownSchema(body.schema)
       }
 
       content = content.withMeta(meta.value)
@@ -126,9 +124,7 @@ export const PUT = factory.createHandlers(
 
     const json = zDirectoryJson.parse({
       cwd: cwd(),
-      files: files.map((file) => {
-        return file.toJson() as any
-      }),
+      files: files.map((file) => file.toJson()) as never,
       indexFile: indexFile.toJson(),
       relations: relations.map((relation) => {
         return relation.toJson()
