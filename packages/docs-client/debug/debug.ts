@@ -1,6 +1,6 @@
 import { DocClient } from "@/doc-client"
 import { DocFileSystem } from "@/doc-file-system"
-import { SchemaBuilder } from "@/schema-builder"
+import { DocSchemaBuilder } from "@/doc-schema-builder"
 import { defineSchema, docCustomSchemaField } from "@/utils"
 
 const client = new DocClient({
@@ -44,7 +44,7 @@ const file = await relations[0].read()
 console.log("relations", file)
 
 // Method 3: Using SchemaBuilder
-const fooSchema = new SchemaBuilder()
+const fooSchema = new DocSchemaBuilder()
   .multiRelation("feature", true)
   .text("priority", false)
   .build()

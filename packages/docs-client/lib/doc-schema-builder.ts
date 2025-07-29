@@ -11,14 +11,14 @@ import type { DocCustomSchema } from "./types"
  *   .selectText("priority", false)
  *   .build()
  */
-export class SchemaBuilder<T extends DocCustomSchema> {
+export class DocSchemaBuilder<T extends DocCustomSchema> {
   constructor(private schema: T = {} as T) {}
 
   text<K extends string>(
     key: K,
     required: boolean,
-  ): SchemaBuilder<T & Record<K, { type: "text"; required: boolean }>> {
-    return new SchemaBuilder({
+  ): DocSchemaBuilder<T & Record<K, { type: "text"; required: boolean }>> {
+    return new DocSchemaBuilder({
       ...this.schema,
       [key]: { type: "text", required },
     })
@@ -27,8 +27,8 @@ export class SchemaBuilder<T extends DocCustomSchema> {
   number<K extends string>(
     key: K,
     required: boolean,
-  ): SchemaBuilder<T & Record<K, { type: "number"; required: boolean }>> {
-    return new SchemaBuilder({
+  ): DocSchemaBuilder<T & Record<K, { type: "number"; required: boolean }>> {
+    return new DocSchemaBuilder({
       ...this.schema,
       [key]: { type: "number", required },
     })
@@ -37,8 +37,8 @@ export class SchemaBuilder<T extends DocCustomSchema> {
   boolean<K extends string>(
     key: K,
     required: boolean,
-  ): SchemaBuilder<T & Record<K, { type: "boolean"; required: boolean }>> {
-    return new SchemaBuilder({
+  ): DocSchemaBuilder<T & Record<K, { type: "boolean"; required: boolean }>> {
+    return new DocSchemaBuilder({
       ...this.schema,
       [key]: { type: "boolean", required },
     })
@@ -47,8 +47,8 @@ export class SchemaBuilder<T extends DocCustomSchema> {
   relation<K extends string>(
     key: K,
     required: boolean,
-  ): SchemaBuilder<T & Record<K, { type: "relation"; required: boolean }>> {
-    return new SchemaBuilder({
+  ): DocSchemaBuilder<T & Record<K, { type: "relation"; required: boolean }>> {
+    return new DocSchemaBuilder({
       ...this.schema,
       [key]: { type: "relation", required },
     })
@@ -57,10 +57,10 @@ export class SchemaBuilder<T extends DocCustomSchema> {
   multiRelation<K extends string>(
     key: K,
     required: boolean,
-  ): SchemaBuilder<
+  ): DocSchemaBuilder<
     T & Record<K, { type: "multi-relation"; required: boolean }>
   > {
-    return new SchemaBuilder({
+    return new DocSchemaBuilder({
       ...this.schema,
       [key]: { type: "multi-relation", required },
     })
@@ -69,8 +69,10 @@ export class SchemaBuilder<T extends DocCustomSchema> {
   selectText<K extends string>(
     key: K,
     required: boolean,
-  ): SchemaBuilder<T & Record<K, { type: "select-text"; required: boolean }>> {
-    return new SchemaBuilder({
+  ): DocSchemaBuilder<
+    T & Record<K, { type: "select-text"; required: boolean }>
+  > {
+    return new DocSchemaBuilder({
       ...this.schema,
       [key]: { type: "select-text", required },
     })
@@ -79,10 +81,10 @@ export class SchemaBuilder<T extends DocCustomSchema> {
   selectNumber<K extends string>(
     key: K,
     required: boolean,
-  ): SchemaBuilder<
+  ): DocSchemaBuilder<
     T & Record<K, { type: "select-number"; required: boolean }>
   > {
-    return new SchemaBuilder({
+    return new DocSchemaBuilder({
       ...this.schema,
       [key]: { type: "select-number", required },
     })
@@ -91,8 +93,10 @@ export class SchemaBuilder<T extends DocCustomSchema> {
   multiText<K extends string>(
     key: K,
     required: boolean,
-  ): SchemaBuilder<T & Record<K, { type: "multi-text"; required: boolean }>> {
-    return new SchemaBuilder({
+  ): DocSchemaBuilder<
+    T & Record<K, { type: "multi-text"; required: boolean }>
+  > {
+    return new DocSchemaBuilder({
       ...this.schema,
       [key]: { type: "multi-text", required },
     })
@@ -101,8 +105,10 @@ export class SchemaBuilder<T extends DocCustomSchema> {
   multiNumber<K extends string>(
     key: K,
     required: boolean,
-  ): SchemaBuilder<T & Record<K, { type: "multi-number"; required: boolean }>> {
-    return new SchemaBuilder({
+  ): DocSchemaBuilder<
+    T & Record<K, { type: "multi-number"; required: boolean }>
+  > {
+    return new DocSchemaBuilder({
       ...this.schema,
       [key]: { type: "multi-number", required },
     })
@@ -111,10 +117,10 @@ export class SchemaBuilder<T extends DocCustomSchema> {
   multiSelectText<K extends string>(
     key: K,
     required: boolean,
-  ): SchemaBuilder<
+  ): DocSchemaBuilder<
     T & Record<K, { type: "multi-select-text"; required: boolean }>
   > {
-    return new SchemaBuilder({
+    return new DocSchemaBuilder({
       ...this.schema,
       [key]: { type: "multi-select-text", required },
     })
@@ -123,10 +129,10 @@ export class SchemaBuilder<T extends DocCustomSchema> {
   multiSelectNumber<K extends string>(
     key: K,
     required: boolean,
-  ): SchemaBuilder<
+  ): DocSchemaBuilder<
     T & Record<K, { type: "multi-select-number"; required: boolean }>
   > {
-    return new SchemaBuilder({
+    return new DocSchemaBuilder({
       ...this.schema,
       [key]: { type: "multi-select-number", required },
     })

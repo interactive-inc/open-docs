@@ -185,9 +185,7 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
     return refs
   }
 
-  async file(
-    fileName: string,
-  ): Promise<DocFileMdReference<T> | DocFileUnknownReference> {
+  file(fileName: string): DocFileMdReference<T> | DocFileUnknownReference {
     const filePath = this.pathSystem.join(this.relativePath, fileName)
 
     if (fileName.endsWith(".md")) {
@@ -208,7 +206,7 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
     })
   }
 
-  async mdFile(fileName: string): Promise<DocFileMdReference<T>> {
+  mdFile(fileName: string): DocFileMdReference<T> {
     return new DocFileMdReference<T>({
       path: fileName.endsWith(".md")
         ? this.pathSystem.join(this.relativePath, fileName)
@@ -287,19 +285,19 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
   /**
    * Get subdirectory references
    */
-  async directories(): Promise<DocDirectoryReference<never>[]> {
+  async directories(): Promise<DocDirectoryReference<T>[]> {
     const directoryNames = await this.directoryNames()
 
     return directoryNames.map((dirName) => {
       const dirPath = this.pathSystem.join(this.relativePath, dirName)
 
-      return new DocDirectoryReference<never>({
+      return new DocDirectoryReference<T>({
         path: dirPath,
         indexFileName: this.indexFileName,
         archiveDirectoryName: this.archiveDirectoryName,
         fileSystem: this.fileSystem,
         pathSystem: this.pathSystem,
-        customSchema: {} as never,
+        customSchema: this.customSchema,
         config: this.props.config,
       })
     })
@@ -308,10 +306,10 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
   /**
    * Get single subdirectory reference
    */
-  directory(directoryName: string) {
+  directory(directoryName: string): DocDirectoryReference<T> {
     const dirPath = this.pathSystem.join(this.relativePath, directoryName)
 
-    return new DocDirectoryReference({
+    return new DocDirectoryReference<T>({
       path: dirPath,
       indexFileName: this.indexFileName,
       archiveDirectoryName: this.archiveDirectoryName,
@@ -322,8 +320,8 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
     })
   }
 
-  indexFile() {
-    return new DocFileIndexReference({
+  indexFile(): DocFileIndexReference<T> {
+    return new DocFileIndexReference<T>({
       path: this.pathSystem.join(this.relativePath, this.indexFileName),
       fileSystem: this.fileSystem,
       pathSystem: this.pathSystem,
@@ -332,7 +330,7 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
     })
   }
 
-  async readIndexFile() {
+  async readIndexFile(): Promise<DocFileIndexEntity<T> | Error> {
     return this.indexFile().read()
   }
 
