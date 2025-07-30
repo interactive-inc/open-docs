@@ -1,6 +1,7 @@
 import { defineConfig } from "vitepress"
 
 export default defineConfig({
+  srcExclude: ["studio/debug", "studio/features", "studio/pages"],
   /** https://vitepress.dev/guide/deploy#setting-a-public-base-path */
   base: "/open-docs/",
   title: "@interactive-inc/docs",
