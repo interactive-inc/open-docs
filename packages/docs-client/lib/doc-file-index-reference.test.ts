@@ -1,11 +1,11 @@
 import { expect, test } from "bun:test"
 import { DocFileIndexReference } from "./doc-file-index-reference"
-import { DocFileSystemDebug } from "./doc-file-system-debug"
+import { DocFileSystemMock } from "./doc-file-system-mock"
 import { DocFileIndexEntity } from "./entities/doc-file-index-entity"
 import { defaultTestConfig } from "./utils"
 
 test("DocFileIndexReference - writeメソッドがフロントマターを含む完全なテキストを書き込む", async () => {
-  const fileSystem = DocFileSystemDebug.createWithFiles({
+  const fileSystem = DocFileSystemMock.createWithFiles({
     fileContents: {
       "docs/products/features/index.md": ["# 機能", "", "機能の説明"].join(
         "\n",
@@ -44,7 +44,7 @@ test("DocFileIndexReference - writeメソッドがフロントマターを含む
 })
 
 test("DocFileIndexReference - readメソッドが正しくエンティティを返す", async () => {
-  const fileSystem = DocFileSystemDebug.createWithFiles({
+  const fileSystem = DocFileSystemMock.createWithFiles({
     fileContents: {
       "docs/index.md": ["# ドキュメント", "", "説明文"].join("\n"),
     },

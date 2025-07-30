@@ -1,15 +1,16 @@
 import { expect, test } from "bun:test"
 import { DocClient } from "./doc-client"
-import { DocFileSystem } from "./doc-file-system"
+import { DocFileSystemMock } from "./doc-file-system-mock"
 import { DocMarkdownSystem } from "./doc-markdown-system"
 import { DocPathSystem } from "./doc-path-system"
 
-test("DocClient - デフォルト値でインスタンスを作成", () => {
-  const pathSystem = new DocPathSystem()
-  const fileSystem = new DocFileSystem({ basePath: "/test", pathSystem })
-  const client = new DocClient({ fileSystem })
+// 共通のMockインスタンスを作成（自動的にmockDirectoryDataが読み込まれる）
+const mockFileSystem = DocFileSystemMock.create()
 
-  expect(client.fileSystem).toBe(fileSystem)
+test("DocClient - デフォルト値でインスタンスを作成", () => {
+  const client = new DocClient({ fileSystem: mockFileSystem })
+
+  expect(client.fileSystem).toBe(mockFileSystem)
   expect(client.pathSystem).toBeInstanceOf(DocPathSystem)
   expect(client.markdownSystem).toBeInstanceOf(DocMarkdownSystem)
   expect(client.config.indexFileName).toBe("index.md")
@@ -17,13 +18,11 @@ test("DocClient - デフォルト値でインスタンスを作成", () => {
 })
 
 test("DocClient - カスタム値でインスタンスを作成", () => {
-  const pathSystem = new DocPathSystem()
-  const fileSystem = new DocFileSystem({ basePath: "/test", pathSystem })
   const markdownSystem = new DocMarkdownSystem()
 
   const client = new DocClient({
-    fileSystem,
-    pathSystem,
+    fileSystem: mockFileSystem,
+    pathSystem: mockFileSystem.getPathSystem(),
     markdownSystem,
     config: {
       defaultIndexIcon: "📃",
@@ -35,25 +34,26 @@ test("DocClient - カスタム値でインスタンスを作成", () => {
     },
   })
 
-  expect(client.fileSystem).toBe(fileSystem)
-  expect(client.pathSystem).toBe(pathSystem)
+  expect(client.fileSystem).toBe(mockFileSystem)
+  expect(client.pathSystem).toBe(mockFileSystem.getPathSystem())
   expect(client.markdownSystem).toBe(markdownSystem)
   expect(client.config.indexFileName).toBe("README.md")
   expect(client.config.archiveDirectoryName).toBe(".archive")
 })
 
 test("DocClient - basePathを取得", () => {
-  const pathSystem = new DocPathSystem()
-  const fileSystem = new DocFileSystem({ basePath: "/test/docs", pathSystem })
-  const client = new DocClient({ fileSystem })
+  // 別のbasePathでテストするため、新しいインスタンスを作成
+  const customFileSystem = new DocFileSystemMock({
+    basePath: "/test/docs",
+    pathSystem: new DocPathSystem(),
+  })
+  const client = new DocClient({ fileSystem: customFileSystem })
 
   expect(client.basePath()).toBe("/test/docs")
 })
 
 test("DocClient - mdFileで.md拡張子を自動補完", () => {
-  const pathSystem = new DocPathSystem()
-  const fileSystem = new DocFileSystem({ basePath: "/test", pathSystem })
-  const client = new DocClient({ fileSystem })
+  const client = new DocClient({ fileSystem: mockFileSystem })
 
   // .md拡張子がない場合は自動で補完される
   const fileWithoutExt = client.mdFile("foo")
@@ -65,9 +65,7 @@ test("DocClient - mdFileで.md拡張子を自動補完", () => {
 })
 
 test("DocClient - file()メソッドが自動的にファイルタイプを判定", () => {
-  const pathSystem = new DocPathSystem()
-  const fileSystem = new DocFileSystem({ basePath: "/test", pathSystem })
-  const client = new DocClient({ fileSystem })
+  const client = new DocClient({ fileSystem: mockFileSystem })
 
   // index.mdを判定
   const indexRef = client.file("docs/index.md")
@@ -83,18 +81,14 @@ test("DocClient - file()メソッドが自動的にファイルタイプを判�
 })
 
 test("DocClient - file()メソッドがサブディレクトリのindex.mdを正しく判定", () => {
-  const pathSystem = new DocPathSystem()
-  const fileSystem = new DocFileSystem({ basePath: "/test", pathSystem })
-  const client = new DocClient({ fileSystem })
+  const client = new DocClient({ fileSystem: mockFileSystem })
 
   const indexRef = client.file("docs/posts/index.md")
   expect(indexRef.constructor.name).toBe("DocFileIndexReference")
 })
 
 test("DocClient - file()メソッドがカスタムスキーマを受け取る", () => {
-  const pathSystem = new DocPathSystem()
-  const fileSystem = new DocFileSystem({ basePath: "/test", pathSystem })
-  const client = new DocClient({ fileSystem })
+  const client = new DocClient({ fileSystem: mockFileSystem })
 
   const schema = {
     title: { type: "text" as const, required: true },
@@ -105,4 +99,80 @@ test("DocClient - file()メソッドがカスタムスキーマを受け取る",
 
   const mdRef = client.file("docs/guide.md", schema)
   expect(mdRef.constructor.name).toBe("DocFileMdReference")
+})
+
+test("DocClient - Mockを使用した統合テスト", async () => {
+  // 統合テスト用に独立したMockインスタンスを作成
+  const integrationFileSystem = DocFileSystemMock.createWithFiles({
+    fileContents: {
+      "docs/index.md": `---
+icon: 📚
+---
+
+# Documentation
+
+Welcome to the documentation!`,
+      "docs/guide/index.md": `---
+icon: 📖
+---
+
+# Guide
+
+This is a guide.`,
+      "docs/guide/getting-started.md": `# Getting Started
+
+Let's get started!`,
+    },
+  })
+
+  const client = new DocClient({ fileSystem: integrationFileSystem })
+
+  // ディレクトリの取得
+  const docsDir = client.directory("docs")
+  const dirNames = await docsDir.directoryNames()
+  expect(dirNames).toEqual(["api", "guide"])
+
+  // index.mdファイルの存在確認
+  const indexFileExists = await docsDir.indexFile().exists()
+  expect(indexFileExists).toBe(true)
+
+  // ガイドディレクトリの探索
+  const guideDir = docsDir.directory("guide")
+  const guideFiles = await guideDir.mdFiles()
+  expect(guideFiles.length).toBe(2) // getting-started.md, advanced.md（index.mdは除外）
+
+  // ファイルの作成
+  const newFile = await guideDir.createMdFile("new-page.md")
+  expect(newFile.path).toBe("docs/guide/new-page.md")
+
+  // ファイルの存在確認
+  expect(integrationFileSystem.getFileCount()).toBe(7) // mockDirectoryData(6) + 新規ファイル(1)
+})
+
+test("DocClient - 事前定義された仮想ディレクトリ構造を使用", async () => {
+  const client = new DocClient({ fileSystem: mockFileSystem })
+
+  // 事前定義されたディレクトリ構造を使用
+  const docsDir = client.directory("docs")
+  const dirNames = await docsDir.directoryNames()
+  expect(dirNames).toEqual(["api", "guide"]) // 事前定義された構造
+
+  // API ディレクトリのテスト
+  const apiDir = docsDir.directory("api")
+  const apiFiles = await apiDir.mdFiles()
+  expect(apiFiles.length).toBe(1) // reference.mdのみ（index.mdは除外）
+
+  // Guide ディレクトリのテスト
+  const guideDir = docsDir.directory("guide")
+  const guideFiles = await guideDir.mdFiles()
+  expect(guideFiles.length).toBe(2) // getting-started.md, advanced.md（index.mdは除外）
+
+  // ファイルの存在確認
+  expect(await docsDir.indexFile().exists()).toBe(true)
+  expect(await apiDir.indexFile().exists()).toBe(true)
+  expect(await guideDir.indexFile().exists()).toBe(true)
+
+  // 特定ファイルの確認
+  const gettingStartedFile = guideDir.file("getting-started.md")
+  expect(await gettingStartedFile.exists()).toBe(true)
 })

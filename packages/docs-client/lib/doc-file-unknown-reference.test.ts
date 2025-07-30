@@ -1,12 +1,12 @@
 import { expect, test } from "bun:test"
-import { DocFileSystemDebug } from "./doc-file-system-debug"
+import { DocFileSystemMock } from "./doc-file-system-mock"
 import { DocFileUnknownReference } from "./doc-file-unknown-reference"
 import { DocFileUnknownEntity } from "./entities/doc-file-unknown-entity"
 import { defaultTestConfig } from "./utils"
 import { DocFilePathValue } from "./values/doc-file-path-value"
 
 test("DocFileUnknownReference - readメソッドが正しくエンティティを返す", async () => {
-  const fileSystem = DocFileSystemDebug.createWithFiles({
+  const fileSystem = DocFileSystemMock.createWithFiles({
     fileContents: {
       "docs/assets/logo.png": "binary data",
       "docs/config.json": '{"version": "1.0"}',
@@ -50,7 +50,7 @@ test("DocFileUnknownReference - readメソッドが正しくエンティティ�
 })
 
 test("DocFileUnknownReference - writeメソッドがファイルを書き込む", async () => {
-  const fileSystem = DocFileSystemDebug.createWithFiles({})
+  const fileSystem = DocFileSystemMock.createWithFiles({})
 
   const ref = new DocFileUnknownReference({
     path: "docs/data/output.csv",
@@ -81,7 +81,7 @@ test("DocFileUnknownReference - writeメソッドがファイルを書き込む"
 })
 
 test("DocFileUnknownReference - 存在しないファイルを読み込もうとするとErrorを返す", async () => {
-  const fileSystem = DocFileSystemDebug.createWithFiles({})
+  const fileSystem = DocFileSystemMock.createWithFiles({})
 
   const ref = new DocFileUnknownReference({
     path: "docs/nonexistent.txt",

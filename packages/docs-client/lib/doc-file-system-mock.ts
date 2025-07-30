@@ -8,16 +8,54 @@ type FileData = {
   size: number
 }
 
+// 仮想ディレクトリ構造
+const mockDirectoryData = {
+  "docs/index.md": `---
+icon: 📚
+---
+
+# Documentation
+
+Welcome to the documentation!`,
+  "docs/guide/index.md": `---
+icon: 📖
+---
+
+# Guide
+
+This is a guide.`,
+  "docs/guide/getting-started.md": `# Getting Started
+
+Let's get started!`,
+  "docs/guide/advanced.md": `# Advanced
+
+Advanced topics here.`,
+  "docs/api/index.md": `---
+icon: 🔧
+---
+
+# API
+
+API documentation.`,
+  "docs/api/reference.md": `# API Reference
+
+Complete API reference.`,
+}
+
 /**
  * In-memory file system for testing
  */
-export class DocFileSystemDebug extends DocFileSystem {
+export class DocFileSystemMock extends DocFileSystem {
   private files: Map<string, FileData> = new Map()
   private readonly _pathSystem: DocPathSystem
 
   constructor(props: { basePath: string; pathSystem: DocPathSystem }) {
     super(props)
     this._pathSystem = props.pathSystem
+
+    // mockDirectoryDataでfilesを初期化
+    this.setupTestFiles(mockDirectoryData)
+
     Object.freeze(this)
   }
 
@@ -29,15 +67,23 @@ export class DocFileSystemDebug extends DocFileSystem {
   }
 
   /**
+   * Create instance (mock data is automatically loaded)
+   */
+  static create(basePath = "/test"): DocFileSystemMock {
+    const pathSystem = new DocPathSystem()
+    return new DocFileSystemMock({ basePath, pathSystem })
+  }
+
+  /**
    * Factory method for testing
    */
   static createWithFiles(props: {
     basePath?: string
     fileContents?: Record<string, string>
-  }): DocFileSystemDebug {
+  }): DocFileSystemMock {
     const pathSystem = new DocPathSystem()
     const basePath = props.basePath ?? "/test"
-    const fileSystem = new DocFileSystemDebug({ basePath, pathSystem })
+    const fileSystem = new DocFileSystemMock({ basePath, pathSystem })
 
     if (props.fileContents) {
       const now = new Date()
@@ -281,9 +327,11 @@ export class DocFileSystemDebug extends DocFileSystem {
     const normalizedDir =
       directoryPath === ""
         ? "docs"
-        : directoryPath.startsWith("docs/")
-          ? directoryPath
-          : `docs/${directoryPath}`
+        : directoryPath === "docs"
+          ? "docs"
+          : directoryPath.startsWith("docs/")
+            ? directoryPath
+            : `docs/${directoryPath}`
     const dirPath = normalizedDir.endsWith("/")
       ? normalizedDir
       : `${normalizedDir}/`
