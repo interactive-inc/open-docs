@@ -16,13 +16,12 @@
     "**/.tanstack": true,
     "**/node_modules": false,
     "**/route-tree.gen.ts": true,
+    "**/tsconfig.tsbuildinfo": true,
     "bun.lock": true,
-    "CLAUDE.md": true,
-    "**/tsconfig.tsbuildinfo": true
+    "CLAUDE.md": true
   },
   "search.exclude": {
     "**/build": true,
-    "app": true,
     "bun.lock": true
   },
   "typescript.preferences.importModuleSpecifier": "non-relative",
