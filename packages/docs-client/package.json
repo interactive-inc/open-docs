@@ -1,6 +1,6 @@
 {
   "name": "@interactive-inc/docs-client",
-  "version": "0.0.16",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "check": "tsgo --noEmit",
@@ -8,8 +8,10 @@
     "deploy": "bun run build && npm publish"
   },
   "dependencies": {
-    "yaml": "^2.8.0",
-    "zod": "^4.0.10"
+    "yaml": "^2.0.0"
+  },
+  "peerDependencies": {
+    "zod": "^4.0.0"
   },
   "publishConfig": {
     "access": "public"

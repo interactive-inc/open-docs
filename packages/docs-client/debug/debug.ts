@@ -12,7 +12,7 @@ const pageSchema = defineSchema({
   features: docCustomSchemaField.multiRelation(true),
 })
 
-const pagesRef = client.directory("docs-studio/pages", pageSchema)
+const pagesRef = client.directory("docs-studio").directory("pages", pageSchema)
 
 const mdFileRef = pagesRef.file("document-editor.md")
 
@@ -51,7 +51,7 @@ const fooSchema = new DocSchemaBuilder()
 
 const fooRef = client.directory("docs-studio/files", fooSchema)
 
-const aaa = await fooRef.mdFile("a")
+const aaa = fooRef.mdFile("a")
 
 const fooFile = await aaa.read()
 

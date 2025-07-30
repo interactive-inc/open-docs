@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query"
 import { apiClient } from "@/lib/api-client"
-import { normalizePath } from "@/lib/path-utils"
+import { normalizePath } from "@/utils/path-utils"
 
 type Params = {
   path: string

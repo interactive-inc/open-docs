@@ -7,7 +7,7 @@ import { useDirectoryQuery } from "@/hooks/use-directory-query"
 import { useFilePropertiesMutation } from "@/hooks/use-file-properties-mutation"
 import { useFileQuery } from "@/hooks/use-file-query"
 import { apiClient } from "@/lib/api-client"
-import { normalizePath } from "@/lib/path-utils"
+import { normalizePath } from "@/utils/path-utils"
 
 type Props = {
   filePath: string

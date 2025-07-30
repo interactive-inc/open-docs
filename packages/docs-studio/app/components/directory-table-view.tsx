@@ -14,7 +14,6 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { apiClient } from "@/lib/api-client"
-import { normalizePath } from "@/lib/path-utils"
 import type {
   DocCustomSchema,
   DocFile,
@@ -22,6 +21,7 @@ import type {
   DocMetaFieldType,
   DocRelation,
 } from "@/lib/types"
+import { normalizePath } from "@/utils/path-utils"
 
 /**
  * テーブルカラムの型定義

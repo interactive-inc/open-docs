@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { VscodeButton } from "@/components/vscode-button"
 import { apiClient } from "@/lib/api-client"
-import { normalizePath } from "@/lib/path-utils"
+import { normalizePath } from "@/utils/path-utils"
 
 type Props = {
   filePath: string

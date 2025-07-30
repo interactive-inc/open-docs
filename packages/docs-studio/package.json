@@ -1,6 +1,6 @@
 {
   "name": "@interactive-inc/docs-studio",
-  "version": "0.0.9",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "check": "tsgo --noEmit",
@@ -11,8 +11,10 @@
     "deploy": "bun run build && npm publish"
   },
   "dependencies": {
-    "@hono/node-server": "^1.15.0",
-    "hono": "^4.8.4"
+    "@hono/node-server": "^1.0.0"
+  },
+  "peerDependencies": {
+    "hono": "^4.0.0"
   },
   "devDependencies": {
     "@dnd-kit/core": "^6.3.1",

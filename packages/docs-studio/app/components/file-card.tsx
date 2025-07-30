@@ -4,8 +4,8 @@ import { Archive, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { apiClient } from "@/lib/api-client"
-import { normalizePath } from "@/lib/path-utils"
 import type { DocFileUnknown } from "@/lib/types"
+import { normalizePath } from "@/utils/path-utils"
 
 type Props = {
   file: DocFileUnknown

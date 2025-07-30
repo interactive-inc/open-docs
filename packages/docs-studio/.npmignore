@@ -6,7 +6,7 @@ lib/
 .npmignore
 index.html
 tsconfig.json
-tsconfig.json
 tsconfig.tsbuildinfo
+tsup.config.ts
 vite-env.d.ts
 vite.config.ts

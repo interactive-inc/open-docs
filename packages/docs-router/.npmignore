@@ -7,3 +7,4 @@ node_modules
 README.md
 tsconfig.json
 tsconfig.tsbuildinfo
+tsup.config.ts

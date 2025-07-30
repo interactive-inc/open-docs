@@ -308,8 +308,30 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
   /**
    * Get single subdirectory reference
    */
-  directory(directoryName: string): DocDirectoryReference<T> {
+  directory(directoryName: string): DocDirectoryReference<T>
+
+  directory<S extends DocCustomSchema>(
+    directoryName: string,
+    customSchema: S,
+  ): DocDirectoryReference<S>
+
+  directory<S extends DocCustomSchema>(
+    directoryName: string,
+    customSchema?: S,
+  ): DocDirectoryReference<S> | DocDirectoryReference<T> {
     const dirPath = this.pathSystem.join(this.relativePath, directoryName)
+
+    if (customSchema) {
+      return new DocDirectoryReference<S>({
+        path: dirPath,
+        indexFileName: this.indexFileName,
+        archiveDirectoryName: this.archiveDirectoryName,
+        fileSystem: this.fileSystem,
+        pathSystem: this.pathSystem,
+        customSchema,
+        config: this.props.config,
+      })
+    }
 
     return new DocDirectoryReference<T>({
       path: dirPath,

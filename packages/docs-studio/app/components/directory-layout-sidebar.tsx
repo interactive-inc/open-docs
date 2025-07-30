@@ -15,7 +15,7 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar"
 import { apiClient } from "@/lib/api-client"
-import { normalizePath } from "@/lib/path-utils"
+import { normalizePath } from "@/utils/path-utils"
 
 function _isFileNode(node: DocTreeNode): node is DocTreeFileNode {
   return (

@@ -1,20 +1,20 @@
 import {
   type DocFile,
+  DocSchemaBuilder,
   type InferDocFileMd,
-  SchemaBuilder,
 } from "@interactive-inc/docs-client"
 
 export * from "@interactive-inc/docs-client"
-export { SchemaBuilder }
+export { DocSchemaBuilder }
 
 // Schema definitions for pages and features
-const pageSchema = new SchemaBuilder()
+const pageSchema = new DocSchemaBuilder()
   .text("title", true)
   .multiRelation("features", false)
   .text("layout", false)
   .build()
 
-const featureSchema = new SchemaBuilder()
+const featureSchema = new DocSchemaBuilder()
   .text("title", true)
   .multiRelation("features", false)
   .text("milestone", false)
