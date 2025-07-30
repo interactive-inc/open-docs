@@ -97,7 +97,7 @@ test("DocClient - file()メソッドがカスタムスキーマを受け取る",
   const client = new DocClient({ fileSystem })
 
   const schema = {
-    title: { type: "text" as const },
+    title: { type: "text" as const, required: true },
   }
 
   const indexRef = client.file("docs/index.md", schema)
