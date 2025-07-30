@@ -14,7 +14,7 @@ const pageSchema = defineSchema({
 
 const pagesRef = client.directory("docs-studio/pages", pageSchema)
 
-const mdFileRef = await pagesRef.mdFile("document-editor")
+const mdFileRef = pagesRef.file("document-editor.md")
 
 const mdFile = await mdFileRef.read()
 
