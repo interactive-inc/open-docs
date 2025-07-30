@@ -1,72 +1,194 @@
 ---
-icon: 📚
+layout: home
+hero:
+  name: "docs-client"
+  text: "Markdown Document Management"
+  tagline: Type-safe, schema-driven documentation for TypeScript
+  actions:
+    - theme: brand
+      text: Get Started
+      link: /guides
+    - theme: alt
+      text: GitHub
+      link: https://github.com/interactive-inc/open-docs
+    - theme: alt
+      text: Contact
+      link: https://www.inta.co.jp/contact/
+features:
+  - title: Type-Safe API
+    details: Fully typed TypeScript API for safer development
+  - title: Schema-Driven
+    details: Validate frontmatter with Zod schemas
+  - title: Extensible
+    details: Pluggable filesystem and Markdown parser
 ---
 
-# Open Docs - ドキュメント管理システム
+## Installation
 
-Open Docsは、開発チームのためのインタラクティブなドキュメント管理システムです。Markdown形式のドキュメントを構造化し、フロントマターでメタデータを管理し、リレーション機能により関連するドキュメント間の繋がりを可視化できます。
-
-## 目的
-
-- **構造化されたドキュメント管理**: プロジェクト、機能、エンティティ、値オブジェクトなどを体系的に整理
-- **メタデータ管理**: フロントマターによる属性管理（優先度、マイルストーン、ステータスなど）
-- **リレーション機能**: ドキュメント間の関連性を定義し、可視化
-- **編集可能なテーブルビュー**: ディレクトリ内のドキュメントを表形式で一覧・編集
-- **スキーマ駆動**: ディレクトリごとにスキーマを定義し、一貫性のあるドキュメント構造を保持
-
-## 主要機能
-
-### ドキュメント構造管理
-- ディレクトリベースの階層構造
-- 各ディレクトリにindex.mdでスキーマとメタデータを定義
-- Markdown + フロントマターによる構造化ドキュメント
-
-### インタラクティブな編集
-- 表形式でのドキュメント一覧表示・編集
-- セル単位での即座な更新
-- 型安全なフィールド編集（文字列、数値、ブール、リレーション、複数選択など）
-
-### リレーション機能
-- ドキュメント間の関連性を定義
-- 1対1リレーション（relation）
-- 1対多リレーション（multi-relation）
-- 相互参照による依存関係の可視化
-
-### プロジェクト管理
-- ページと機能の関連付け
-- マイルストーン管理
-- 優先度管理
-- 進捗ステータス管理
-
-## 技術スタック
-
-- **フロントエンド**: Next.js 15, React 19, TypeScript
-- **バックエンド**: Hono (API), Node.js
-- **UI**: Tailwind CSS, Radix UI
-- **状態管理**: TanStack Query
-- **ファイル処理**: カスタムドキュメントエンジン
-- **スキーマ検証**: Zod
-
-## アーキテクチャ
-
-```
-open-docs/
-├── app/                    # Next.js App Router
-├── docs/                   # ドキュメントストレージ
-│   ├── products/          # 製品ドキュメント
-│   │   ├── api/           # API仕様
-│   │   └── client/        # クライアント仕様
-│   └── terms/             # 用語集
-├── lib/                   # コアライブラリ
-│   └── engine/            # ドキュメントエンジン
-└── system/                # APIルート
+```bash
+bun add @interactive-inc/docs-client
+# or
+npm install @interactive-inc/docs-client
 ```
 
-## 対象ユーザー
+## Quick Start
 
-- 開発チーム（エンジニア、デザイナー、プロダクトマネージャー）
-- プロジェクトマネージャー
-- テクニカルライター
-- アーキテクト
+Get up and running with minimal setup. This example shows how to read a Markdown file from your documentation.
 
-このシステムにより、チームの知識を構造化し、効率的な開発プロセスを支援します。
+```typescript
+import { DocClient, DocFileSystem } from '@interactive-inc/docs-client'
+
+// Initialize
+const fileSystem = new DocFileSystem({ basePath: './docs' })
+const client = new DocClient({ fileSystem })
+
+// Read Markdown
+const file = await client.mdFile('guides/getting-started.md').read()
+if (file instanceof Error) throw file
+
+console.log(file.content.title())
+console.log(file.content.body())
+```
+
+## Working with Directories
+
+Navigate through your documentation structure easily. Directories provide methods to list, filter, and access files.
+
+```typescript
+// Get directory reference
+const directory = client.directory('features')
+
+// List all Markdown files
+const files = await directory.mdFiles()
+
+// Read specific file
+const loginFeature = directory.mdFile('login.md')
+const entity = await loginFeature.read()
+```
+
+## Custom Schemas
+
+Define type-safe metadata with Zod schemas. This ensures your frontmatter follows a consistent structure across documents.
+
+```typescript
+import { DocSchemaBuilder } from '@interactive-inc/docs-client'
+import { z } from 'zod'
+
+const featureSchema = new DocSchemaBuilder()
+  .addRequired('milestone', z.string())
+  .addRequired('priority', z.enum(['high', 'medium', 'low']))
+  .addOptional('assignee', z.string())
+  .addOptional('tags', z.array(z.string()).default([]))
+  .build()
+
+// Type-safe file operations
+const file = await client.mdFile('features/auth.md', featureSchema).read()
+if (file instanceof Error) throw file
+
+const meta = file.content.meta()
+console.log(meta.text('milestone'))  // string
+console.log(meta.text('priority'))   // 'high' | 'medium' | 'low'
+console.log(meta.multiText('tags'))  // string[]
+```
+
+## File Operations
+
+Common operations for managing your documentation files programmatically.
+
+### Creating Files
+
+Create new documentation files with predefined content and metadata.
+
+```typescript
+// Create new file with default content
+const newFile = await directory.createMdFile('new-feature.md')
+
+// Write custom content
+const entity = newFile.create({
+  title: 'New Feature',
+  body: '# New Feature\n\nDescription here...'
+})
+await newFile.write(entity)
+```
+
+### Updating Metadata
+
+Modify frontmatter without touching the document content.
+
+```typescript
+const file = await client.mdFile('features/login.md').read()
+if (file instanceof Error) throw file
+
+// Update frontmatter
+const meta = file.content.meta()
+const updated = file.withMeta(
+  meta
+    .withProperty('status', 'completed')
+    .withProperty('updated_at', new Date().toISOString())
+)
+
+await client.mdFile('features/login.md').write(updated)
+```
+
+## Archive System
+
+Instead of deleting files, move them to archive. This preserves document history and allows easy restoration.
+
+```typescript
+// Archive a file (moves to _/ directory)
+const fileRef = client.mdFile('old-specs/deprecated.md')
+await fileRef.archive()
+
+// Access archived files
+const archived = client.directory('old-specs/_').mdFile('deprecated.md')
+const content = await archived.read()
+```
+
+## Advanced Usage
+
+Powerful features for complex documentation workflows.
+
+### File Tree Navigation
+
+Explore your entire documentation structure programmatically.
+
+```typescript
+// Get complete file tree
+const tree = await client.fileTree('products')
+
+// Get directories only
+const dirs = await client.directoryTree('products')
+```
+
+### Batch Operations
+
+Process multiple files efficiently using async generators.
+
+```typescript
+// Process all files in directory
+for await (const file of directory.mdFilesGenerator()) {
+  const entity = await file.read()
+  if (entity instanceof Error) continue
+  
+  // Process each file
+  console.log(entity.title)
+}
+```
+
+## Configuration
+
+Customize the behavior of docs-client to match your project structure.
+
+```typescript
+const client = new DocClient({
+  fileSystem,
+  config: {
+    indexFileName: 'index.md',        // Default index file
+    archiveDirectoryName: '_',        // Archive directory name
+    directoryExcludes: ['.git'],      // Ignore directories
+    defaultIndexIcon: '📁',           // Icon for index files
+  }
+})
+```
+
+
