@@ -6,7 +6,7 @@ import type { DocPathSystem } from "./doc-path-system"
 import { DocFileIndexEntity } from "./entities/doc-file-index-entity"
 import { DocFileMdEntity } from "./entities/doc-file-md-entity"
 import { DocFileUnknownEntity } from "./entities/doc-file-unknown-entity"
-import type { DocClientConfig, DocCustomSchema } from "./types"
+import type { DocClientConfig, DocCustomSchema, InferReference } from "./types"
 
 type Props<T extends DocCustomSchema> = {
   customSchema: T
@@ -184,6 +184,8 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
 
     return refs
   }
+
+  file<FileName extends string>(fileName: FileName): InferReference<FileName, T>
 
   file(fileName: string): DocFileMdReference<T> | DocFileUnknownReference {
     const filePath = this.pathSystem.join(this.relativePath, fileName)

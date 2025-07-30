@@ -12,6 +12,7 @@ import type {
   DocCustomSchema,
   DocTreeDirectoryNode,
   DocTreeNode,
+  InferReference,
 } from "./types"
 
 type Props = {
@@ -66,27 +67,38 @@ export class DocClient {
     return this.fileSystem.getBasePath()
   }
 
-  file(
-    relativePath: string,
-  ): DocFileMdReference<DocCustomSchema> | DocFileUnknownReference
+  file<Path extends string>(
+    relativePath: Path,
+  ): InferReference<Path, DocCustomSchema>
 
-  file<T extends DocCustomSchema>(
-    relativePath: string,
+  file<Path extends string, T extends DocCustomSchema>(
+    relativePath: Path,
     customSchema: T,
-  ): DocFileMdReference<T> | DocFileUnknownReference
+  ): InferReference<Path, T>
 
   /**
    * Get file reference
    */
-  file<T extends DocCustomSchema>(relativePath: string, customSchema?: T) {
-    if (relativePath.endsWith(".md") && customSchema === undefined) {
-      return this.mdFile(relativePath)
+  file<Path extends string, T extends DocCustomSchema>(
+    relativePath: Path,
+    customSchema?: T,
+  ) {
+    // Check if it's index.md
+    const fileName = this.pathSystem.basename(relativePath)
+    if (fileName === this.config.indexFileName) {
+      const dirPath = this.pathSystem.dirname(relativePath)
+      return this.indexFile(dirPath === "." ? "" : dirPath, customSchema as T)
     }
 
-    if (relativePath.endsWith(".md") && customSchema !== undefined) {
+    // Check if it's a markdown file
+    if (relativePath.endsWith(".md")) {
+      if (customSchema === undefined) {
+        return this.mdFile(relativePath)
+      }
       return this.mdFile<T>(relativePath, customSchema)
     }
 
+    // Unknown file type
     return new DocFileUnknownReference({
       path: relativePath,
       fileSystem: this.fileSystem,

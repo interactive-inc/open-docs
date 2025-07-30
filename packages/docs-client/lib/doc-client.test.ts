@@ -63,3 +63,46 @@ test("DocClient - mdFileで.md拡張子を自動補完", () => {
   const fileWithExt = client.mdFile("bar.md")
   expect(fileWithExt.path).toBe("bar.md")
 })
+
+test("DocClient - file()メソッドが自動的にファイルタイプを判定", () => {
+  const pathSystem = new DocPathSystem()
+  const fileSystem = new DocFileSystem({ basePath: "/test", pathSystem })
+  const client = new DocClient({ fileSystem })
+
+  // index.mdを判定
+  const indexRef = client.file("docs/index.md")
+  expect(indexRef.constructor.name).toBe("DocFileIndexReference")
+
+  // 通常のmarkdownファイルを判定
+  const mdRef = client.file("docs/guide.md")
+  expect(mdRef.constructor.name).toBe("DocFileMdReference")
+
+  // 不明なファイルタイプを判定
+  const unknownRef = client.file("docs/data.json")
+  expect(unknownRef.constructor.name).toBe("DocFileUnknownReference")
+})
+
+test("DocClient - file()メソッドがサブディレクトリのindex.mdを正しく判定", () => {
+  const pathSystem = new DocPathSystem()
+  const fileSystem = new DocFileSystem({ basePath: "/test", pathSystem })
+  const client = new DocClient({ fileSystem })
+
+  const indexRef = client.file("docs/posts/index.md")
+  expect(indexRef.constructor.name).toBe("DocFileIndexReference")
+})
+
+test("DocClient - file()メソッドがカスタムスキーマを受け取る", () => {
+  const pathSystem = new DocPathSystem()
+  const fileSystem = new DocFileSystem({ basePath: "/test", pathSystem })
+  const client = new DocClient({ fileSystem })
+
+  const schema = {
+    title: { type: "text" as const },
+  }
+
+  const indexRef = client.file("docs/index.md", schema)
+  expect(indexRef.constructor.name).toBe("DocFileIndexReference")
+
+  const mdRef = client.file("docs/guide.md", schema)
+  expect(mdRef.constructor.name).toBe("DocFileMdReference")
+})

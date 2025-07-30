@@ -1,4 +1,7 @@
 import type { z } from "zod"
+import type { DocFileIndexReference } from "./doc-file-index-reference"
+import type { DocFileMdReference } from "./doc-file-md-reference"
+import type { DocFileUnknownReference } from "./doc-file-unknown-reference"
 import type {
   zDocClientConfig,
   zDocFileIndexSchemaField,
@@ -394,6 +397,58 @@ export type DocRelation = z.infer<typeof zDocRelation>
  * Relation field type
  */
 export type DocRelationField = z.infer<typeof zDocRelationField>
+
+/**
+ * String literal type utilities for file path detection
+ */
+
+/**
+ * Check if path ends with specific extension
+ */
+type EndsWith<T extends string, U extends string> = T extends `${string}${U}`
+  ? true
+  : false
+
+/**
+ * Extract filename from path
+ */
+type Basename<T extends string> = T extends `${string}/${infer U}`
+  ? Basename<U>
+  : T
+
+/**
+ * Check if filename is index.md
+ */
+type IsIndexMd<T extends string> = Basename<T> extends "index.md" ? true : false
+
+/**
+ * Detect file type from path
+ */
+export type DetectFileType<T extends string> = IsIndexMd<T> extends true
+  ? "index"
+  : EndsWith<T, ".md"> extends true
+    ? "markdown"
+    : "unknown"
+
+/**
+ * Map file type to reference class
+ */
+type FileTypeToReference<
+  FileType extends string,
+  Schema extends DocCustomSchema,
+> = FileType extends "index"
+  ? DocFileIndexReference<Schema>
+  : FileType extends "markdown"
+    ? DocFileMdReference<Schema>
+    : DocFileUnknownReference
+
+/**
+ * Infer reference type from path
+ */
+export type InferReference<
+  Path extends string,
+  Schema extends DocCustomSchema,
+> = FileTypeToReference<DetectFileType<Path>, Schema>
 
 /**
  * File path information type
