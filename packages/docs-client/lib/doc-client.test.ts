@@ -5,12 +5,12 @@ import { DocMarkdownSystem } from "./doc-markdown-system"
 import { DocPathSystem } from "./doc-path-system"
 
 // 共通のMockインスタンスを作成（自動的にmockDirectoryDataが読み込まれる）
-const mockFileSystem = DocFileSystemMock.create()
+const fileSystemMock = DocFileSystemMock.create()
 
 test("DocClient - デフォルト値でインスタンスを作成", () => {
-  const client = new DocClient({ fileSystem: mockFileSystem })
+  const client = new DocClient({ fileSystem: fileSystemMock })
 
-  expect(client.fileSystem).toBe(mockFileSystem)
+  expect(client.fileSystem).toBe(fileSystemMock)
   expect(client.pathSystem).toBeInstanceOf(DocPathSystem)
   expect(client.markdownSystem).toBeInstanceOf(DocMarkdownSystem)
   expect(client.config.indexFileName).toBe("index.md")
@@ -21,8 +21,8 @@ test("DocClient - カスタム値でインスタンスを作成", () => {
   const markdownSystem = new DocMarkdownSystem()
 
   const client = new DocClient({
-    fileSystem: mockFileSystem,
-    pathSystem: mockFileSystem.getPathSystem(),
+    fileSystem: fileSystemMock,
+    pathSystem: fileSystemMock.getPathSystem(),
     markdownSystem,
     config: {
       defaultIndexIcon: "📃",
@@ -34,8 +34,8 @@ test("DocClient - カスタム値でインスタンスを作成", () => {
     },
   })
 
-  expect(client.fileSystem).toBe(mockFileSystem)
-  expect(client.pathSystem).toBe(mockFileSystem.getPathSystem())
+  expect(client.fileSystem).toBe(fileSystemMock)
+  expect(client.pathSystem).toBe(fileSystemMock.getPathSystem())
   expect(client.markdownSystem).toBe(markdownSystem)
   expect(client.config.indexFileName).toBe("README.md")
   expect(client.config.archiveDirectoryName).toBe(".archive")
@@ -53,7 +53,7 @@ test("DocClient - basePathを取得", () => {
 })
 
 test("DocClient - mdFileで.md拡張子を自動補完", () => {
-  const client = new DocClient({ fileSystem: mockFileSystem })
+  const client = new DocClient({ fileSystem: fileSystemMock })
 
   // .md拡張子がない場合は自動で補完される
   const fileWithoutExt = client.mdFile("foo")
@@ -65,7 +65,7 @@ test("DocClient - mdFileで.md拡張子を自動補完", () => {
 })
 
 test("DocClient - file()メソッドが自動的にファイルタイプを判定", () => {
-  const client = new DocClient({ fileSystem: mockFileSystem })
+  const client = new DocClient({ fileSystem: fileSystemMock })
 
   // index.mdを判定
   const indexRef = client.file("docs/index.md")
@@ -81,14 +81,14 @@ test("DocClient - file()メソッドが自動的にファイルタイプを判�
 })
 
 test("DocClient - file()メソッドがサブディレクトリのindex.mdを正しく判定", () => {
-  const client = new DocClient({ fileSystem: mockFileSystem })
+  const client = new DocClient({ fileSystem: fileSystemMock })
 
   const indexRef = client.file("docs/posts/index.md")
   expect(indexRef.constructor.name).toBe("DocFileIndexReference")
 })
 
 test("DocClient - file()メソッドがカスタムスキーマを受け取る", () => {
-  const client = new DocClient({ fileSystem: mockFileSystem })
+  const client = new DocClient({ fileSystem: fileSystemMock })
 
   const schema = {
     title: { type: "text" as const, required: true },
@@ -150,7 +150,7 @@ Let's get started!`,
 })
 
 test("DocClient - 事前定義された仮想ディレクトリ構造を使用", async () => {
-  const client = new DocClient({ fileSystem: mockFileSystem })
+  const client = new DocClient({ fileSystem: fileSystemMock })
 
   // 事前定義されたディレクトリ構造を使用
   const docsDir = client.directory("docs")
