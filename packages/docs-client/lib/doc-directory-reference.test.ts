@@ -30,6 +30,9 @@ test("DocDirectoryReference - directoryNames メソッドでサブディレク�
   })
 
   const dirNames = await dirRef.directoryNames()
+  if (dirNames instanceof Error) {
+    throw dirNames
+  }
 
   expect(dirNames.length).toBe(2) // _archiveは除外
   expect(dirNames).toContain("subdir1")
@@ -65,6 +68,9 @@ test("DocDirectoryReference - directories メソッドでサブディレクト�
   })
 
   const directories = await dirRef.directories()
+  if (directories instanceof Error) {
+    throw directories
+  }
 
   expect(directories.length).toBe(2) // _archiveは除外
   expect(directories[0]).toBeInstanceOf(DocDirectoryReference)
@@ -95,7 +101,13 @@ test("DocDirectoryReference - 空のディレクトリでも正常に動作す�
   })
 
   const dirNames = await dirRef.directoryNames()
+  if (dirNames instanceof Error) {
+    throw dirNames
+  }
   const directories = await dirRef.directories()
+  if (directories instanceof Error) {
+    throw directories
+  }
 
   expect(dirNames.length).toBe(0)
   expect(directories.length).toBe(0)

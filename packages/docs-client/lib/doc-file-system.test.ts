@@ -7,11 +7,11 @@ import { assertType } from "./utils"
 test("DocFileSystem - メソッドの戻り値の型", () => {
   // readFile の戻り値の型
   type ReadFileResult = Awaited<ReturnType<DocFileSystem["readFile"]>>
-  assertType<Equals<ReadFileResult, string | null>>()
+  assertType<Equals<ReadFileResult, string | null | Error>>()
 
   // writeFile の戻り値の型
   type WriteFileResult = Awaited<ReturnType<DocFileSystem["writeFile"]>>
-  assertType<Equals<WriteFileResult, void>>()
+  assertType<Equals<WriteFileResult, Error | null>>()
 
   // deleteFile の戻り値の型
   type DeleteFileResult = Awaited<ReturnType<DocFileSystem["deleteFile"]>>
@@ -25,23 +25,23 @@ test("DocFileSystem - メソッドの戻り値の型", () => {
   type ReadDirResult = Awaited<
     ReturnType<DocFileSystem["readDirectoryFilePaths"]>
   >
-  assertType<Equals<ReadDirResult, string[]>>()
+  assertType<Equals<ReadDirResult, string[] | Error>>()
 
   // getFileSize の戻り値の型
   type FileSizeResult = Awaited<ReturnType<DocFileSystem["getFileSize"]>>
-  assertType<Equals<FileSizeResult, number>>()
+  assertType<Equals<FileSizeResult, number | Error>>()
 
   // getFileModifiedTime の戻り値の型
   type FileModifiedTimeResult = Awaited<
     ReturnType<DocFileSystem["getFileModifiedTime"]>
   >
-  assertType<Equals<FileModifiedTimeResult, Date>>()
+  assertType<Equals<FileModifiedTimeResult, Date | Error>>()
 
   // getFileCreatedTime の戻り値の型
   type FileCreatedTimeResult = Awaited<
     ReturnType<DocFileSystem["getFileCreatedTime"]>
   >
-  assertType<Equals<FileCreatedTimeResult, Date>>()
+  assertType<Equals<FileCreatedTimeResult, Date | Error>>()
 })
 
 test("DocFileSystem - コンストラクタのProps型", () => {
@@ -63,11 +63,11 @@ test("DocFileSystem - コンストラクタのProps型", () => {
 test("DocFileSystem - moveFile と copyFile の型", () => {
   // moveFile の戻り値の型
   type MoveFileResult = Awaited<ReturnType<DocFileSystem["moveFile"]>>
-  assertType<Equals<MoveFileResult, void>>()
+  assertType<Equals<MoveFileResult, Error | null>>()
 
   // copyFile の戻り値の型
   type CopyFileResult = Awaited<ReturnType<DocFileSystem["copyFile"]>>
-  assertType<Equals<CopyFileResult, void>>()
+  assertType<Equals<CopyFileResult, Error | null>>()
 
   // 両メソッドとも string の引数を2つ取る
   type MoveFileParams = Parameters<DocFileSystem["moveFile"]>

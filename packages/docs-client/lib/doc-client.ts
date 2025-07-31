@@ -212,11 +212,17 @@ export class DocClient {
 
   async fileTree(directoryPath = ""): Promise<DocTreeNode[]> {
     const results = await this.fileTreeSystem.buildFileTree(directoryPath)
+    if (results instanceof Error) {
+      throw results
+    }
     return results.map((node) => node.toJson())
   }
 
   async directoryTree(directoryPath = ""): Promise<DocTreeDirectoryNode[]> {
     const results = await this.fileTreeSystem.buildDirectoryTree(directoryPath)
+    if (results instanceof Error) {
+      throw results
+    }
     return results.map((node) => node.toJson())
   }
 }

@@ -23,6 +23,9 @@ test("DocFileIndexReference - writeメソッドがフロントマターを含む
 
   // 既存のエンティティを読み込む
   const entity = await ref.read()
+  if (entity instanceof Error) {
+    throw entity
+  }
   expect(entity).toBeInstanceOf(DocFileIndexEntity)
 
   // タイトルを更新
@@ -59,6 +62,9 @@ test("DocFileIndexReference - readメソッドが正しくエンティティを�
   })
 
   const entity = await ref.read()
+  if (entity instanceof Error) {
+    throw entity
+  }
   expect(entity).toBeInstanceOf(DocFileIndexEntity)
 
   // コンテンツの確認

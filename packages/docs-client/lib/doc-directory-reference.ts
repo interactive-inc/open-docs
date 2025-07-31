@@ -68,17 +68,21 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
     return this.props.archiveDirectoryName
   }
 
-  async fileNames(): Promise<string[]> {
+  async fileNames(): Promise<string[] | Error> {
     const filePaths = await this.fileSystem.readDirectoryFilePaths(
       this.relativePath,
     )
+
+    if (filePaths instanceof Error) {
+      return filePaths
+    }
 
     return filePaths
       .map((p) => this.pathSystem.basename(p))
       .filter((name) => name.includes("."))
   }
 
-  async archivedFileNames(): Promise<string[]> {
+  async archivedFileNames(): Promise<string[] | Error> {
     const archivePath = this.pathSystem.join(
       this.relativePath,
       this.archiveDirectoryName,
@@ -86,17 +90,26 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
 
     const filePaths = await this.fileSystem.readDirectoryFilePaths(archivePath)
 
+    if (filePaths instanceof Error) {
+      return filePaths
+    }
+
     return filePaths
       .map((p) => this.pathSystem.basename(p))
       .filter((name) => name.includes("."))
   }
 
   async *filesGenerator(): AsyncGenerator<
-    DocFileMdReference<T> | DocFileUnknownReference,
+    DocFileMdReference<T> | DocFileUnknownReference | Error,
     void,
     unknown
   > {
     const fileNames = await this.fileNames()
+
+    if (fileNames instanceof Error) {
+      yield fileNames
+      return
+    }
 
     // Process regular files
     for (const fileName of fileNames) {
@@ -120,6 +133,11 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
     }
 
     const archivedFileNames = await this.archivedFileNames()
+
+    if (archivedFileNames instanceof Error) {
+      yield archivedFileNames
+      return
+    }
 
     // Process archived files
     for (const fileName of archivedFileNames) {
@@ -152,33 +170,45 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
   }
 
   async *mdFilesGenerator(): AsyncGenerator<
-    DocFileMdReference<T>,
+    DocFileMdReference<T> | Error,
     void,
     unknown
   > {
     const generator = this.filesGenerator()
 
     for await (const file of generator) {
+      if (file instanceof Error) {
+        yield file
+        return
+      }
       if (file instanceof DocFileMdReference) {
         yield file
       }
     }
   }
 
-  async files(): Promise<(DocFileMdReference<T> | DocFileUnknownReference)[]> {
+  async files(): Promise<
+    (DocFileMdReference<T> | DocFileUnknownReference)[] | Error
+  > {
     const files: (DocFileMdReference<T> | DocFileUnknownReference)[] = []
 
     for await (const ref of this.filesGenerator()) {
+      if (ref instanceof Error) {
+        return ref
+      }
       files.push(ref)
     }
 
     return files
   }
 
-  async mdFiles(): Promise<DocFileMdReference<T>[]> {
+  async mdFiles(): Promise<DocFileMdReference<T>[] | Error> {
     const refs: DocFileMdReference<T>[] = []
 
     for await (const file of this.mdFilesGenerator()) {
+      if (file instanceof Error) {
+        return file
+      }
       refs.push(file)
     }
 
@@ -220,10 +250,15 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
     })
   }
 
-  async readFiles(): Promise<(DocFileMdEntity<T> | DocFileUnknownEntity)[]> {
+  async readFiles(): Promise<
+    (DocFileMdEntity<T> | DocFileUnknownEntity)[] | Error
+  > {
     const entities: (DocFileMdEntity<T> | DocFileUnknownEntity)[] = []
 
     for await (const file of this.filesGenerator()) {
+      if (file instanceof Error) {
+        return file
+      }
       const entity = await file.read()
       if (entity instanceof Error) continue
       entities.push(entity)
@@ -232,10 +267,13 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
     return entities
   }
 
-  async readMdFiles(): Promise<DocFileMdEntity<T>[]> {
+  async readMdFiles(): Promise<DocFileMdEntity<T>[] | Error> {
     const entities: DocFileMdEntity<T>[] = []
 
     for await (const file of this.filesGenerator()) {
+      if (file instanceof Error) {
+        return file
+      }
       const entity = await file.read()
       if (entity instanceof Error) continue
       if (entity instanceof DocFileUnknownEntity) continue
@@ -245,10 +283,13 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
     return entities
   }
 
-  async readUnknownFiles(): Promise<DocFileUnknownEntity[]> {
+  async readUnknownFiles(): Promise<DocFileUnknownEntity[] | Error> {
     const entities: DocFileUnknownEntity[] = []
 
     for await (const file of this.filesGenerator()) {
+      if (file instanceof Error) {
+        return file
+      }
       const entity = await file.read()
       if (entity instanceof Error) continue
       if (entity instanceof DocFileMdEntity) continue
@@ -261,10 +302,15 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
   /**
    * Get list of subdirectory names
    */
-  async directoryNames(): Promise<string[]> {
+  async directoryNames(): Promise<string[] | Error> {
     const allFileNames = await this.fileSystem.readDirectoryFileNames(
       this.relativePath,
     )
+
+    if (allFileNames instanceof Error) {
+      return allFileNames
+    }
+
     const directoryNames: string[] = []
 
     for (const fileName of allFileNames) {
@@ -287,8 +333,12 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
   /**
    * Get subdirectory references
    */
-  async directories(): Promise<DocDirectoryReference<T>[]> {
+  async directories(): Promise<DocDirectoryReference<T>[] | Error> {
     const directoryNames = await this.directoryNames()
+
+    if (directoryNames instanceof Error) {
+      return directoryNames
+    }
 
     return directoryNames.map((dirName) => {
       const dirPath = this.pathSystem.join(this.relativePath, dirName)
@@ -384,7 +434,11 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
       return new Error("Entity content is undefined")
     }
 
-    await this.fileSystem.writeFile(filePath, content)
+    const writeResult = await this.fileSystem.writeFile(filePath, content)
+
+    if (writeResult instanceof Error) {
+      return writeResult
+    }
 
     return null
   }
@@ -423,7 +477,11 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
       config: this.props.config,
     })
 
-    await fileRef.writeDefault()
+    const writeResult = await fileRef.writeDefault()
+
+    if (writeResult instanceof Error) {
+      throw writeResult
+    }
 
     return fileRef
   }

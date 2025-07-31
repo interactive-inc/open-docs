@@ -68,6 +68,10 @@ export class DocFileUnknownReference {
   async read(): Promise<Error | DocFileUnknownEntity> {
     const content = await this.fileSystem.readFile(this.path)
 
+    if (content instanceof Error) {
+      return content
+    }
+
     if (content === null) {
       return new Error(`File not found at ${this.path}.`)
     }
@@ -110,22 +114,22 @@ export class DocFileUnknownReference {
   /**
    * Write content to file
    */
-  async writeContent(content: string): Promise<void> {
-    await this.fileSystem.writeFile(this.path, content)
+  async writeContent(content: string): Promise<Error | null> {
+    return await this.fileSystem.writeFile(this.path, content)
   }
 
   /**
    * Write entity
    */
-  async write(entity: DocFileUnknownEntity): Promise<void> {
-    await this.fileSystem.writeFile(this.path, entity.value.content)
+  async write(entity: DocFileUnknownEntity): Promise<Error | null> {
+    return await this.fileSystem.writeFile(this.path, entity.value.content)
   }
 
   /**
    * Write raw content
    */
-  async writeRaw(content: string): Promise<void> {
-    await this.fileSystem.writeFile(this.path, content)
+  async writeRaw(content: string): Promise<Error | null> {
+    return await this.fileSystem.writeFile(this.path, content)
   }
 
   /**
@@ -145,35 +149,35 @@ export class DocFileUnknownReference {
   /**
    * Copy file
    */
-  async copyTo(destinationPath: string): Promise<void> {
-    await this.fileSystem.copyFile(this.path, destinationPath)
+  async copyTo(destinationPath: string): Promise<Error | null> {
+    return await this.fileSystem.copyFile(this.path, destinationPath)
   }
 
   /**
    * Move file
    */
-  async moveTo(destinationPath: string): Promise<void> {
-    await this.fileSystem.moveFile(this.path, destinationPath)
+  async moveTo(destinationPath: string): Promise<Error | null> {
+    return await this.fileSystem.moveFile(this.path, destinationPath)
   }
 
   /**
    * Get file size in bytes
    */
-  async size(): Promise<number> {
+  async size(): Promise<number | Error> {
     return this.fileSystem.getFileSize(this.path)
   }
 
   /**
    * Get file last modified time
    */
-  async lastModified(): Promise<Date> {
+  async lastModified(): Promise<Date | Error> {
     return this.fileSystem.getFileModifiedTime(this.path)
   }
 
   /**
    * Get file creation time
    */
-  async createdAt(): Promise<Date> {
+  async createdAt(): Promise<Date | Error> {
     return this.fileSystem.getFileCreatedTime(this.path)
   }
 
@@ -191,7 +195,10 @@ export class DocFileUnknownReference {
       fileName,
     )
 
-    await this.moveTo(archivePath)
+    const moveResult = await this.moveTo(archivePath)
+    if (moveResult instanceof Error) {
+      throw moveResult
+    }
 
     return new DocFileUnknownReference({
       path: archivePath,
@@ -221,7 +228,10 @@ export class DocFileUnknownReference {
     )
 
     // Move file
-    await this.moveTo(restorePath)
+    const moveResult = await this.moveTo(restorePath)
+    if (moveResult instanceof Error) {
+      throw moveResult
+    }
 
     return new DocFileUnknownReference({
       path: restorePath,

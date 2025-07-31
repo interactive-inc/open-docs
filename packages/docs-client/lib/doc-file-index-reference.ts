@@ -49,8 +49,13 @@ export class DocFileIndexReference<T extends DocCustomSchema> {
     return this.pathSystem.dirname(this.filePath)
   }
 
-  async read(): Promise<DocFileIndexEntity<T>> {
+  async read(): Promise<DocFileIndexEntity<T> | Error> {
     const content = await this.fileSystem.readFile(this.filePath)
+
+    if (content instanceof Error) {
+      return content
+    }
+
     if (content === null) {
       // Get directory name for index.md
       const dirPath = this.pathSystem.dirname(this.filePath)
@@ -115,23 +120,23 @@ export class DocFileIndexReference<T extends DocCustomSchema> {
   /**
    * Write content to file
    */
-  async writeContent(content: string): Promise<void> {
-    await this.fileSystem.writeFile(this.filePath, content)
+  async writeContent(content: string): Promise<Error | null> {
+    return await this.fileSystem.writeFile(this.filePath, content)
   }
 
   /**
    * Write entity
    */
-  async write(entity: DocFileIndexEntity<T>): Promise<void> {
+  async write(entity: DocFileIndexEntity<T>): Promise<Error | null> {
     const content = entity.content.toText()
 
-    await this.fileSystem.writeFile(this.filePath, content)
+    return await this.fileSystem.writeFile(this.filePath, content)
   }
 
   /**
    * Create new file with default content
    */
-  async writeDefault(): Promise<null> {
+  async writeDefault(): Promise<Error | null> {
     const dirPath = this.pathSystem.dirname(this.filePath)
 
     const dirName =
@@ -144,7 +149,14 @@ export class DocFileIndexReference<T extends DocCustomSchema> {
       `Please describe the overview of ${dirName} here.`,
     ].join("\n")
 
-    await this.fileSystem.writeFile(this.filePath, defaultContent)
+    const writeResult = await this.fileSystem.writeFile(
+      this.filePath,
+      defaultContent,
+    )
+
+    if (writeResult instanceof Error) {
+      return writeResult
+    }
 
     return null
   }
@@ -163,8 +175,12 @@ export class DocFileIndexReference<T extends DocCustomSchema> {
     return this.fileSystem.exists(this.filePath)
   }
 
-  async relations(): Promise<DocFileRelationReference[]> {
+  async relations(): Promise<DocFileRelationReference[] | Error> {
     const indexFile = await this.read()
+
+    if (indexFile instanceof Error) {
+      return indexFile
+    }
 
     const schema = indexFile.content.meta().schema()
 
@@ -198,14 +214,19 @@ export class DocFileIndexReference<T extends DocCustomSchema> {
     return refs
   }
 
-  async readRelations(): Promise<DocRelationValue[]> {
+  async readRelations(): Promise<DocRelationValue[] | Error> {
     const relations = await this.relations()
+
+    if (relations instanceof Error) {
+      return relations
+    }
 
     const files: DocRelationValue[] = []
 
     for (const relation of relations) {
       const entity = await relation.read()
       if (entity === null) continue
+      if (entity instanceof Error) continue
       files.push(entity)
     }
 
@@ -215,21 +236,21 @@ export class DocFileIndexReference<T extends DocCustomSchema> {
   /**
    * Get file size in bytes
    */
-  async size(): Promise<number> {
+  async size(): Promise<number | Error> {
     return this.fileSystem.getFileSize(this.filePath)
   }
 
   /**
    * Get last modified date
    */
-  async lastModified(): Promise<Date> {
+  async lastModified(): Promise<Date | Error> {
     return this.fileSystem.getFileModifiedTime(this.filePath)
   }
 
   /**
    * Get file creation date
    */
-  async createdAt(): Promise<Date> {
+  async createdAt(): Promise<Date | Error> {
     return this.fileSystem.getFileCreatedTime(this.filePath)
   }
 
@@ -249,7 +270,13 @@ export class DocFileIndexReference<T extends DocCustomSchema> {
       fileName,
     )
 
-    await this.fileSystem.moveFile(this.filePath, archivePath)
+    const moveResult = await this.fileSystem.moveFile(
+      this.filePath,
+      archivePath,
+    )
+    if (moveResult instanceof Error) {
+      throw moveResult
+    }
 
     return new DocFileIndexReference<T>({
       path: archivePath,
@@ -283,7 +310,13 @@ export class DocFileIndexReference<T extends DocCustomSchema> {
     )
 
     // Move file
-    await this.fileSystem.moveFile(this.filePath, restorePath)
+    const moveResult = await this.fileSystem.moveFile(
+      this.filePath,
+      restorePath,
+    )
+    if (moveResult instanceof Error) {
+      throw moveResult
+    }
 
     // Create reference with new path
     return new DocFileIndexReference<T>({

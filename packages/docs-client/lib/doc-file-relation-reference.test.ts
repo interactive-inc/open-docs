@@ -89,6 +89,9 @@ test("DocFileRelationReference - 空のリレーションディレクトリの�
 
   const relation = await ref.read()
   expect(relation).not.toBe(null)
+  if (relation instanceof Error) {
+    throw relation
+  }
   expect(relation?.value.path).toBe("relations/empty")
   expect(relation?.value.files).toEqual([])
 
@@ -125,6 +128,9 @@ test("DocFileRelationReference - リレーションファイルの読み込み",
   })
 
   const files = await ref.readFiles()
+  if (files instanceof Error) {
+    throw files
+  }
   expect(files).toHaveLength(2)
   expect(files[0].id).toBe("john")
   expect(files[0].label).toBe("John Doe")
@@ -133,6 +139,9 @@ test("DocFileRelationReference - リレーションファイルの読み込み",
 
   const relation = await ref.read()
   expect(relation).not.toBe(null)
+  if (relation instanceof Error) {
+    throw relation
+  }
   expect(relation?.value.path).toBe("relations/authors")
   expect(relation?.value.files).toHaveLength(2)
 })
@@ -152,6 +161,9 @@ test("DocFileRelationReference - index.md ファイルの除外", async () => {
   })
 
   const files = await ref.readFiles()
+  if (files instanceof Error) {
+    throw files
+  }
   expect(files).toHaveLength(1)
   expect(files[0].id).toBe("tech")
 })
@@ -230,23 +242,23 @@ test("DocFileRelationReference - 型の推論", async () => {
 
   // readFiles の戻り値の型
   const files = await ref.readFiles()
-  expectType<DocRelationFileValue[]>(files)
+  expectType<DocRelationFileValue[] | Error>(files)
 
   // read の戻り値の型
   const relation = await ref.read()
-  expectType<DocRelationValue | null>(relation)
+  expectType<DocRelationValue | Error | null>(relation)
 
   // readSlugs の戻り値の型
   const slugs = await ref.readSlugs()
-  expectType<string[]>(slugs)
+  expectType<string[] | Error>(slugs)
 
   // count の戻り値の型
   const count = await ref.count()
-  expectType<number>(count)
+  expectType<number | Error>(count)
 
   // isEmpty の戻り値の型
   const isEmpty = await ref.isEmpty()
-  expectType<boolean>(isEmpty)
+  expectType<boolean | Error>(isEmpty)
 
   // exists の戻り値の型
   const exists = await ref.exists("test")
@@ -288,6 +300,9 @@ test("DocFileRelationReference - 単一ファイルの読み込み", async () =>
 
   const file = await ref.readFile("relations/authors/specific.md")
   expect(file).not.toBe(null)
+  if (file instanceof Error) {
+    throw file
+  }
   expect(file?.id).toBe("specific")
   expect(file?.label).toBe("Specific Author")
 })

@@ -29,9 +29,14 @@ export class DocFileTreeSystem {
   /**
    * Build file tree recursively
    */
-  async buildFileTree(directoryPath = ""): Promise<DocTreeNodeValue[]> {
+  async buildFileTree(directoryPath = ""): Promise<DocTreeNodeValue[] | Error> {
     const fileNames =
       await this.props.fileSystem.readDirectoryFileNames(directoryPath)
+
+    if (fileNames instanceof Error) {
+      return fileNames
+    }
+
     const results: DocTreeNodeValue[] = []
 
     for (const fileName of fileNames) {
@@ -48,11 +53,17 @@ export class DocFileTreeSystem {
 
       if (!isDirectory) {
         const fileNode = await this.createFileNode(fileName, filePath)
+        if (fileNode instanceof Error) {
+          return fileNode
+        }
         results.push(fileNode)
         continue
       }
 
       const directoryNode = await this.createDirectoryNode(fileName, filePath)
+      if (directoryNode instanceof Error) {
+        return directoryNode
+      }
       results.push(directoryNode)
     }
 
@@ -65,7 +76,7 @@ export class DocFileTreeSystem {
   private async createFileNode(
     fileName: string,
     filePath: string,
-  ): Promise<DocTreeFileNodeValue> {
+  ): Promise<DocTreeFileNodeValue | Error> {
     let title = fileName
     let icon = ""
 
@@ -96,7 +107,7 @@ export class DocFileTreeSystem {
   private async createDirectoryNode(
     fileName: string,
     filePath: string,
-  ): Promise<DocTreeDirectoryNodeValue> {
+  ): Promise<DocTreeDirectoryNodeValue | Error> {
     let title = fileName
     let icon = this.config.defaultIndexIcon
 
@@ -104,6 +115,9 @@ export class DocFileTreeSystem {
 
     if (await indexFile.exists()) {
       const entity = await indexFile.read()
+      if (entity instanceof Error) {
+        return entity
+      }
       title = entity.value.content.title || fileName
       const content = entity.content
       const frontMatter = content.meta()
@@ -113,6 +127,10 @@ export class DocFileTreeSystem {
     }
 
     const children = await this.buildFileTree(filePath)
+
+    if (children instanceof Error) {
+      return children
+    }
 
     return DocTreeDirectoryNodeValue.from({
       name: fileName,
@@ -163,9 +181,14 @@ export class DocFileTreeSystem {
    */
   async buildDirectoryTree(
     directoryPath = "",
-  ): Promise<DocTreeDirectoryNodeValue[]> {
+  ): Promise<DocTreeDirectoryNodeValue[] | Error> {
     const fileNames =
       await this.props.fileSystem.readDirectoryFileNames(directoryPath)
+
+    if (fileNames instanceof Error) {
+      return fileNames
+    }
+
     const results: DocTreeDirectoryNodeValue[] = []
 
     for (const fileName of fileNames) {
@@ -183,6 +206,9 @@ export class DocFileTreeSystem {
         fileName,
         filePath,
       )
+      if (directoryNode instanceof Error) {
+        return directoryNode
+      }
       results.push(directoryNode)
     }
 
@@ -195,7 +221,7 @@ export class DocFileTreeSystem {
   private async createDirectoryNodeForTree(
     fileName: string,
     filePath: string,
-  ): Promise<DocTreeDirectoryNodeValue> {
+  ): Promise<DocTreeDirectoryNodeValue | Error> {
     let title = fileName
     let icon = this.config.defaultIndexIcon
 
@@ -203,6 +229,9 @@ export class DocFileTreeSystem {
 
     if (await indexFile.exists()) {
       const entity = await indexFile.read()
+      if (entity instanceof Error) {
+        return entity
+      }
       title = entity.value.content.title || fileName
       const content = entity.content
       const frontMatter = content.meta()
@@ -216,6 +245,10 @@ export class DocFileTreeSystem {
     }
 
     const children = await this.buildDirectoryTree(filePath)
+
+    if (children instanceof Error) {
+      return children
+    }
 
     return DocTreeDirectoryNodeValue.from({
       name: fileName,

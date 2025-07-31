@@ -86,10 +86,19 @@ export class DocFileMdReference<T extends DocCustomSchema> {
   async read(): Promise<DocFileMdEntity<T> | Error> {
     const content = await this.fileSystem.readFile(this.path)
 
+    if (content instanceof Error) {
+      return content
+    }
+
     const actualPath = this.path
 
     if (content === null) {
       const archivedContent = await this.fileSystem.readFile(this.archivedPath)
+
+      if (archivedContent instanceof Error) {
+        return archivedContent
+      }
+
       if (archivedContent !== null) {
         const contentValue = DocFileMdContentValue.fromMarkdown(
           archivedContent,
@@ -155,20 +164,25 @@ export class DocFileMdReference<T extends DocCustomSchema> {
   /**
    * Write entity
    */
-  async write(entity: DocFileMdEntity<T>): Promise<null> {
+  async write(entity: DocFileMdEntity<T>): Promise<Error | null> {
     const content = entity.content.toText()
-    await this.fileSystem.writeFile(this.path, content)
+    const writeResult = await this.fileSystem.writeFile(this.path, content)
+
+    if (writeResult instanceof Error) {
+      return writeResult
+    }
+
     return null
   }
 
-  async writeText(text: string): Promise<void> {
+  async writeText(text: string): Promise<Error | null> {
     return await this.fileSystem.writeFile(this.path, text)
   }
 
   /**
    * Create new file with default content
    */
-  async writeDefault(): Promise<void> {
+  async writeDefault(): Promise<Error | null> {
     const fileName = this.pathSystem.basename(this.path, ".md")
     const defaultContent = [
       `# ${fileName}`,
@@ -188,15 +202,15 @@ export class DocFileMdReference<T extends DocCustomSchema> {
   /**
    * Copy file
    */
-  async copyTo(destinationPath: string): Promise<void> {
-    await this.fileSystem.copyFile(this.path, destinationPath)
+  async copyTo(destinationPath: string): Promise<Error | null> {
+    return await this.fileSystem.copyFile(this.path, destinationPath)
   }
 
   /**
    * Move file
    */
-  async moveTo(destinationPath: string): Promise<void> {
-    await this.fileSystem.moveFile(this.path, destinationPath)
+  async moveTo(destinationPath: string): Promise<Error | null> {
+    return await this.fileSystem.moveFile(this.path, destinationPath)
   }
 
   /**
@@ -215,7 +229,10 @@ export class DocFileMdReference<T extends DocCustomSchema> {
       fileName,
     )
 
-    await this.moveTo(archivePath)
+    const moveResult = await this.moveTo(archivePath)
+    if (moveResult instanceof Error) {
+      throw moveResult
+    }
 
     return new DocFileMdReference({
       path: archivePath,
@@ -247,7 +264,10 @@ export class DocFileMdReference<T extends DocCustomSchema> {
       fileName,
     )
 
-    await this.moveTo(restorePath)
+    const moveResult = await this.moveTo(restorePath)
+    if (moveResult instanceof Error) {
+      throw moveResult
+    }
 
     return new DocFileMdReference({
       path: restorePath,
@@ -261,21 +281,21 @@ export class DocFileMdReference<T extends DocCustomSchema> {
   /**
    * Get file size in bytes
    */
-  async size(): Promise<number> {
+  async size(): Promise<number | Error> {
     return this.fileSystem.getFileSize(this.path)
   }
 
   /**
    * Get file last modified time
    */
-  async lastModified(): Promise<Date> {
+  async lastModified(): Promise<Date | Error> {
     return this.fileSystem.getFileModifiedTime(this.path)
   }
 
   /**
    * Get file creation time
    */
-  async createdAt(): Promise<Date> {
+  async createdAt(): Promise<Date | Error> {
     return this.fileSystem.getFileCreatedTime(this.path)
   }
 

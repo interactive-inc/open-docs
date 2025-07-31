@@ -100,31 +100,47 @@ export class DocFileSystemMock extends DocFileSystem {
     return fileSystem
   }
 
-  override async readFile(filePath: string): Promise<string | null> {
-    // Remove 'docs/' prefix if present
-    const normalizedPath = filePath.startsWith("docs/")
-      ? filePath
-      : `docs/${filePath}`
-    const file = this.files.get(normalizedPath)
-    return file ? file.content : null
+  override async readFile(filePath: string): Promise<string | null | Error> {
+    try {
+      // Remove 'docs/' prefix if present
+      const normalizedPath = filePath.startsWith("docs/")
+        ? filePath
+        : `docs/${filePath}`
+      const file = this.files.get(normalizedPath)
+      return file ? file.content : null
+    } catch (error) {
+      return error instanceof Error
+        ? error
+        : new Error(`Failed to read file at ${filePath}`)
+    }
   }
 
-  override async writeFile(filePath: string, content: string): Promise<void> {
-    const normalizedPath = filePath.startsWith("docs/")
-      ? filePath
-      : `docs/${filePath}`
-    const now = new Date()
-    const existing = this.files.get(normalizedPath)
+  override async writeFile(
+    filePath: string,
+    content: string,
+  ): Promise<Error | null> {
+    try {
+      const normalizedPath = filePath.startsWith("docs/")
+        ? filePath
+        : `docs/${filePath}`
+      const now = new Date()
+      const existing = this.files.get(normalizedPath)
 
-    this.files.set(normalizedPath, {
-      content,
-      modifiedTime: now,
-      createdTime: existing?.createdTime ?? now,
-      size: new TextEncoder().encode(content).length,
-    })
+      this.files.set(normalizedPath, {
+        content,
+        modifiedTime: now,
+        createdTime: existing?.createdTime ?? now,
+        size: new TextEncoder().encode(content).length,
+      })
+      return null
+    } catch (error) {
+      return error instanceof Error
+        ? error
+        : new Error(`Failed to write file at ${filePath}`)
+    }
   }
 
-  override async deleteFile(filePath: string) {
+  override async deleteFile(filePath: string): Promise<Error | null> {
     const normalizedPath = filePath.startsWith("docs/")
       ? filePath
       : `docs/${filePath}`
@@ -158,40 +174,60 @@ export class DocFileSystemMock extends DocFileSystem {
     return false
   }
 
-  override async copyFile(source: string, destination: string): Promise<void> {
-    const normalizedSource = source.startsWith("docs/")
-      ? source
-      : `docs/${source}`
-    const normalizedDest = destination.startsWith("docs/")
-      ? destination
-      : `docs/${destination}`
+  override async copyFile(
+    source: string,
+    destination: string,
+  ): Promise<Error | null> {
+    try {
+      const normalizedSource = source.startsWith("docs/")
+        ? source
+        : `docs/${source}`
+      const normalizedDest = destination.startsWith("docs/")
+        ? destination
+        : `docs/${destination}`
 
-    const file = this.files.get(normalizedSource)
-    if (!file) {
-      throw new Error(`Source file not found: ${normalizedSource}`)
+      const file = this.files.get(normalizedSource)
+      if (!file) {
+        return new Error(`Source file not found: ${normalizedSource}`)
+      }
+
+      this.files.set(normalizedDest, {
+        ...file,
+        createdTime: new Date(),
+      })
+      return null
+    } catch (error) {
+      return error instanceof Error
+        ? error
+        : new Error(`Failed to copy file from ${source} to ${destination}`)
     }
-
-    this.files.set(normalizedDest, {
-      ...file,
-      createdTime: new Date(),
-    })
   }
 
-  override async moveFile(source: string, destination: string): Promise<void> {
-    const normalizedSource = source.startsWith("docs/")
-      ? source
-      : `docs/${source}`
-    const normalizedDest = destination.startsWith("docs/")
-      ? destination
-      : `docs/${destination}`
+  override async moveFile(
+    source: string,
+    destination: string,
+  ): Promise<Error | null> {
+    try {
+      const normalizedSource = source.startsWith("docs/")
+        ? source
+        : `docs/${source}`
+      const normalizedDest = destination.startsWith("docs/")
+        ? destination
+        : `docs/${destination}`
 
-    const file = this.files.get(normalizedSource)
-    if (!file) {
-      throw new Error(`Source file not found: ${normalizedSource}`)
+      const file = this.files.get(normalizedSource)
+      if (!file) {
+        return new Error(`Source file not found: ${normalizedSource}`)
+      }
+
+      this.files.set(normalizedDest, file)
+      this.files.delete(normalizedSource)
+      return null
+    } catch (error) {
+      return error instanceof Error
+        ? error
+        : new Error(`Failed to move file from ${source} to ${destination}`)
     }
-
-    this.files.set(normalizedDest, file)
-    this.files.delete(normalizedSource)
   }
 
   async readDirectory(directoryPath: string): Promise<string[]> {
@@ -230,25 +266,36 @@ export class DocFileSystemMock extends DocFileSystem {
 
   override async readDirectoryFilePaths(
     directoryPath: string,
-  ): Promise<string[]> {
-    const dirPath = directoryPath.endsWith("/")
-      ? directoryPath
-      : `${directoryPath}/`
-    const files: string[] = []
+  ): Promise<string[] | Error> {
+    try {
+      const dirPath = directoryPath.endsWith("/")
+        ? directoryPath
+        : `${directoryPath}/`
+      const files: string[] = []
 
-    for (const path of this.files.keys()) {
-      if (
-        path.startsWith(dirPath) &&
-        !path.slice(dirPath.length).includes("/")
-      ) {
-        files.push(path)
+      for (const path of this.files.keys()) {
+        if (
+          path.startsWith(dirPath) &&
+          !path.slice(dirPath.length).includes("/")
+        ) {
+          files.push(path)
+        }
       }
-    }
 
-    return files.sort()
+      return files.sort()
+    } catch (error) {
+      return error instanceof Error
+        ? error
+        : new Error(`Failed to read directory file paths at ${directoryPath}`)
+    }
   }
 
-  override async createDirectory(_directoryPath: string): Promise<void> {}
+  override async createDirectory(
+    _directoryPath: string,
+  ): Promise<Error | null> {
+    // No directory creation needed in in-memory file system
+    return null
+  }
 
   async deleteDirectory(directoryPath: string): Promise<void> {
     const dirPath = directoryPath.endsWith("/")
@@ -262,37 +309,55 @@ export class DocFileSystemMock extends DocFileSystem {
     }
   }
 
-  override async getFileSize(filePath: string): Promise<number> {
-    const normalizedPath = filePath.startsWith("docs/")
-      ? filePath
-      : `docs/${filePath}`
-    const file = this.files.get(normalizedPath)
-    if (!file) {
-      throw new Error(`File not found: ${normalizedPath}`)
+  override async getFileSize(filePath: string): Promise<number | Error> {
+    try {
+      const normalizedPath = filePath.startsWith("docs/")
+        ? filePath
+        : `docs/${filePath}`
+      const file = this.files.get(normalizedPath)
+      if (!file) {
+        return new Error(`File not found: ${normalizedPath}`)
+      }
+      return file.size
+    } catch (error) {
+      return error instanceof Error
+        ? error
+        : new Error(`Failed to get file size at ${filePath}`)
     }
-    return file.size
   }
 
-  override async getFileModifiedTime(filePath: string): Promise<Date> {
-    const normalizedPath = filePath.startsWith("docs/")
-      ? filePath
-      : `docs/${filePath}`
-    const file = this.files.get(normalizedPath)
-    if (!file) {
-      throw new Error(`File not found: ${normalizedPath}`)
+  override async getFileModifiedTime(filePath: string): Promise<Date | Error> {
+    try {
+      const normalizedPath = filePath.startsWith("docs/")
+        ? filePath
+        : `docs/${filePath}`
+      const file = this.files.get(normalizedPath)
+      if (!file) {
+        return new Error(`File not found: ${normalizedPath}`)
+      }
+      return file.modifiedTime
+    } catch (error) {
+      return error instanceof Error
+        ? error
+        : new Error(`Failed to get file modified time at ${filePath}`)
     }
-    return file.modifiedTime
   }
 
-  override async getFileCreatedTime(filePath: string): Promise<Date> {
-    const normalizedPath = filePath.startsWith("docs/")
-      ? filePath
-      : `docs/${filePath}`
-    const file = this.files.get(normalizedPath)
-    if (!file) {
-      throw new Error(`File not found: ${normalizedPath}`)
+  override async getFileCreatedTime(filePath: string): Promise<Date | Error> {
+    try {
+      const normalizedPath = filePath.startsWith("docs/")
+        ? filePath
+        : `docs/${filePath}`
+      const file = this.files.get(normalizedPath)
+      if (!file) {
+        return new Error(`File not found: ${normalizedPath}`)
+      }
+      return file.createdTime
+    } catch (error) {
+      return error instanceof Error
+        ? error
+        : new Error(`Failed to get file created time at ${filePath}`)
     }
-    return file.createdTime
   }
 
   override async isDirectory(relativePath: string): Promise<boolean> {
@@ -322,32 +387,40 @@ export class DocFileSystemMock extends DocFileSystem {
   /**
    * Get list of entries in directory
    */
-  override async readDirectoryFileNames(directoryPath = ""): Promise<string[]> {
-    // Normalize path
-    const normalizedDir =
-      directoryPath === ""
-        ? "docs"
-        : directoryPath === "docs"
+  override async readDirectoryFileNames(
+    directoryPath = "",
+  ): Promise<string[] | Error> {
+    try {
+      // Normalize path
+      const normalizedDir =
+        directoryPath === ""
           ? "docs"
-          : directoryPath.startsWith("docs/")
-            ? directoryPath
-            : `docs/${directoryPath}`
-    const dirPath = normalizedDir.endsWith("/")
-      ? normalizedDir
-      : `${normalizedDir}/`
-    const entries = new Set<string>()
+          : directoryPath === "docs"
+            ? "docs"
+            : directoryPath.startsWith("docs/")
+              ? directoryPath
+              : `docs/${directoryPath}`
+      const dirPath = normalizedDir.endsWith("/")
+        ? normalizedDir
+        : `${normalizedDir}/`
+      const entries = new Set<string>()
 
-    for (const path of this.files.keys()) {
-      if (path.startsWith(dirPath)) {
-        const relativePath = path.slice(dirPath.length)
-        const firstSegment = relativePath.split("/")[0]
-        if (firstSegment) {
-          entries.add(firstSegment)
+      for (const path of this.files.keys()) {
+        if (path.startsWith(dirPath)) {
+          const relativePath = path.slice(dirPath.length)
+          const firstSegment = relativePath.split("/")[0]
+          if (firstSegment) {
+            entries.add(firstSegment)
+          }
         }
       }
-    }
 
-    return Array.from(entries).sort()
+      return Array.from(entries).sort()
+    } catch (error) {
+      return error instanceof Error
+        ? error
+        : new Error(`Failed to read directory at ${directoryPath}`)
+    }
   }
 
   /**
@@ -367,8 +440,11 @@ export class DocFileSystemMock extends DocFileSystem {
   /**
    * Create directory if it doesn't exist
    */
-  override async ensureDirectoryExists(_relativePath: string): Promise<void> {
+  override async ensureDirectoryExists(
+    _relativePath: string,
+  ): Promise<Error | null> {
     // No directory creation needed in in-memory file system
+    return null
   }
 
   /**

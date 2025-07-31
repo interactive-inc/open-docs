@@ -49,8 +49,12 @@ export class DocFileRelationReference {
     )
   }
 
-  async read(): Promise<DocRelationValue | null> {
+  async read(): Promise<DocRelationValue | Error | null> {
     const files = await this.readFiles()
+
+    if (files instanceof Error) {
+      return files
+    }
 
     return new DocRelationValue({
       path: this.path,
@@ -61,7 +65,7 @@ export class DocFileRelationReference {
   /**
    * Read list of relation files
    */
-  async readFiles(): Promise<DocRelationFileValue[]> {
+  async readFiles(): Promise<DocRelationFileValue[] | Error> {
     const exists = await this.fileSystem.exists(this.path)
 
     if (!exists) {
@@ -70,10 +74,17 @@ export class DocFileRelationReference {
 
     const filePaths = await this.fileSystem.readDirectoryFilePaths(this.path)
 
+    if (filePaths instanceof Error) {
+      return filePaths
+    }
+
     const files: DocRelationFileValue[] = []
 
     for (const filePath of filePaths) {
       const file = await this.readFile(filePath)
+      if (file instanceof Error) {
+        return file
+      }
       if (file === null) continue
       files.push(file)
     }
@@ -84,12 +95,18 @@ export class DocFileRelationReference {
   /**
    * Read single relation file
    */
-  async readFile(filePath: string): Promise<DocRelationFileValue | null> {
+  async readFile(
+    filePath: string,
+  ): Promise<DocRelationFileValue | Error | null> {
     if (filePath.includes("index.md")) {
       return null
     }
 
     const content = await this.fileSystem.readFile(filePath)
+
+    if (content instanceof Error) {
+      return content
+    }
 
     if (content === null) {
       return null
@@ -127,8 +144,12 @@ export class DocFileRelationReference {
   /**
    * Get list of file names (without extension)
    */
-  async readSlugs(): Promise<string[]> {
+  async readSlugs(): Promise<string[] | Error> {
     const files = await this.readFiles()
+
+    if (files instanceof Error) {
+      return files
+    }
 
     return files.map((file) => file.id)
   }
@@ -136,8 +157,12 @@ export class DocFileRelationReference {
   /**
    * Get file count
    */
-  async count(): Promise<number> {
+  async count(): Promise<number | Error> {
     const files = await this.readFiles()
+
+    if (files instanceof Error) {
+      return files
+    }
 
     return files.length
   }
@@ -145,8 +170,12 @@ export class DocFileRelationReference {
   /**
    * Check if empty
    */
-  async isEmpty(): Promise<boolean> {
+  async isEmpty(): Promise<boolean | Error> {
     const count = await this.count()
+
+    if (count instanceof Error) {
+      return count
+    }
 
     return count === 0
   }

@@ -139,6 +139,9 @@ Let's get started!`,
   // ガイドディレクトリの探索
   const guideDir = docsDir.directory("guide")
   const guideFiles = await guideDir.mdFiles()
+  if (guideFiles instanceof Error) {
+    throw guideFiles
+  }
   expect(guideFiles.length).toBe(2) // getting-started.md, advanced.md（index.mdは除外）
 
   // ファイルの作成
@@ -160,11 +163,17 @@ test("DocClient - 事前定義された仮想ディレクトリ構造を使用",
   // API ディレクトリのテスト
   const apiDir = docsDir.directory("api")
   const apiFiles = await apiDir.mdFiles()
+  if (apiFiles instanceof Error) {
+    throw apiFiles
+  }
   expect(apiFiles.length).toBe(1) // reference.mdのみ（index.mdは除外）
 
   // Guide ディレクトリのテスト
   const guideDir = docsDir.directory("guide")
   const guideFiles = await guideDir.mdFiles()
+  if (guideFiles instanceof Error) {
+    throw guideFiles
+  }
   expect(guideFiles.length).toBe(2) // getting-started.md, advanced.md（index.mdは除外）
 
   // ファイルの存在確認

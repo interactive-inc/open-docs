@@ -44,6 +44,9 @@ Content`
   })
 
   const tree = await fileTreeSystem.buildFileTree()
+  if (tree instanceof Error) {
+    throw tree
+  }
 
   expect(tree.length).toBe(2) // file1.md と dir1 (_archiveは除外)
 
@@ -106,6 +109,9 @@ Content`
   })
 
   const tree = await fileTreeSystem.buildDirectoryTree()
+  if (tree instanceof Error) {
+    throw tree
+  }
 
   expect(tree.length).toBe(2) // dir1 と dir2のみ (file1.mdと_archiveは除外)
 
@@ -167,12 +173,18 @@ test("FileTreeSystem - directoryExcludesで指定されたディレクトリが�
   })
 
   const tree = await fileTreeSystem.buildFileTree()
+  if (tree instanceof Error) {
+    throw tree
+  }
 
   // .vitepress、node_modules、_archiveが除外され、docsのみが残る
   expect(tree.length).toBe(1)
   expect(tree[0].name).toBe("docs")
 
   const directoryTree = await fileTreeSystem.buildDirectoryTree()
+  if (directoryTree instanceof Error) {
+    throw directoryTree
+  }
   expect(directoryTree.length).toBe(1)
   expect(directoryTree[0].name).toBe("docs")
 })
