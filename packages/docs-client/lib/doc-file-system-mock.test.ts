@@ -23,7 +23,7 @@ test("DocFileSystemMock - createWithFilesファクトリメソッド", () => {
 
   expect(fileSystem.getFileContent("docs/index.md")).toBe("# Index")
   expect(fileSystem.getFileContent("docs/guide.md")).toBe("# Guide")
-  expect(fileSystem.getFileCount()).toBe(7) // mockDirectoryData(6) + 追加ファイル(1、docs/index.mdは上書き)
+  expect(fileSystem.getFileCount()).toBe(2) // createWithFilesはデフォルトファイルを含まない
 })
 
 test("DocFileSystemMock - ファイルの存在確認", async () => {

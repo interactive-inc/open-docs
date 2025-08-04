@@ -37,9 +37,7 @@ test("DocFileIndexReference - writeメソッドがフロントマターを含む
   await ref.write(updatedEntity)
 
   // ファイルの内容を確認
-  const writtenContent = fileSystem.getFileContent(
-    "docs/products/features/index.md",
-  )
+  const writtenContent = fileSystem.getFileContent("products/features/index.md")
   expect(writtenContent).toBeTruthy()
 
   // タイトルが更新されていることを確認

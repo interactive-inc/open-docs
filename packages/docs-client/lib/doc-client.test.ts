@@ -122,6 +122,12 @@ This is a guide.`,
       "docs/guide/getting-started.md": `# Getting Started
 
 Let's get started!`,
+      "docs/guide/advanced.md": `# Advanced
+
+Advanced topics here.`,
+      "docs/api/reference.md": `# API Reference
+
+API documentation.`,
     },
   })
 
@@ -149,7 +155,7 @@ Let's get started!`,
   expect(newFile.path).toBe("docs/guide/new-page.md")
 
   // ファイルの存在確認
-  expect(integrationFileSystem.getFileCount()).toBe(7) // mockDirectoryData(6) + 新規ファイル(1)
+  expect(integrationFileSystem.getFileCount()).toBe(6) // createWithFilesで作成した5ファイル + 新規ファイル(1)
 })
 
 test("DocClient - 事前定義された仮想ディレクトリ構造を使用", async () => {

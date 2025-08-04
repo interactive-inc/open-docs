@@ -186,7 +186,7 @@ export class DocFileIndexContentValue<T extends DocCustomSchema> {
       schema: this.meta().schema().toJson(),
     }
     const yamlStr = stringify(yamlData).trim()
-    return `---\n${yamlStr}\n---\n\n${this.body}`
+    return `---\n${yamlStr}\n---\n\n${this.toMarkdownText()}`
   }
 
   /**

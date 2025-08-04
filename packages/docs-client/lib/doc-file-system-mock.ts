@@ -48,13 +48,23 @@ Complete API reference.`,
 export class DocFileSystemMock extends DocFileSystem {
   private files: Map<string, FileData> = new Map()
   private readonly _pathSystem: DocPathSystem
+  private readonly _basePath: string
 
-  constructor(props: { basePath: string; pathSystem: DocPathSystem }) {
+  constructor(props: {
+    basePath: string
+    pathSystem: DocPathSystem
+    skipDefaultFiles?: boolean
+  }) {
     super(props)
     this._pathSystem = props.pathSystem
+    this._basePath = props.basePath.endsWith("/")
+      ? props.basePath.slice(0, -1)
+      : props.basePath
 
-    // mockDirectoryDataでfilesを初期化
-    this.setupTestFiles(mockDirectoryData)
+    // skipDefaultFilesがtrueでない場合のみmockDirectoryDataでfilesを初期化
+    if (!props.skipDefaultFiles) {
+      this.setupTestFiles(mockDirectoryData)
+    }
 
     Object.freeze(this)
   }
@@ -64,6 +74,21 @@ export class DocFileSystemMock extends DocFileSystem {
    */
   getPathSystem() {
     return this._pathSystem
+  }
+
+  /**
+   * Normalize path using basePath
+   */
+  private normalizePath(filePath: string): string {
+    // basePathが既に含まれている場合はそのまま返す
+    if (filePath.startsWith(this._basePath)) {
+      return filePath
+    }
+
+    // Remove leading slash if present
+    const cleanPath = filePath.startsWith("/") ? filePath.slice(1) : filePath
+
+    return `${this._basePath}/${cleanPath}`
   }
 
   /**
@@ -83,12 +108,22 @@ export class DocFileSystemMock extends DocFileSystem {
   }): DocFileSystemMock {
     const pathSystem = new DocPathSystem()
     const basePath = props.basePath ?? "/test"
-    const fileSystem = new DocFileSystemMock({ basePath, pathSystem })
+    // skipDefaultFiles: true を渡してデフォルトファイルをスキップ
+    const fileSystem = new DocFileSystemMock({
+      basePath,
+      pathSystem,
+      skipDefaultFiles: true,
+    })
 
     if (props.fileContents) {
       const now = new Date()
       for (const [path, content] of Object.entries(props.fileContents)) {
-        fileSystem.files.set(path, {
+        // basePathを使って正規化
+        const cleanPath = path.startsWith("/") ? path.slice(1) : path
+        const normalizedPath = path.startsWith(basePath)
+          ? path
+          : `${basePath}/${cleanPath}`
+        fileSystem.files.set(normalizedPath, {
           content,
           modifiedTime: now,
           createdTime: now,
@@ -102,10 +137,7 @@ export class DocFileSystemMock extends DocFileSystem {
 
   override async readFile(filePath: string): Promise<string | null | Error> {
     try {
-      // Remove 'docs/' prefix if present
-      const normalizedPath = filePath.startsWith("docs/")
-        ? filePath
-        : `docs/${filePath}`
+      const normalizedPath = this.normalizePath(filePath)
       const file = this.files.get(normalizedPath)
       return file ? file.content : null
     } catch (error) {
@@ -120,9 +152,7 @@ export class DocFileSystemMock extends DocFileSystem {
     content: string,
   ): Promise<Error | null> {
     try {
-      const normalizedPath = filePath.startsWith("docs/")
-        ? filePath
-        : `docs/${filePath}`
+      const normalizedPath = this.normalizePath(filePath)
       const now = new Date()
       const existing = this.files.get(normalizedPath)
 
@@ -141,10 +171,8 @@ export class DocFileSystemMock extends DocFileSystem {
   }
 
   override async deleteFile(filePath: string): Promise<Error | null> {
-    const normalizedPath = filePath.startsWith("docs/")
-      ? filePath
-      : `docs/${filePath}`
     try {
+      const normalizedPath = this.normalizePath(filePath)
       this.files.delete(normalizedPath)
       return null
     } catch (error) {
@@ -153,10 +181,7 @@ export class DocFileSystemMock extends DocFileSystem {
   }
 
   override async exists(filePath: string): Promise<boolean> {
-    // Normalize path
-    const normalizedPath = filePath.startsWith("docs/")
-      ? filePath
-      : `docs/${filePath}`
+    const normalizedPath = this.normalizePath(filePath)
 
     if (this.files.has(normalizedPath)) {
       return true
@@ -179,12 +204,8 @@ export class DocFileSystemMock extends DocFileSystem {
     destination: string,
   ): Promise<Error | null> {
     try {
-      const normalizedSource = source.startsWith("docs/")
-        ? source
-        : `docs/${source}`
-      const normalizedDest = destination.startsWith("docs/")
-        ? destination
-        : `docs/${destination}`
+      const normalizedSource = this.normalizePath(source)
+      const normalizedDest = this.normalizePath(destination)
 
       const file = this.files.get(normalizedSource)
       if (!file) {
@@ -208,12 +229,8 @@ export class DocFileSystemMock extends DocFileSystem {
     destination: string,
   ): Promise<Error | null> {
     try {
-      const normalizedSource = source.startsWith("docs/")
-        ? source
-        : `docs/${source}`
-      const normalizedDest = destination.startsWith("docs/")
-        ? destination
-        : `docs/${destination}`
+      const normalizedSource = this.normalizePath(source)
+      const normalizedDest = this.normalizePath(destination)
 
       const file = this.files.get(normalizedSource)
       if (!file) {
@@ -268,9 +285,10 @@ export class DocFileSystemMock extends DocFileSystem {
     directoryPath: string,
   ): Promise<string[] | Error> {
     try {
-      const dirPath = directoryPath.endsWith("/")
-        ? directoryPath
-        : `${directoryPath}/`
+      const normalizedDir = this.normalizePath(directoryPath)
+      const dirPath = normalizedDir.endsWith("/")
+        ? normalizedDir
+        : `${normalizedDir}/`
       const files: string[] = []
 
       for (const path of this.files.keys()) {
@@ -278,7 +296,11 @@ export class DocFileSystemMock extends DocFileSystem {
           path.startsWith(dirPath) &&
           !path.slice(dirPath.length).includes("/")
         ) {
-          files.push(path)
+          // basePathを除去して相対パスにして返す
+          const relativePath = path.startsWith(`${this._basePath}/`)
+            ? path.slice(this._basePath.length + 1)
+            : path
+          files.push(relativePath)
         }
       }
 
@@ -311,9 +333,7 @@ export class DocFileSystemMock extends DocFileSystem {
 
   override async getFileSize(filePath: string): Promise<number | Error> {
     try {
-      const normalizedPath = filePath.startsWith("docs/")
-        ? filePath
-        : `docs/${filePath}`
+      const normalizedPath = this.normalizePath(filePath)
       const file = this.files.get(normalizedPath)
       if (!file) {
         return new Error(`File not found: ${normalizedPath}`)
@@ -328,9 +348,7 @@ export class DocFileSystemMock extends DocFileSystem {
 
   override async getFileModifiedTime(filePath: string): Promise<Date | Error> {
     try {
-      const normalizedPath = filePath.startsWith("docs/")
-        ? filePath
-        : `docs/${filePath}`
+      const normalizedPath = this.normalizePath(filePath)
       const file = this.files.get(normalizedPath)
       if (!file) {
         return new Error(`File not found: ${normalizedPath}`)
@@ -345,9 +363,7 @@ export class DocFileSystemMock extends DocFileSystem {
 
   override async getFileCreatedTime(filePath: string): Promise<Date | Error> {
     try {
-      const normalizedPath = filePath.startsWith("docs/")
-        ? filePath
-        : `docs/${filePath}`
+      const normalizedPath = this.normalizePath(filePath)
       const file = this.files.get(normalizedPath)
       if (!file) {
         return new Error(`File not found: ${normalizedPath}`)
@@ -363,9 +379,7 @@ export class DocFileSystemMock extends DocFileSystem {
   override async isDirectory(relativePath: string): Promise<boolean> {
     // In memory system doesn't track directories explicitly
     // Check if any files exist with this prefix
-    const normalizedPath = relativePath.startsWith("docs/")
-      ? relativePath
-      : `docs/${relativePath}`
+    const normalizedPath = this.normalizePath(relativePath)
     const dirPath = normalizedPath.endsWith("/")
       ? normalizedPath
       : `${normalizedPath}/`
@@ -378,9 +392,7 @@ export class DocFileSystemMock extends DocFileSystem {
   }
 
   override async isFile(relativePath: string): Promise<boolean> {
-    const normalizedPath = relativePath.startsWith("docs/")
-      ? relativePath
-      : `docs/${relativePath}`
+    const normalizedPath = this.normalizePath(relativePath)
     return this.files.has(normalizedPath)
   }
 
@@ -391,15 +403,10 @@ export class DocFileSystemMock extends DocFileSystem {
     directoryPath = "",
   ): Promise<string[] | Error> {
     try {
-      // Normalize path
       const normalizedDir =
         directoryPath === ""
-          ? "docs"
-          : directoryPath === "docs"
-            ? "docs"
-            : directoryPath.startsWith("docs/")
-              ? directoryPath
-              : `docs/${directoryPath}`
+          ? this._basePath
+          : this.normalizePath(directoryPath)
       const dirPath = normalizedDir.endsWith("/")
         ? normalizedDir
         : `${normalizedDir}/`
@@ -458,21 +465,30 @@ export class DocFileSystemMock extends DocFileSystem {
    * Check file existence (for testing)
    */
   hasFile(filePath: string): boolean {
-    return this.files.has(filePath)
+    const normalizedPath = this.normalizePath(filePath)
+    return this.files.has(normalizedPath)
   }
 
   /**
    * Get file content (sync version, for testing)
    */
   getFileContent(filePath: string): string | undefined {
-    return this.files.get(filePath)?.content
+    const normalizedPath = this.normalizePath(filePath)
+    return this.files.get(normalizedPath)?.content
   }
 
   /**
    * Get all file paths (for testing)
    */
   getAllFilePaths(): string[] {
-    return Array.from(this.files.keys()).sort()
+    return Array.from(this.files.keys())
+      .map((path) => {
+        // basePathを除去して相対パスにして返す
+        return path.startsWith(`${this._basePath}/`)
+          ? path.slice(this._basePath.length + 1)
+          : path
+      })
+      .sort()
   }
 
   /**
@@ -488,7 +504,8 @@ export class DocFileSystemMock extends DocFileSystem {
   setupTestFiles(files: Record<string, string>): void {
     const now = new Date()
     for (const [path, content] of Object.entries(files)) {
-      this.files.set(path, {
+      const normalizedPath = this.normalizePath(path)
+      this.files.set(normalizedPath, {
         content,
         modifiedTime: now,
         createdTime: now,
