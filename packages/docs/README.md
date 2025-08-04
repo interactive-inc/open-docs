@@ -1,290 +1,226 @@
 # @interactive-inc/docs
 
-技術仕様書、製品資料など、Markdownで記述された資料をリポジトリで管理する際に、それらを効率的に読み書きするためのAPIを提供します。
+Type-safe Markdown document management system for TypeScript. Organize and manage technical specifications, product documentation, and any structured Markdown content with schema validation and rich metadata support.
 
-## パッケージ構成
+https://interactive-inc.github.io/open-docs/
 
-- `@interactive-inc/docs-client` - ドキュメント操作のクライアントライブラリ
-- `@interactive-inc/docs-server` - サーバー側のドキュメント処理エンジン
-
-```ts
-import { DocClient, DocFileSystem, DocPathSystem } from "@interactive-inc/docs-client"
-
-const docClient = new DocClient({
-  fileSystem: new DocFileSystem({
-    basePath: "/docs", // リポジトリ内のドキュメントルート
-    pathSystem: new DocPathSystem(),
-  }),
-})
-
-const directory = docClient.directory("products/product-1/features")
-
-const fileRef = directory.mdFile("login.md")
-
-const entity = await fileRef.read()
-
-if (entity instanceof Error) throw entity
-
-console.log(entity.content.title)
-```
-
-## インストール
+## Installation
 
 ```bash
-bun i @interactive-inc/docs
-# または
+# Using bun (recommended)
+bun add @interactive-inc/docs
+
+# Using npm
 npm install @interactive-inc/docs
+
+# Using yarn
+yarn add @interactive-inc/docs
+
+# Using pnpm
+pnpm add @interactive-inc/docs
 ```
 
-## 設計
+## Quick Start
 
-このライブラリは、Markdownファイルを構造化されたディレクトリでの動作を想定しています。
+```typescript
+import { DocClient, DocFileSystem } from '@interactive-inc/docs-client'
 
-以下は製品仕様書を管理する場合の一例です。ディレクトリ構造は自由に設計できます：
+// Initialize the client
+const fileSystem = new DocFileSystem({ basePath: './docs' })
+const client = new DocClient({ fileSystem })
 
-```
-docs/                   # ドキュメントルート（任意の名前）
-├── products/           # 製品ドキュメント（例）
-│   ├── product-a/
-│   │   ├── index.md    # 製品概要
-│   │   ├── features/   # 機能仕様
-│   │   │   ├── login.md
-│   │   │   └── _/      # アーカイブ（非推奨・削除予定）
-│   │   │       └── old-feature.md
-│   │   ├── pages/      # 画面仕様
-│   │   └── terms/      # 製品固有の用語
-│   └── product-b/
-├── terms/              # 共通用語集（例）
-├── guidelines/         # 開発ガイドライン（例）
-└── index.md            # ルートドキュメント
-```
-
-## 機能
-
-### メタデータ管理
-
-各Markdownファイルの先頭にYAML形式でメタデータを記述：
-
-```markdown
----
-title: ログイン機能
-milestone: 2025.01
-features:
-  - authentication
-  - security
-priority: high
-is-done: false
----
-
-# ログイン機能
-
-説明...
-
-本文...
-```
-
-このように操作できます。
-
-```ts
-// メタデータの読み取り
-const fileRef = docClient.directory("features").mdFile("login.md")
-
-const file = await fileRef.read()
-
+// Read a document
+const file = await client.mdFile('getting-started.md').read()
 if (file instanceof Error) throw file
 
-// "ログイン機能"
-console.log(file.content.title)
-
-// ["authentication", "security"]
-console.log(file.content.meta.features)
+console.log(file.content.title())  // Get document title
+console.log(file.content.body())   // Get content without frontmatter
 ```
 
-### ファイル間のリレーション
+## Core Features
 
-FrontMatterとスキーマを使用して、ドキュメント間の関連を定義できます。
+### 1. Type-Safe Schema Definition
 
-#### スキーマの定義（index.md）
+Define and validate document metadata with full TypeScript support:
 
-```markdown
----
-title: 機能一覧
-schema:
-  page:
-    type: relation
-    path: "../pages"
-    title: 関連ページ
-    required: false
-  tags:
-    type: multi-relation
-    path: "../tags"
-    title: タグ
-    required: false
----
+```typescript
+import { DocSchemaBuilder } from '@interactive-inc/docs-client'
+import { z } from 'zod'
+
+// Build a schema with chainable API
+const featureSchema = new DocSchemaBuilder()
+  .addRequired('milestone', z.string())
+  .addRequired('priority', z.enum(['high', 'medium', 'low']))
+  .addOptional('assignee', z.string())
+  .addOptional('tags', z.array(z.string()).default([]))
+  .build()
+
+// Use with type safety
+const fileRef = client.mdFile('features/auth.md', featureSchema)
+const entity = await fileRef.read()
+if (entity instanceof Error) throw entity
+
+// Access metadata with proper types
+const meta = entity.content.meta()
+console.log(meta.text('milestone'))    // string
+console.log(meta.text('priority'))     // 'high' | 'medium' | 'low'
+console.log(meta.multiText('tags'))    // string[]
 ```
 
-#### リレーションの使用
+### 2. Document Relations & Management
 
-features/login.md
+Organize and link documents with powerful management features:
 
-```markdown
----
-title: ログイン機能
-page: login-page
-tags:
-  - authentication
-  - security
----
+```typescript
+// Work with directories
+const featuresDir = client.directory('products/app/features')
+const files = await featuresDir.mdFiles()
+
+// Define relations in frontmatter
+// features/login.md:
+// ---
+// title: Login Feature
+// dependencies:
+//   - /features/user-management
+//   - /features/session-handling
+// ---
+
+// Get related documents
+const featureRef = client.mdFile('features/login.md')
+const dependencies = await featureRef.relations('dependencies')
+
+// Archive old documents
+const oldSpec = client.mdFile('specs/v1/deprecated-api.md')
+await oldSpec.archive()  // Moves to specs/v1/_/deprecated-api.md
+
+// Update content with type safety
+const fileRef = client.mdFile('features/auth.md', {
+  status: { type: 'text', required: true },
+  completed_date: { type: 'text', required: false }
+})
+
+const entity = await fileRef.read()
+if (entity instanceof Error) throw entity
+
+const draft = entity.withMeta(
+  entity.content.meta()
+    .withProperty('status', 'completed')  // Type-safe: only accepts string values
+    .withProperty('completed_date', new Date().toISOString())
+)
+
+await fileRef.write(draft)
 ```
 
-#### 使い方
+### 3. Studio Support
 
-```ts
-const featureRef = docClient.directory("features").mdFile("login.md")
+Perfect integration with [Studio](https://interactive-inc.github.io/open-docs/studio/) for visual editing:
 
-const relatedTags = await featureRef.relations("tags")
+- **Visual Schema Editor**: Design schemas with a GUI
+- **Live Preview**: See changes in real-time
+- **Relation Navigator**: Visualize document connections
+- **Batch Operations**: Update multiple documents at once
+- **Archive Management**: Easily archive and restore documents
 
-for (const tagRef of relatedTags) {
-  const tagEntity = await tagRef.read()
-  if (tagEntity instanceof Error) continue
-  console.log(tagEntity.content.title)
-}
+```
+bun docs
 ```
 
-### アーカイブシステム
+The library is designed to work seamlessly with Studio, providing both programmatic and visual interfaces for document management.
 
-ファイルを削除する代わりに、`_`ディレクトリに移動することで論理削除を表現できます。
+## Advanced Configuration
 
-- `features/login.md` → `features/_/login.md` （アーカイブ）
-- アーカイブされたファイルも読み取り可能
-- 必要に応じて復元可能
-
-```ts
-// ファイルをアーカイブする
-const fileRef = docClient.directory("specs/v1").mdFile("deprecated-api.md")
-await fileRef.archive()
-```
-
-## 使い方
-
-### 初期設定
-
-```ts
-import { DocClient, DocFileSystem, DocPathSystem } from "@interactive-inc/docs-client"
-
-const docClient = new DocClient({
+```typescript
+const client = new DocClient({
   fileSystem: new DocFileSystem({
-    basePath: "/path/to/your-repo/docs",
+    basePath: './docs',
     pathSystem: new DocPathSystem(),
   }),
   config: {
-    defaultIndexIcon: "📃",
-    indexFileName: "index.md",
-    archiveDirectoryName: "_",
-    defaultDirectoryName: "Directory",
-    indexMetaIncludes: [],
-    directoryExcludes: [".vitepress"],
-  },
+    // Customize behavior
+    indexFileName: 'index.md',          // Default index file name
+    archiveDirectoryName: '_',          // Archive directory name
+    directoryExcludes: ['.git', 'node_modules'], // Ignored directories
+    defaultIndexIcon: '📁',             // Icon for index files
+    
+    // Schema defaults
+    indexMetaIncludes: ['author', 'updated'], // Auto-include in index
+  }
 })
 ```
 
-### ファイルの読み書き
+## Directory Structure Example
 
-```ts
-// ファイル読み取り
-const fileRef = docClient
-  .directory("specifications/api")
-  .mdFile("authentication.md")
-
-const entity = await fileRef.read()
-if (entity instanceof Error) throw entity
-
-console.log(entity.content.body)
-console.log(entity.content.meta)
-
-// ファイル作成・更新
-const newEntity = await fileRef.create({
-  title: "認証API仕様",
-  version: "2.0.0",
-  body: `# 認証API仕様
-
-POST /api/v2/auth/login`,
-})
+```
+docs/                       # Document root
+├── products/              # Product documentation
+│   ├── mobile-app/
+│   │   ├── index.md      # Product overview
+│   │   ├── features/     # Feature specifications
+│   │   │   ├── auth.md
+│   │   │   ├── profile.md
+│   │   │   └── _/        # Archived features
+│   │   │       └── old-login.md
+│   │   ├── pages/        # UI specifications
+│   │   └── api/          # API documentation
+│   └── web-app/
+├── guides/               # User guides
+├── design/               # Design documents
+└── index.md             # Root documentation
 ```
 
-### FrontMatterの操作
+## Error Handling
 
-```ts
-const entity = await fileRef.read()
-if (entity instanceof Error) throw entity
+All operations return either a value or an Error instance:
 
-// メタデータ更新
-const updatedEntity = entity.withMeta({
-  ...entity.content.meta,
-  milestone: "2025.02",
-})
+```typescript
+const fileRef = client.mdFile('important-doc.md')
+const result = await fileRef.read()
 
-await fileRef.write(updatedEntity)
+if (result instanceof Error) {
+  // Handle specific error types
+  if (result.message.includes('ENOENT')) {
+    console.error('File not found')
+  } else {
+    console.error('Read error:', result.message)
+  }
+  return
+}
+
+// Safe to use result
+console.log(result.content.title())
 ```
 
-### アーカイブ操作
+## TypeScript Support
 
-```ts
-// ファイルをアーカイブ
-const fileRef = docClient
-  .directory("specifications/api/v1")
-  .mdFile("legacy-endpoints.md")
-await fileRef.archive()
+Full TypeScript support with strict typing:
 
-// アーカイブされたファイルも読み取り可能
-const archivedRef = docClient
-  .directory("specifications/api/v1/_")
-  .mdFile("legacy-endpoints.md")
-const archivedEntity = await archivedRef.read()
-```
+```typescript
+import type { DocCustomSchema } from '@interactive-inc/docs-client'
 
-### ファイルツリーの取得
-
-```ts
-// ディレクトリツリーの取得
-const directoryTree = await docClient.directoryTree("products")
-console.log(directoryTree)
-
-// ファイルツリーの取得（ファイルとディレクトリの両方）
-const fileTree = await docClient.fileTree("products")
-console.log(fileTree)
-```
-
-### カスタムスキーマの使用
-
-型安全なメタデータ操作のためにカスタムスキーマを定義できます：
-
-```ts
-import type { DocCustomSchema } from "@interactive-inc/docs-client"
-
-// スキーマ定義
-type FeatureSchema = DocCustomSchema<{
-  milestone: { type: "text"; required: true }
-  priority: { type: "select-text"; required: true }
-  is_done: { type: "boolean"; required: false }
-  tags: { type: "multi-relation"; required: false }
+// Define custom schema type
+type ProjectSchema = DocCustomSchema<{
+  status: { type: 'text'; required: true }
+  owner: { type: 'relation'; required: true }
+  tags: { type: 'multi-text'; required: false }
+  archived: { type: 'boolean'; required: false }
 }>
 
-// 型安全なファイル操作
-const featureRef = docClient
-  .directory("features")
-  .mdFile<FeatureSchema>("login.md", {
-    milestone: { type: "text", required: true },
-    priority: { type: "select-text", required: true },
-    is_done: { type: "boolean", required: false },
-    tags: { type: "multi-relation", required: false },
-  })
-
-const entity = await featureRef.read()
+// Use with full type inference
+const projectRef = client.mdFile<ProjectSchema>('projects/new-app.md')
+const entity = await projectRef.read()
 if (entity instanceof Error) throw entity
 
-// 型安全なアクセス
-console.log(entity.content.meta.milestone) // string
-console.log(entity.content.meta.priority) // string
-console.log(entity.content.meta.is_done) // boolean | undefined
+// TypeScript knows these types
+const status: string = entity.content.meta().status
+const owner: string = entity.content.meta().owner
+const tags: string[] | undefined = entity.content.meta().tags
+const archived: boolean | undefined = entity.content.meta().archived
 ```
+
+## License
+
+MIT
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for development setup and guidelines.
