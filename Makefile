@@ -43,17 +43,17 @@ deploy-studio:
 # Run all checks
 check:
 	bun biome check . --fix --unsafe
-	bun --cwd packages/docs check
 	bun --cwd packages/docs-client check
 	bun --cwd packages/docs-router check
 	bun --cwd packages/docs-studio check
+	bun --cwd packages/docs check
 	bun test
 
 build:
-	bun run --cwd packages/docs build
 	bun run --cwd packages/docs-client build
 	bun run --cwd packages/docs-router build
 	bun run --cwd packages/docs-studio build
+	bun run --cwd packages/docs build
 
 build-client:
 	bun run --cwd packages/docs-client build

@@ -91,7 +91,7 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
     const filePaths = await this.fileSystem.readDirectoryFilePaths(archivePath)
 
     if (filePaths instanceof Error) {
-      return filePaths
+      return []
     }
 
     return filePaths
