@@ -24,9 +24,7 @@ export const POST = factory.createHandlers(
     const file = await fileRef.read()
 
     if (file instanceof Error) {
-      throw new HTTPException(500, {
-        message: file.message,
-      })
+      throw new HTTPException(500, { message: file.message })
     }
 
     return c.json(file.toJson(), 202)

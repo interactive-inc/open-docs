@@ -27,7 +27,15 @@ export const GET = factory.createHandlers(
 
     const indexFile = await directory.indexFile().read()
 
+    if (indexFile instanceof Error) {
+      throw new HTTPException(404, { message: indexFile.message })
+    }
+
     const relations = await directory.indexFile().readRelations()
+
+    if (relations instanceof Error) {
+      throw new HTTPException(500, { message: relations.message })
+    }
 
     const json = zDirectoryJson.parse({
       cwd: cwd(),
@@ -121,6 +129,10 @@ export const PUT = factory.createHandlers(
     const files = await directoryRef.readFiles()
 
     const relations = await indexFileRef.readRelations()
+
+    if (relations instanceof Error) {
+      throw new HTTPException(500, { message: relations.message })
+    }
 
     const json = zDirectoryJson.parse({
       cwd: cwd(),
