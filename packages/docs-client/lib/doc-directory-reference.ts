@@ -100,16 +100,13 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
   }
 
   async *filesGenerator(): AsyncGenerator<
-    DocFileMdReference<T> | DocFileUnknownReference | Error,
+    DocFileMdReference<T> | DocFileUnknownReference,
     void,
     unknown
   > {
     const fileNames = await this.fileNames()
 
-    if (fileNames instanceof Error) {
-      yield fileNames
-      return
-    }
+    if (fileNames instanceof Error) return
 
     // Process regular files
     for (const fileName of fileNames) {
@@ -134,10 +131,7 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
 
     const archivedFileNames = await this.archivedFileNames()
 
-    if (archivedFileNames instanceof Error) {
-      yield archivedFileNames
-      return
-    }
+    if (archivedFileNames instanceof Error) return
 
     // Process archived files
     for (const fileName of archivedFileNames) {
@@ -187,28 +181,22 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
     }
   }
 
-  async files(): Promise<
-    (DocFileMdReference<T> | DocFileUnknownReference)[] | Error
-  > {
+  async files(): Promise<(DocFileMdReference<T> | DocFileUnknownReference)[]> {
     const files: (DocFileMdReference<T> | DocFileUnknownReference)[] = []
 
     for await (const ref of this.filesGenerator()) {
-      if (ref instanceof Error) {
-        return ref
-      }
+      if (ref instanceof Error) continue
       files.push(ref)
     }
 
     return files
   }
 
-  async mdFiles(): Promise<DocFileMdReference<T>[] | Error> {
+  async mdFiles(): Promise<DocFileMdReference<T>[]> {
     const refs: DocFileMdReference<T>[] = []
 
     for await (const file of this.mdFilesGenerator()) {
-      if (file instanceof Error) {
-        return file
-      }
+      if (file instanceof Error) continue
       refs.push(file)
     }
 
@@ -250,15 +238,10 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
     })
   }
 
-  async readFiles(): Promise<
-    (DocFileMdEntity<T> | DocFileUnknownEntity)[] | Error
-  > {
+  async readFiles(): Promise<(DocFileMdEntity<T> | DocFileUnknownEntity)[]> {
     const entities: (DocFileMdEntity<T> | DocFileUnknownEntity)[] = []
 
     for await (const file of this.filesGenerator()) {
-      if (file instanceof Error) {
-        return file
-      }
       const entity = await file.read()
       if (entity instanceof Error) continue
       entities.push(entity)
@@ -267,13 +250,10 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
     return entities
   }
 
-  async readMdFiles(): Promise<DocFileMdEntity<T>[] | Error> {
+  async readMdFiles(): Promise<DocFileMdEntity<T>[]> {
     const entities: DocFileMdEntity<T>[] = []
 
     for await (const file of this.filesGenerator()) {
-      if (file instanceof Error) {
-        return file
-      }
       const entity = await file.read()
       if (entity instanceof Error) continue
       if (entity instanceof DocFileUnknownEntity) continue
@@ -283,13 +263,10 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
     return entities
   }
 
-  async readUnknownFiles(): Promise<DocFileUnknownEntity[] | Error> {
+  async readUnknownFiles(): Promise<DocFileUnknownEntity[]> {
     const entities: DocFileUnknownEntity[] = []
 
     for await (const file of this.filesGenerator()) {
-      if (file instanceof Error) {
-        return file
-      }
       const entity = await file.read()
       if (entity instanceof Error) continue
       if (entity instanceof DocFileMdEntity) continue
@@ -302,13 +279,13 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
   /**
    * Get list of subdirectory names
    */
-  async directoryNames(): Promise<string[] | Error> {
+  async directoryNames(): Promise<string[]> {
     const allFileNames = await this.fileSystem.readDirectoryFileNames(
       this.relativePath,
     )
 
     if (allFileNames instanceof Error) {
-      return allFileNames
+      return []
     }
 
     const directoryNames: string[] = []
@@ -333,11 +310,11 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
   /**
    * Get subdirectory references
    */
-  async directories(): Promise<DocDirectoryReference<T>[] | Error> {
+  async directories(): Promise<DocDirectoryReference<T>[]> {
     const directoryNames = await this.directoryNames()
 
     if (directoryNames instanceof Error) {
-      return directoryNames
+      return []
     }
 
     return directoryNames.map((dirName) => {
