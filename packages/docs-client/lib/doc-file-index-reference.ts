@@ -2,7 +2,12 @@ import { DocFileRelationReference } from "./doc-file-relation-reference"
 import type { DocFileSystem } from "./doc-file-system"
 import type { DocPathSystem } from "./doc-path-system"
 import { DocFileIndexEntity } from "./entities/doc-file-index-entity"
-import type { DocClientConfig, DocCustomSchema } from "./types"
+import type {
+  DocClientConfig,
+  DocCustomSchema,
+  DocFileIndexSchema,
+  RecordKey,
+} from "./types"
 import { DocFileIndexContentValue } from "./values/doc-file-index-content-value"
 import { DocFilePathValue } from "./values/doc-file-path-value"
 import type { DocRelationValue } from "./values/doc-relation-value"
@@ -102,6 +107,16 @@ export class DocFileIndexReference<T extends DocCustomSchema> {
       },
       this.customSchema,
     )
+  }
+
+  async readSchemaValue(): Promise<DocFileIndexSchema<RecordKey>> {
+    const indexFile = await this.read()
+
+    if (indexFile instanceof Error) {
+      return {}
+    }
+
+    return indexFile.content.meta().schema().value
   }
 
   /**

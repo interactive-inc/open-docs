@@ -1,4 +1,5 @@
 import { parse, stringify } from "yaml"
+import { INDEX_META } from "@/constants"
 import { zDocFileIndexMeta } from "@/models"
 import type {
   DocClientConfig,
@@ -14,19 +15,13 @@ import { DocFileIndexSchemaValue } from "./doc-file-index-schema-value"
  * File: index.md > content > FrontMatter
  */
 export class DocFileIndexMetaValue<T extends DocCustomSchema> {
-  /**
-   * Additional properties to include in the meta data
-   */
-  private readonly additionalProperties: Record<string, unknown>
-
   constructor(
     readonly value: DocFileIndexMeta<T>,
     readonly customSchema: T,
     private readonly config: DocClientConfig,
-    additionalProperties: Record<string, unknown> = {},
+    private readonly additionalProperties: Record<string, unknown> = {},
   ) {
     zDocFileIndexMeta.parse(value)
-    this.additionalProperties = additionalProperties
     Object.freeze(this)
   }
 
@@ -55,10 +50,8 @@ export class DocFileIndexMetaValue<T extends DocCustomSchema> {
    * Update icon field
    */
   withIcon(value: string | null): DocFileIndexMetaValue<T> {
-    const currentData = this.toJson()
-
     return new DocFileIndexMetaValue(
-      { ...currentData, icon: value },
+      { ...this.value, icon: value },
       this.customSchema,
       this.config,
       this.additionalProperties,
@@ -70,10 +63,7 @@ export class DocFileIndexMetaValue<T extends DocCustomSchema> {
    */
   withSchema(value: DocFileIndexSchema<keyof T>): DocFileIndexMetaValue<T> {
     return new DocFileIndexMetaValue(
-      {
-        ...this.value,
-        schema: value,
-      },
+      { ...this.value, schema: value },
       this.customSchema,
       this.config,
       this.additionalProperties,
@@ -92,7 +82,7 @@ export class DocFileIndexMetaValue<T extends DocCustomSchema> {
 
     return new DocFileIndexMetaValue<DocCustomSchema>(
       {
-        type: "index-meta" as const,
+        type: INDEX_META,
         icon: this.value.icon,
         schema: typedSchema,
       },
@@ -246,18 +236,39 @@ export class DocFileIndexMetaValue<T extends DocCustomSchema> {
     schema: Record<RecordKey, unknown>,
     customSchema: T,
   ): DocFileIndexSchema<keyof T> {
-    const record = {} as DocFileIndexSchema<keyof T>
-
-    const customSchemaKeys = Object.keys(customSchema) as Array<keyof T>
-
     const factory = new DocFileIndexSchemaFieldFactory()
 
-    for (const key of customSchemaKeys) {
-      const schemaValue = schema[key as keyof typeof schema]
-      const field = factory.normalize(key, schemaValue as never)
-      record[key] = field.value
+    // Process all keys from the actual schema when customSchema is empty
+    if (Object.keys(customSchema).length === 0) {
+      const dynamicRecord: Record<string, unknown> = {}
+      for (const key of Object.keys(schema)) {
+        const schemaValue = schema[key]
+        if (schemaValue !== undefined && schemaValue !== null) {
+          const field = factory.from(key, schemaValue as never)
+          // Ensure required field has a default value
+          const normalizedValue = {
+            ...field.value,
+            required: field.value.required ?? false,
+          }
+          dynamicRecord[key] = normalizedValue
+        }
+      }
+      return dynamicRecord as DocFileIndexSchema<keyof T>
     }
 
+    // Use customSchema keys when provided
+    const record = {} as DocFileIndexSchema<keyof T>
+    const customSchemaKeys = Object.keys(customSchema) as Array<keyof T>
+    for (const key of customSchemaKeys) {
+      const schemaValue = schema[key as keyof typeof schema]
+      const field = factory.from(key, schemaValue as never)
+      // Ensure required field has a default value for customSchema path too
+      const normalizedValue = {
+        ...field.value,
+        required: field.value.required ?? false,
+      }
+      record[key] = normalizedValue
+    }
     return record
   }
 
@@ -273,7 +284,12 @@ export class DocFileIndexMetaValue<T extends DocCustomSchema> {
     for (const key of customSchemaKeys) {
       const field = customSchema[key]
       const customSchemaField = factory.empty(key, field.type)
-      record[key] = customSchemaField.value
+      // Ensure required field has a default value
+      const normalizedValue = {
+        ...customSchemaField.value,
+        required: customSchemaField.value.required ?? false,
+      }
+      record[key] = normalizedValue
     }
 
     return record

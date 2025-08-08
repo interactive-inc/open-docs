@@ -67,6 +67,13 @@ export class DocFilePathValue {
   }
 
   /**
+   * Export as JSON format
+   */
+  toJson(): DocFilePath {
+    return this.value
+  }
+
+  /**
    * Create instance from relative path (DI support)
    */
   static fromPathWithSystem(
@@ -95,12 +102,5 @@ export class DocFilePathValue {
       },
       pathSystem,
     )
-  }
-
-  /**
-   * Export as JSON format
-   */
-  toJson(): DocFilePath {
-    return this.value
   }
 }

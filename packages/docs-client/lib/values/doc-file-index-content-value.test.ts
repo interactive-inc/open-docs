@@ -355,3 +355,264 @@ test("DocFileContentIndexValue - toJsonで元のデータ構造を返す", () =>
   )
   expect(value.toJson()).toEqual(data)
 })
+
+test("DocFileIndexContentValue - toJsonでmetaのschemaが空のcustomSchemaでも含まれる", () => {
+  const markdown = `---
+icon: 📄
+schema:
+  isDone:
+    type: boolean
+    title: 完了
+---
+
+# 機能
+
+テスト用のコンテンツ`
+
+  const contentValue = DocFileIndexContentValue.fromMarkdown(
+    markdown,
+    {}, // 空のcustomSchema
+    defaultTestConfig,
+  )
+
+  const json = contentValue.toJson()
+
+  // metaが含まれることを確認
+  expect(json.meta).toBeDefined()
+  expect(json.meta.type).toBe("index-meta")
+  expect(json.meta.icon).toBe("📄")
+
+  // schemaが含まれることを確認
+  expect(json.meta.schema).toBeDefined()
+  expect(Object.keys(json.meta.schema)).toContain("isDone")
+
+  // isDoneフィールドの詳細を確認
+  if ("isDone" in json.meta.schema) {
+    expect(json.meta.schema.isDone).toMatchObject({
+      type: "boolean",
+      title: "完了",
+      required: false,
+    })
+  }
+})
+
+test("DocFileIndexContentValue - 複数のスキーマフィールドが空のcustomSchemaで正しく処理される", () => {
+  const markdown = `---
+icon: 📂
+schema:
+  status:
+    type: select-text
+    title: ステータス
+    options:
+      - draft
+      - published
+      - archived
+  priority:
+    type: number
+    title: 優先度
+    required: true
+---
+
+# テストディレクトリ
+
+説明文`
+
+  const contentValue = DocFileIndexContentValue.fromMarkdown(
+    markdown,
+    {}, // 空のcustomSchema
+    defaultTestConfig,
+  )
+
+  const json = contentValue.toJson()
+
+  expect(json.meta.schema).toBeDefined()
+  expect(Object.keys(json.meta.schema)).toHaveLength(2)
+  expect(Object.keys(json.meta.schema)).toContain("status")
+  expect(Object.keys(json.meta.schema)).toContain("priority")
+
+  if ("status" in json.meta.schema) {
+    expect(json.meta.schema.status).toMatchObject({
+      type: "select-text",
+      title: "ステータス",
+      options: ["draft", "published", "archived"],
+    })
+  }
+
+  if ("priority" in json.meta.schema) {
+    expect(json.meta.schema.priority).toMatchObject({
+      type: "number",
+      title: "優先度",
+      required: true,
+    })
+  }
+})
+
+test("DocFileIndexContentValue - 全てのフィールドタイプが空のcustomSchemaで正しく処理される", () => {
+  const markdown = `---
+icon: 🗂️
+schema:
+  # 基本タイプ
+  textField:
+    type: text
+    title: テキストフィールド
+    required: true
+  numberField:
+    type: number
+    title: 数値フィールド
+    default: 0
+  booleanField:
+    type: boolean
+    title: 真偽値フィールド
+    required: false
+  
+  # 選択タイプ
+  selectTextField:
+    type: select-text
+    title: テキスト選択
+    options:
+      - option1
+      - option2
+      - option3
+  selectNumberField:
+    type: select-number
+    title: 数値選択
+    options: [10, 20, 30]
+  
+  # リレーションタイプ  
+  relationField:
+    type: relation
+    title: 単一リレーション
+    path: /docs/other
+  
+  # 複数値タイプ
+  multiTextField:
+    type: multi-text
+    title: 複数テキスト
+    default: []
+  multiNumberField:
+    type: multi-number
+    title: 複数数値
+  multiRelationField:
+    type: multi-relation
+    title: 複数リレーション
+    path: /docs/items
+  
+  # 複数選択タイプ
+  multiSelectTextField:
+    type: multi-select-text
+    title: 複数テキスト選択
+    options: ["A", "B", "C"]
+  multiSelectNumberField:
+    type: multi-select-number
+    title: 複数数値選択
+    options: [1, 2, 3, 4, 5]
+---
+
+# 全タイプテスト
+
+全てのフィールドタイプのテスト`
+
+  const contentValue = DocFileIndexContentValue.fromMarkdown(
+    markdown,
+    {}, // 空のcustomSchema
+    defaultTestConfig,
+  )
+
+  const json = contentValue.toJson()
+  const schema = json.meta.schema
+
+  // 全11フィールドタイプが存在することを確認
+  expect(Object.keys(schema)).toHaveLength(11)
+
+  // 基本タイプのチェック
+  if ("textField" in schema) {
+    expect(schema.textField).toMatchObject({
+      type: "text",
+      title: "テキストフィールド",
+      required: true,
+    })
+  }
+
+  if ("numberField" in schema) {
+    expect(schema.numberField).toMatchObject({
+      type: "number",
+      title: "数値フィールド",
+      default: 0,
+    })
+  }
+
+  if ("booleanField" in schema) {
+    expect(schema.booleanField).toMatchObject({
+      type: "boolean",
+      title: "真偽値フィールド",
+      required: false,
+    })
+  }
+
+  // 選択タイプのチェック
+  if ("selectTextField" in schema) {
+    expect(schema.selectTextField).toMatchObject({
+      type: "select-text",
+      title: "テキスト選択",
+      options: ["option1", "option2", "option3"],
+    })
+  }
+
+  if ("selectNumberField" in schema) {
+    expect(schema.selectNumberField).toMatchObject({
+      type: "select-number",
+      title: "数値選択",
+      options: [10, 20, 30],
+    })
+  }
+
+  // リレーションタイプのチェック
+  if ("relationField" in schema) {
+    expect(schema.relationField).toMatchObject({
+      type: "relation",
+      title: "単一リレーション",
+      path: "/docs/other",
+    })
+  }
+
+  // 複数値タイプのチェック
+  if ("multiTextField" in schema) {
+    expect(schema.multiTextField).toMatchObject({
+      type: "multi-text",
+      title: "複数テキスト",
+      default: [],
+    })
+  }
+
+  if ("multiNumberField" in schema) {
+    expect(schema.multiNumberField).toMatchObject({
+      type: "multi-number",
+      title: "複数数値",
+    })
+  }
+
+  if ("multiRelationField" in schema) {
+    expect(schema.multiRelationField).toMatchObject({
+      type: "multi-relation",
+      title: "複数リレーション",
+      path: "/docs/items",
+    })
+  }
+
+  // 複数選択タイプのチェック
+  if ("multiSelectTextField" in schema) {
+    expect(schema.multiSelectTextField).toMatchObject({
+      type: "multi-select-text",
+      title: "複数テキスト選択",
+      options: ["A", "B", "C"],
+    })
+  }
+
+  if ("multiSelectNumberField" in schema) {
+    expect(schema.multiSelectNumberField).toMatchObject({
+      type: "multi-select-number",
+      title: "複数数値選択",
+      options: [1, 2, 3, 4, 5],
+    })
+  }
+})

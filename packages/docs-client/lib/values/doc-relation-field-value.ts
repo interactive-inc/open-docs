@@ -56,7 +56,7 @@ export class DocRelationFieldValue {
   /**
    * Generate full relation path
    */
-  getFullPath(basePath: string): string {
+  fullPath(basePath: string): string {
     if (this.value.filePath.startsWith("/")) {
       return this.value.filePath
     }
@@ -72,6 +72,13 @@ export class DocRelationFieldValue {
       this.relationPath === other.relationPath &&
       this.isArray === other.isArray
     )
+  }
+
+  /**
+   * Convert to JSON format
+   */
+  toJson(): DocRelationField {
+    return { ...this.value }
   }
 
   /**
@@ -91,12 +98,5 @@ export class DocRelationFieldValue {
     isArray: boolean
   }): DocRelationFieldValue {
     return new DocRelationFieldValue(props)
-  }
-
-  /**
-   * Convert to JSON format
-   */
-  toJson(): DocRelationField {
-    return { ...this.value }
   }
 }

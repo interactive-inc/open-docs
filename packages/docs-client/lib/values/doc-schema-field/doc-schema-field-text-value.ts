@@ -15,19 +15,19 @@ export class DocSchemaFieldTextValue<T extends RecordKey> {
     Object.freeze(this)
   }
 
-  get type() {
+  get type(): "text" {
     return this.value.type
   }
 
-  get required() {
+  get required(): boolean {
     return this.value.required
   }
 
-  get title() {
+  get title(): string {
     return this.value.title ?? ""
   }
 
-  get description() {
+  get description(): string {
     return this.value.description ?? ""
   }
 
@@ -62,14 +62,14 @@ export class DocSchemaFieldTextValue<T extends RecordKey> {
     })
   }
 
-  static normalize(
+  static from(
     key: RecordKey,
     record: Record<RecordKey, unknown>,
   ): DocSchemaFieldTextValue<RecordKey> {
     const value = record as DocSchemaFieldText
     return new DocSchemaFieldTextValue(key, {
       type: value.type,
-      required: value.required,
+      required: value.required ?? false,
       title: value.title ?? null,
       description: value.description ?? null,
       default: value.default ?? null,

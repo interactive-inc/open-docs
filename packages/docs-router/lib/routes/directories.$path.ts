@@ -21,15 +21,20 @@ export const GET = factory.createHandlers(
       throw new HTTPException(400, { message: "パスが無効です。" })
     }
 
-    const directory = c.var.client.directory(currentPath)
-
-    const files = await directory.readFiles()
-
-    const indexFile = await directory.indexFile().read()
+    const indexFile = await c.var.client
+      .directory(currentPath)
+      .indexFile()
+      .read()
 
     if (indexFile instanceof Error) {
       throw new HTTPException(404, { message: indexFile.message })
     }
+
+    const schema = indexFile.content.meta().schema().value
+
+    const directory = c.var.client.directory(currentPath, schema)
+
+    const files = await directory.readFiles()
 
     const relations = await directory.indexFile().readRelations()
 
@@ -37,10 +42,22 @@ export const GET = factory.createHandlers(
       throw new HTTPException(500, { message: relations.message })
     }
 
+    const indexFileJson = indexFile.toJson()
+
+    // スキーマのrequiredフィールドがundefinedの場合、falseに修正
+    if (indexFileJson.content?.meta?.schema) {
+      for (const key in indexFileJson.content.meta.schema) {
+        const field = indexFileJson.content.meta.schema[key]
+        if (field && field.required === undefined) {
+          field.required = false
+        }
+      }
+    }
+
     const json = zDirectoryJson.parse({
       cwd: cwd(),
       files: files.map((file) => file.toJson()) as never,
-      indexFile: indexFile.toJson(),
+      indexFile: indexFileJson,
       relations: relations.map((relation) => {
         return relation.toJson()
       }),
@@ -134,10 +151,12 @@ export const PUT = factory.createHandlers(
       throw new HTTPException(500, { message: relations.message })
     }
 
+    const indexFileJson = indexFile.toJson()
+
     const json = zDirectoryJson.parse({
       cwd: cwd(),
       files: files.map((file) => file.toJson()) as never,
-      indexFile: indexFile.toJson(),
+      indexFile: indexFileJson,
       relations: relations.map((relation) => {
         return relation.toJson()
       }),

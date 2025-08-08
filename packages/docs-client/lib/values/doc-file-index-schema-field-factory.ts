@@ -60,52 +60,52 @@ export class DocFileIndexSchemaFieldFactory {
     throw new Error(`Unknown field type: ${type}`)
   }
 
-  normalize(key: RecordKey, record: Record<RecordKey, unknown>) {
+  from(key: RecordKey, record: Record<RecordKey, unknown>) {
     const value = record as { type: DocMetaFieldType }
     const type = value.type
 
     if (type === "text") {
-      return DocSchemaFieldTextValue.normalize(key, record)
+      return DocSchemaFieldTextValue.from(key, record)
     }
 
     if (type === "number") {
-      return DocSchemaFieldNumberValue.normalize(key, record)
+      return DocSchemaFieldNumberValue.from(key, record)
     }
 
     if (type === "boolean") {
-      return DocSchemaFieldBooleanValue.normalize(key, record)
+      return DocSchemaFieldBooleanValue.from(key, record)
     }
 
     if (type === "select-text") {
-      return DocSchemaFieldSelectTextValue.normalize(key, record)
+      return DocSchemaFieldSelectTextValue.from(key, record)
     }
 
     if (type === "select-number") {
-      return DocSchemaFieldSelectNumberValue.normalize(key, record)
+      return DocSchemaFieldSelectNumberValue.from(key, record)
     }
 
     if (type === "relation") {
-      return DocSchemaFieldRelationValue.normalize(key, record)
+      return DocSchemaFieldRelationValue.from(key, record)
     }
 
     if (type === "multi-text") {
-      return DocSchemaFieldMultiTextValue.normalize(key, record)
+      return DocSchemaFieldMultiTextValue.from(key, record)
     }
 
     if (type === "multi-number") {
-      return DocSchemaFieldMultiNumberValue.normalize(key, record)
+      return DocSchemaFieldMultiNumberValue.from(key, record)
     }
 
     if (type === "multi-select-text") {
-      return DocSchemaFieldMultiSelectTextValue.normalize(key, record)
+      return DocSchemaFieldMultiSelectTextValue.from(key, record)
     }
 
     if (type === "multi-select-number") {
-      return DocSchemaFieldMultiSelectNumberValue.normalize(key, record)
+      return DocSchemaFieldMultiSelectNumberValue.from(key, record)
     }
 
     if (type === "multi-relation") {
-      return DocSchemaFieldMultiRelationValue.normalize(key, record)
+      return DocSchemaFieldMultiRelationValue.from(key, record)
     }
 
     throw new Error(`Unknown field type: ${type}`)

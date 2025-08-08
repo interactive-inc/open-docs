@@ -25,7 +25,7 @@ test("リレーションファイルを値オブジェクトとして取得で�
     ],
   })
 
-  const files = relation.files
+  const files = relation.files()
   expect(files.length).toBe(2)
   expect(files[0]).toBeInstanceOf(DocRelationFileValue)
   expect(files[0].id).toBe("tech")
@@ -36,7 +36,7 @@ test("空のリレーションを作成できる", () => {
   const relation = DocRelationValue.empty("users/admins")
 
   expect(relation.path).toBe("users/admins")
-  expect(relation.files).toEqual([])
+  expect(relation.files()).toEqual([])
   expect(relation.fileCount).toBe(0)
   expect(relation.isEmpty).toBe(true)
 })
@@ -69,7 +69,7 @@ test("ラベルが未定義のファイルも処理できる", () => {
     ],
   })
 
-  const files = relation.files
+  const files = relation.files()
   expect(files[0].label).toBe("2024-01")
   expect(files[1].label).toBe("2024年2月")
 })

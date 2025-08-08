@@ -15,23 +15,23 @@ export class DocSchemaFieldBooleanValue<T extends RecordKey> {
     Object.freeze(this)
   }
 
-  get type() {
+  get type(): "boolean" {
     return this.value.type
   }
 
-  get required() {
+  get required(): boolean {
     return this.value.required
   }
 
-  get title() {
+  get title(): string {
     return this.value.title ?? ""
   }
 
-  get description() {
+  get description(): string {
     return this.value.description ?? ""
   }
 
-  get default() {
+  get default(): boolean | null {
     return this.value.default
   }
 
@@ -62,14 +62,14 @@ export class DocSchemaFieldBooleanValue<T extends RecordKey> {
     })
   }
 
-  static normalize(
+  static from(
     key: RecordKey,
     record: Record<RecordKey, unknown>,
   ): DocSchemaFieldBooleanValue<RecordKey> {
     const value = record as DocSchemaFieldBoolean
     return new DocSchemaFieldBooleanValue(key, {
       type: value.type,
-      required: value.required,
+      required: value.required ?? false,
       title: value.title ?? null,
       description: value.description ?? null,
       default: value.default ?? null,

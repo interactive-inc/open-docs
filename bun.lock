@@ -20,21 +20,21 @@
     },
     "packages/docs": {
       "name": "@interactive-inc/docs",
-      "version": "1.0.3",
+      "version": "1.0.7",
       "bin": {
         "docs": "bin/docs.js",
       },
       "dependencies": {
-        "@hono/node-server": "^1.0.0",
-        "@interactive-inc/docs-client": "^1.0.0",
-        "@interactive-inc/docs-router": "^1.0.0",
-        "@interactive-inc/docs-studio": "^1.0.0",
-        "hono": "^4.0.0",
+        "@hono/node-server": "latest",
+        "@interactive-inc/docs-client": "latest",
+        "@interactive-inc/docs-router": "latest",
+        "@interactive-inc/docs-studio": "latest",
+        "hono": "latest",
       },
     },
     "packages/docs-client": {
       "name": "@interactive-inc/docs-client",
-      "version": "1.0.4",
+      "version": "1.0.6",
       "dependencies": {
         "yaml": "^2.0.0",
       },
@@ -44,10 +44,10 @@
     },
     "packages/docs-router": {
       "name": "@interactive-inc/docs-router",
-      "version": "1.0.0",
+      "version": "1.0.2",
       "dependencies": {
         "@hono/zod-validator": "^0.7.0",
-        "@interactive-inc/docs-client": "^1.0.0",
+        "@interactive-inc/docs-client": "file:../docs-client",
         "hono": "^4.0.0",
       },
       "peerDependencies": {
@@ -56,7 +56,7 @@
     },
     "packages/docs-studio": {
       "name": "@interactive-inc/docs-studio",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "dependencies": {
         "@hono/node-server": "^1.0.0",
       },
@@ -288,7 +288,7 @@
 
     "@floating-ui/utils": ["@floating-ui/utils@0.2.10", "", {}, "sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ=="],
 
-    "@hono/node-server": ["@hono/node-server@1.17.1", "", { "peerDependencies": { "hono": "^4" } }, "sha512-SY79W/C+2b1MyAzmIcV32Q47vO1b5XwLRwj8S9N6Jr5n1QCkIfAIH6umOSgqWZ4/v67hg6qq8Ha5vZonVidGsg=="],
+    "@hono/node-server": ["@hono/node-server@1.18.1", "", { "peerDependencies": { "hono": "^4" } }, "sha512-O3puG/b7owYYmoQ2XPBf3SxBz6Dhk5VmWFhbaBU8/5wcUaXUPS0goxaI2Zfyg+Cu14ILJHEU7IFRw7miFxuXxg=="],
 
     "@hono/zod-validator": ["@hono/zod-validator@0.7.2", "", { "peerDependencies": { "hono": ">=3.9.0", "zod": "^3.25.0 || ^4.0.0" } }, "sha512-ub5eL/NeZ4eLZawu78JpW/J+dugDAYhwqUIdp9KYScI6PZECij4Hx4UsrthlEUutqDDhPwRI0MscUfNkvn/mqQ=="],
 
@@ -856,7 +856,7 @@
 
     "hast-util-whitespace": ["hast-util-whitespace@3.0.0", "", { "dependencies": { "@types/hast": "^3.0.0" } }, "sha512-88JUN06ipLwsnv+dVn+OIYOvAuvBMy/Qoi6O7mQHxdPXpjy+Cd6xRkWwux7DKO+4sYILtLBRIKgsdpS2gQc7qw=="],
 
-    "hono": ["hono@4.8.5", "", {}, "sha512-Up2cQbtNz1s111qpnnECdTGqSIUIhZJMLikdKkshebQSEBcoUKq6XJayLGqSZWidiH0zfHRCJqFu062Mz5UuRA=="],
+    "hono": ["hono@4.8.12", "", {}, "sha512-MQSKk1Mg7b74k8l+A025LfysnLtXDKkE4pLaSsYRQC5iy85lgZnuyeQ1Wynair9mmECzoLu+FtJtqNZSoogBDQ=="],
 
     "hookable": ["hookable@5.5.3", "", {}, "sha512-Yc+BQe8SvoXH1643Qez1zqLRmbA5rCL+sSmk6TVos0LWVfNIB7PGncdlId77WzLGSIB5KaWgTaNTs2lNVEI6VQ=="],
 
@@ -1267,6 +1267,16 @@
     "zod-to-json-schema": ["zod-to-json-schema@3.24.6", "", { "peerDependencies": { "zod": "^3.24.1" } }, "sha512-h/z3PKvcTcTetyjl1fkj79MHNEjm+HpD6NXheWjzOekY7kV+lwDYnHw+ivHkijnCSMz1yJaWBD9vu/Fcmk+vEg=="],
 
     "zwitch": ["zwitch@2.0.4", "", {}, "sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A=="],
+
+    "@interactive-inc/docs/@interactive-inc/docs-client": ["@interactive-inc/docs-client@1.0.5", "", { "dependencies": { "yaml": "^2.0.0" }, "peerDependencies": { "zod": "^4.0.0" } }, "sha512-QVnX75sGL1hO8T+H9mC7fxPA1DOKpWosrlrzL1HoV4FLkeY2dj3Um2klcKe5uSm916Lsr1ePdO0ZaLWe8VtFRQ=="],
+
+    "@interactive-inc/docs/@interactive-inc/docs-router": ["@interactive-inc/docs-router@1.0.2", "", { "dependencies": { "@hono/zod-validator": "^0.7.0", "@interactive-inc/docs-client": "latest", "hono": "^4.0.0" }, "peerDependencies": { "zod": "^4.0.0" } }, "sha512-Z+we/wpK/icRMifOFMJE2qF9v/FHXp7I53wUoZY/JxsjGb5l0OBHyPIdH8FPvkZANM9Oq8MhNJODp03YFv/yaQ=="],
+
+    "@interactive-inc/docs/@interactive-inc/docs-studio": ["@interactive-inc/docs-studio@1.0.1", "", { "dependencies": { "@hono/node-server": "^1.0.0" }, "peerDependencies": { "hono": "^4.0.0" } }, "sha512-O/CVC9v02XG0SI3Ew6Dozhh2FTBhGV/YdJvghLqhXLHWcKMxUMLnFEf2Rx5YzETA+tTkYW41xXOJmARXY8pk+A=="],
+
+    "@interactive-inc/docs-router/@interactive-inc/docs-client": ["@interactive-inc/docs-client@file:packages/docs-client", { "dependencies": { "yaml": "^2.0.0" }, "peerDependencies": { "zod": "^4.0.0" } }],
+
+    "@interactive-inc/docs-studio/@hono/node-server": ["@hono/node-server@1.17.1", "", { "peerDependencies": { "hono": "^4" } }, "sha512-SY79W/C+2b1MyAzmIcV32Q47vO1b5XwLRwj8S9N6Jr5n1QCkIfAIH6umOSgqWZ4/v67hg6qq8Ha5vZonVidGsg=="],
 
     "@isaacs/cliui/string-width": ["string-width@5.1.2", "", { "dependencies": { "eastasianwidth": "^0.2.0", "emoji-regex": "^9.2.2", "strip-ansi": "^7.0.1" } }, "sha512-HnLOCR3vjcY8beoNLtcjZ5/nxn2afmME6lhrDrebokqMap+XbeW8n9TXpPDOqdGK5qcI3oT0GKTW6wC7EMiVqA=="],
 

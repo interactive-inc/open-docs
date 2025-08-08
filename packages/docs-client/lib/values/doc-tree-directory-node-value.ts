@@ -1,3 +1,4 @@
+import { DOC_NODE_TYPE_DIRECTORY } from "@/constants"
 import { zDocTreeDirectoryNode, zDocTreeNode } from "@/models"
 import type { DocTreeDirectoryNode, DocTreeNode } from "@/types"
 import { DocTreeFileNodeValue } from "./doc-tree-file-node-value"
@@ -41,8 +42,8 @@ export class DocTreeDirectoryNodeValue {
     return this.props.children
   }
 
-  get type(): "directory" {
-    return "directory"
+  get type(): typeof DOC_NODE_TYPE_DIRECTORY {
+    return DOC_NODE_TYPE_DIRECTORY
   }
 
   /**
@@ -52,7 +53,7 @@ export class DocTreeDirectoryNodeValue {
     return {
       name: this.name,
       path: this.path,
-      type: "directory",
+      type: DOC_NODE_TYPE_DIRECTORY,
       icon: this.icon,
       title: this.title,
       children: this.children.map((child) => child.toJson()),

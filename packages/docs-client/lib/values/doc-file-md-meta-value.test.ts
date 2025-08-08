@@ -83,3 +83,101 @@ test("DocFileMdMetaValue - withPropertyメソッド", () => {
   expect(value.value.title).toBe("元のタイトル")
   expect(updated.value.title).toBe("新しいタイトル")
 })
+
+test("DocFileMdMetaValue - 空のcustomSchemaでschemaFieldメソッドがエラーをスローする", () => {
+  // 空のcustomSchemaで初期化
+  const value = new DocFileMdMetaValue(
+    {
+      isDone: false,
+      priority: 1,
+      tags: ["test", "sample"],
+    },
+    {}, // 空のcustomSchema
+  )
+
+  // schemaFieldメソッドが存在しないフィールドに対してエラーをスローすることを確認
+  expect(() => value.schemaField("isDone" as never)).toThrow(
+    'Field "isDone" does not exist in schema.',
+  )
+})
+
+test("DocFileMdMetaValue - 存在しないフィールドへのアクセスでエラーをスローする", () => {
+  const value = new DocFileMdMetaValue(
+    {
+      existingField: "value",
+    },
+    {}, // 空のcustomSchema
+  )
+
+  // valueに存在しないフィールドへのアクセスでエラーをスローすることを確認
+  expect(() => value.schemaField("nonExistent" as never)).toThrow(
+    'Field "nonExistent" does not exist in schema.',
+  )
+
+  // isDoneのような特定のフィールドも同様
+  expect(() => value.schemaField("isDone" as never)).toThrow(
+    'Field "isDone" does not exist in schema.',
+  )
+})
+
+test("DocFileMdMetaValue - relationタイプのスキーマ定義", () => {
+  const value = new DocFileMdMetaValue(
+    {
+      relatedDoc: "docs/other.md",
+      relatedDocs: ["docs/doc1.md", "docs/doc2.md"],
+    },
+    {
+      relatedDoc: { type: "relation", required: false },
+      relatedDocs: { type: "multi-relation", required: false },
+    },
+  )
+
+  // 定義されたスキーマが正しく取得できることを確認
+  const relatedDocField = value.schemaField("relatedDoc")
+  expect(relatedDocField).toMatchObject({
+    type: "relation",
+    required: false,
+  })
+
+  const relatedDocsField = value.schemaField("relatedDocs")
+  expect(relatedDocsField).toMatchObject({
+    type: "multi-relation",
+    required: false,
+  })
+})
+
+test("DocFileMdMetaValue - 空配列のスキーマ定義", () => {
+  const value = new DocFileMdMetaValue(
+    {
+      emptyArray: [],
+    },
+    {
+      emptyArray: { type: "multi-text", required: false },
+    },
+  )
+
+  // 定義されたスキーマが正しく取得できることを確認
+  const emptyArrayField = value.schemaField("emptyArray")
+  expect(emptyArrayField).toMatchObject({
+    type: "multi-text",
+    required: false,
+  })
+})
+
+test("DocFileMdMetaValue - customSchemaが定義されている場合は優先される", () => {
+  const value = new DocFileMdMetaValue(
+    {
+      status: "draft",
+    },
+    {
+      status: { type: "select-text", required: true },
+    },
+  )
+
+  // customSchemaが定義されている場合はそれが優先される
+  const statusField = value.schemaField("status")
+  expect(statusField).toMatchObject({
+    type: "select-text",
+    required: true,
+  })
+})

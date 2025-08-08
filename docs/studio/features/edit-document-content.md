@@ -1,6 +1,6 @@
 ---
 milestone: 2028.01.01
-is-done: false
+is-done: true
 priority: 1
 ---
 

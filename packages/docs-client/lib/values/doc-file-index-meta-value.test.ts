@@ -328,3 +328,123 @@ test("DocFrontMatterIndexValue - indexMetaIncludesに含まれないプロパテ
   expect(yaml).not.toContain("features:")
   expect(yaml).not.toContain("otherProp:")
 })
+
+test("DocFrontMatterIndexValue - 空のcustomSchemaでも実際のschemaを正しく処理", () => {
+  // Markdownテキストから生成（実際のindex.mdと同じ形式）
+  const markdownText = `---
+icon: 📄
+schema:
+  isDone:
+    type: boolean
+    title: 完了
+---
+
+# 機能
+
+テストコンテンツ`
+
+  // 空のcustomSchemaで生成
+  const value = DocFileIndexMetaValue.from(
+    markdownText,
+    {}, // 空のcustomSchema
+    defaultTestConfig,
+  )
+
+  // schemaが正しく抽出されることを確認
+  const schema = value.schema()
+  const schemaJson = schema.toJson()
+
+  // isDoneフィールドが存在することを確認
+  expect(schemaJson).toHaveProperty("isDone")
+  if ("isDone" in schemaJson) {
+    expect(schemaJson.isDone).toMatchObject({
+      type: "boolean",
+      title: "完了",
+    })
+  }
+
+  // iconも正しく設定されていることを確認
+  expect(value.icon).toBe("📄")
+})
+
+test("DocFrontMatterIndexValue - fromRecordで空のcustomSchemaでも実際のschemaを処理", () => {
+  const record = {
+    icon: "📄",
+    schema: {
+      milestone: {
+        type: "relation",
+        title: "マイルストーン",
+        path: "/docs/studio/milestones",
+      },
+      priority: {
+        type: "select-number",
+        title: "優先度",
+        options: [0, 1, 2],
+      },
+      isDone: {
+        type: "boolean",
+        title: "完了",
+      },
+    },
+  }
+
+  // 空のcustomSchemaで生成
+  const value = DocFileIndexMetaValue.fromRecord(
+    record,
+    {}, // 空のcustomSchema
+    defaultTestConfig,
+  )
+
+  const schemaJson = value.schema().toJson()
+
+  // すべてのフィールドが正しく処理されることを確認
+  expect(Object.keys(schemaJson)).toHaveLength(3)
+
+  if ("milestone" in schemaJson) {
+    expect(schemaJson.milestone).toMatchObject({
+      type: "relation",
+      title: "マイルストーン",
+      path: "/docs/studio/milestones",
+    })
+  }
+
+  if ("priority" in schemaJson) {
+    expect(schemaJson.priority).toMatchObject({
+      type: "select-number",
+      title: "優先度",
+      options: [0, 1, 2],
+    })
+  }
+
+  if ("isDone" in schemaJson) {
+    expect(schemaJson.isDone).toMatchObject({
+      type: "boolean",
+      title: "完了",
+    })
+  }
+})
+
+test("DocFrontMatterIndexValue - toJsonでschemaが含まれる", () => {
+  const record = {
+    icon: "📄",
+    schema: {
+      isDone: {
+        type: "boolean",
+        title: "完了",
+      },
+    },
+  }
+
+  const value = DocFileIndexMetaValue.fromRecord(
+    record,
+    {}, // 空のcustomSchema
+    defaultTestConfig,
+  )
+
+  const json = value.toJson()
+
+  expect(json.type).toBe("index-meta")
+  expect(json.icon).toBe("📄")
+  expect(json.schema).toBeDefined()
+  expect(Object.keys(json.schema)).toContain("isDone")
+})

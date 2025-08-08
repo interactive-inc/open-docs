@@ -19,23 +19,23 @@ export class DocSchemaFieldMultiTextValue<T extends RecordKey> {
     }
   }
 
-  get type() {
+  get type(): "multi-text" {
     return this.value.type
   }
 
-  get required() {
+  get required(): boolean {
     return this.value.required
   }
 
-  get title() {
+  get title(): string {
     return this.value.title ?? ""
   }
 
-  get description() {
+  get description(): string {
     return this.value.description ?? ""
   }
 
-  get default() {
+  get default(): string[] | null {
     return this.value.default
   }
 
@@ -66,14 +66,14 @@ export class DocSchemaFieldMultiTextValue<T extends RecordKey> {
     })
   }
 
-  static normalize(
+  static from(
     key: RecordKey,
     record: Record<RecordKey, unknown>,
   ): DocSchemaFieldMultiTextValue<RecordKey> {
     const value = record as DocSchemaFieldMultiText
     return new DocSchemaFieldMultiTextValue(key, {
       type: value.type,
-      required: value.required,
+      required: value.required ?? false,
       title: value.title ?? null,
       description: value.description ?? null,
       default: value.default ?? null,

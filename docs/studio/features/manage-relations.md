@@ -1,7 +1,5 @@
 ---
-milestone: 2028.01.01
 is-done: true
-priority: 2
 ---
 
 # ドキュメント間のリレーションを管理する

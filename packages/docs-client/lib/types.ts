@@ -42,17 +42,6 @@ import type {
   zDocSchemaFieldSelectText,
   zDocSchemaFieldText,
 } from "./models"
-import type { DocSchemaFieldBooleanValue } from "./values/doc-schema-field/doc-schema-field-boolean-value"
-import type { DocSchemaFieldMultiNumberValue } from "./values/doc-schema-field/doc-schema-field-multi-number-value"
-import type { DocSchemaFieldMultiRelationValue } from "./values/doc-schema-field/doc-schema-field-multi-relation-value"
-import type { DocSchemaFieldMultiSelectNumberValue } from "./values/doc-schema-field/doc-schema-field-multi-select-number-value"
-import type { DocSchemaFieldMultiSelectTextValue } from "./values/doc-schema-field/doc-schema-field-multi-select-text-value"
-import type { DocSchemaFieldMultiTextValue } from "./values/doc-schema-field/doc-schema-field-multi-text-value"
-import type { DocSchemaFieldNumberValue } from "./values/doc-schema-field/doc-schema-field-number-value"
-import type { DocSchemaFieldRelationValue } from "./values/doc-schema-field/doc-schema-field-relation-value"
-import type { DocSchemaFieldSelectNumberValue } from "./values/doc-schema-field/doc-schema-field-select-number-value"
-import type { DocSchemaFieldSelectTextValue } from "./values/doc-schema-field/doc-schema-field-select-text-value"
-import type { DocSchemaFieldTextValue } from "./values/doc-schema-field/doc-schema-field-text-value"
 
 /**
  * Text field type
@@ -487,7 +476,7 @@ export type DocDirectory<T extends DocCustomSchema> = {
   relations: DocRelation[]
 }
 
-export type RecordKey = string | number | symbol
+export type RecordKey = PropertyKey
 
 /**
  * DocClient configuration
@@ -568,47 +557,10 @@ export type GetValueType<
   ? BaseFieldValueType<ExtractFieldType<T[K]>>
   : BaseFieldValueType<ExtractFieldType<T[K]>> | undefined | null
 
-/**
- * Type definitions for DocFileIndexSchema
- */
-export type ExtractIndexFieldType<T> = T extends { type: infer Type }
-  ? Type
-  : never
-
 export type GetIndexFieldType<
   Schema extends DocFileIndexSchema<RecordKey>,
   K extends keyof Schema,
 > = Schema[K] extends DocFileIndexSchemaField ? Schema[K] : never
-
-// Get specific field type from DocFileIndexSchema
-export type GetIndexFieldValueType<
-  Schema extends DocFileIndexSchema<RecordKey>,
-  K extends keyof Schema,
-> = Schema[K] extends { type: infer Type }
-  ? Type extends "text"
-    ? DocSchemaFieldTextValue<K>
-    : Type extends "number"
-      ? DocSchemaFieldNumberValue<K>
-      : Type extends "boolean"
-        ? DocSchemaFieldBooleanValue<K>
-        : Type extends "relation"
-          ? DocSchemaFieldRelationValue<K>
-          : Type extends "select-text"
-            ? DocSchemaFieldSelectTextValue<K>
-            : Type extends "select-number"
-              ? DocSchemaFieldSelectNumberValue<K>
-              : Type extends "multi-text"
-                ? DocSchemaFieldMultiTextValue<K>
-                : Type extends "multi-number"
-                  ? DocSchemaFieldMultiNumberValue<K>
-                  : Type extends "multi-relation"
-                    ? DocSchemaFieldMultiRelationValue<K>
-                    : Type extends "multi-select-text"
-                      ? DocSchemaFieldMultiSelectTextValue<K>
-                      : Type extends "multi-select-number"
-                        ? DocSchemaFieldMultiSelectNumberValue<K>
-                        : never
-  : never
 
 /**
  * Infers DocFileMd type from the result of defineSchema

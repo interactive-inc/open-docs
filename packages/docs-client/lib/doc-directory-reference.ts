@@ -425,15 +425,6 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
   }
 
   /**
-   * Generate unique filename
-   */
-  private uniqueFileName(prefix = "document"): string {
-    const [uuid] = crypto.randomUUID().split("-")
-
-    return `${prefix}-${uuid}.md`
-  }
-
-  /**
    * Create new Markdown file
    */
   async createMdFile(fileName?: string): Promise<DocFileMdReference<T>> {
@@ -461,5 +452,14 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
     }
 
     return fileRef
+  }
+
+  /**
+   * Generate unique filename
+   */
+  private uniqueFileName(prefix = "document"): string {
+    const [uuid] = crypto.randomUUID().split("-")
+
+    return `${prefix}-${uuid}.md`
   }
 }

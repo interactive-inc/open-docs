@@ -65,39 +65,56 @@ export class DocFileIndexSchemaValue<T extends DocCustomSchema> {
                           : never
     : never {
     const fieldValue = this.value[key]
+
     if (!fieldValue) {
       throw new Error(`Field "${key as string}" not found in schema`)
     }
 
-    switch (fieldValue.type) {
-      case "text":
-        return new DocSchemaFieldTextValue(key, fieldValue) as never
-      case "number":
-        return new DocSchemaFieldNumberValue(key, fieldValue) as never
-      case "boolean":
-        return new DocSchemaFieldBooleanValue(key, fieldValue) as never
-      case "relation":
-        return new DocSchemaFieldRelationValue(key, fieldValue) as never
-      case "select-text":
-        return new DocSchemaFieldSelectTextValue(key, fieldValue) as never
-      case "select-number":
-        return new DocSchemaFieldSelectNumberValue(key, fieldValue) as never
-      case "multi-text":
-        return new DocSchemaFieldMultiTextValue(key, fieldValue) as never
-      case "multi-number":
-        return new DocSchemaFieldMultiNumberValue(key, fieldValue) as never
-      case "multi-relation":
-        return new DocSchemaFieldMultiRelationValue(key, fieldValue) as never
-      case "multi-select-text":
-        return new DocSchemaFieldMultiSelectTextValue(key, fieldValue) as never
-      case "multi-select-number":
-        return new DocSchemaFieldMultiSelectNumberValue(
-          key,
-          fieldValue,
-        ) as never
-      default:
-        throw new Error("Unknown field type")
+    if (fieldValue.type === "text") {
+      return new DocSchemaFieldTextValue(key, fieldValue) as never
     }
+
+    if (fieldValue.type === "number") {
+      return new DocSchemaFieldNumberValue(key, fieldValue) as never
+    }
+
+    if (fieldValue.type === "boolean") {
+      return new DocSchemaFieldBooleanValue(key, fieldValue) as never
+    }
+
+    if (fieldValue.type === "relation") {
+      return new DocSchemaFieldRelationValue(key, fieldValue) as never
+    }
+
+    if (fieldValue.type === "select-text") {
+      return new DocSchemaFieldSelectTextValue(key, fieldValue) as never
+    }
+
+    if (fieldValue.type === "select-number") {
+      return new DocSchemaFieldSelectNumberValue(key, fieldValue) as never
+    }
+
+    if (fieldValue.type === "multi-text") {
+      return new DocSchemaFieldMultiTextValue(key, fieldValue) as never
+    }
+
+    if (fieldValue.type === "multi-number") {
+      return new DocSchemaFieldMultiNumberValue(key, fieldValue) as never
+    }
+
+    if (fieldValue.type === "multi-relation") {
+      return new DocSchemaFieldMultiRelationValue(key, fieldValue) as never
+    }
+
+    if (fieldValue.type === "multi-select-text") {
+      return new DocSchemaFieldMultiSelectTextValue(key, fieldValue) as never
+    }
+
+    if (fieldValue.type === "multi-select-number") {
+      return new DocSchemaFieldMultiSelectNumberValue(key, fieldValue) as never
+    }
+
+    throw new Error("Unknown field type")
   }
 
   relation<K extends keyof T>(key: K): DocSchemaFieldRelationValue<K> {
@@ -126,32 +143,6 @@ export class DocFileIndexSchemaValue<T extends DocCustomSchema> {
     }
 
     return new DocSchemaFieldMultiRelationValue(key, fieldValue)
-  }
-
-  /**
-   * Get all fields
-   * Note: For type safety, it's recommended to use field() method individually
-   */
-  get fields(): DocFileIndexSchema<keyof T>[keyof T][] {
-    return this.fieldNames.map((name) => {
-      const value = this.value[name]
-      if (value === undefined) {
-        throw new Error(`Field "${name as never}" does not exist in schema.`)
-      }
-      return this.value[name]
-    })
-  }
-
-  get relationFields(): (
-    | DocSchemaFieldRelationValue<string>
-    | DocSchemaFieldMultiRelationValue<string>
-  )[] {
-    return this.fields.filter((t) => {
-      return (
-        t instanceof DocSchemaFieldRelationValue ||
-        t instanceof DocSchemaFieldMultiRelationValue
-      )
-    })
   }
 
   toJson(): DocFileIndexSchema<keyof T> {

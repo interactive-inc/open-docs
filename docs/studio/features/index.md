@@ -1,6 +1,9 @@
 ---
 icon: 📄
-schema: {}
+schema:
+  is-done:
+    type: boolean
+    title: 完了
 ---
 
 # 機能

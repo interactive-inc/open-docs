@@ -5,7 +5,6 @@ import type {
   Equals,
   ExtractFieldType,
   FieldValueType,
-  GetIndexFieldValueType,
   GetValueType,
   SchemaToValueType,
 } from "./types"
@@ -116,36 +115,6 @@ test("SchemaToValueType - スキーマ全体から値の型を生成", () => {
   type _ActualValue = SchemaToValueType<TestSchema>
   // 実際には optional プロパティが null を許容するため、完全に一致しない
   // 主要なプロパティをチェック
-})
-
-// GetMdFieldValueType は存在しないのでテストを削除
-
-test("GetIndexFieldValueType - Indexフィールドの型を取得", () => {
-  type Schema = {
-    name: {
-      type: "text"
-      required: true
-      title: null
-      description: null
-      default: null
-    }
-    items: {
-      type: "multi-relation"
-      required: true
-      title: null
-      description: null
-      default: null
-      path: ""
-    }
-  }
-
-  // text フィールドの型テスト
-  type NameFieldType = GetIndexFieldValueType<Schema, "name">
-  assertType<Equals<NameFieldType["type"], "text">>()
-
-  // multi-relation フィールドの型テスト
-  type ItemsFieldType = GetIndexFieldValueType<Schema, "items">
-  assertType<Equals<ItemsFieldType["type"], "multi-relation">>()
 })
 
 test("GetValueType - スキーマフィールドから値の型を取得", () => {

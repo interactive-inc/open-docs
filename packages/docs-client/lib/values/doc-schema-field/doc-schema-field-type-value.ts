@@ -11,51 +11,51 @@ export class DocSchemaFieldTypeValue<_T extends RecordKey> {
   }
 
   /**
-   * Get type value
+   * Get the type value
    */
-  get type() {
+  get type(): DocMetaFieldType {
     return this.value
   }
 
   /**
    * Check if text type
    */
-  get isText() {
+  get isText(): boolean {
     return this.value === "text"
   }
 
   /**
    * Check if number type
    */
-  get isNumber() {
+  get isNumber(): boolean {
     return this.value === "number"
   }
 
   /**
    * Check if boolean type
    */
-  get isBoolean() {
+  get isBoolean(): boolean {
     return this.value === "boolean"
   }
 
   /**
    * Check if select type (single)
    */
-  get isSelect() {
+  get isSelect(): boolean {
     return this.value === "select-text" || this.value === "select-number"
   }
 
   /**
    * Check if relation type
    */
-  get isRelation() {
+  get isRelation(): boolean {
     return this.value === "relation" || this.value === "multi-relation"
   }
 
   /**
    * Check if array type
    */
-  get isArray() {
+  get isArray(): boolean {
     return (
       this.value === "multi-text" ||
       this.value === "multi-number" ||
@@ -68,7 +68,7 @@ export class DocSchemaFieldTypeValue<_T extends RecordKey> {
   /**
    * Check if single value type
    */
-  get isSingle() {
+  get isSingle(): boolean {
     return !this.isArray
   }
 

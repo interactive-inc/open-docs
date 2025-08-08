@@ -15,23 +15,23 @@ export class DocSchemaFieldRelationValue<T extends RecordKey> {
     Object.freeze(this)
   }
 
-  get type() {
+  get type(): "relation" {
     return this.value.type
   }
 
-  get required() {
+  get required(): boolean {
     return this.value.required
   }
 
-  get title() {
+  get title(): string {
     return this.value.title ?? ""
   }
 
-  get description() {
+  get description(): string {
     return this.value.description ?? ""
   }
 
-  get default() {
+  get default(): string | null {
     return this.value.default
   }
 
@@ -67,14 +67,14 @@ export class DocSchemaFieldRelationValue<T extends RecordKey> {
     })
   }
 
-  static normalize(
+  static from(
     key: RecordKey,
     record: Record<RecordKey, unknown>,
   ): DocSchemaFieldRelationValue<RecordKey> {
     const value = record as DocSchemaFieldRelation
     return new DocSchemaFieldRelationValue(key, {
       type: value.type,
-      required: value.required,
+      required: value.required ?? false,
       title: value.title ?? null,
       description: value.description ?? null,
       default: value.default ?? null,

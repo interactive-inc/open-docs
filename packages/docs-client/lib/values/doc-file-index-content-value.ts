@@ -101,11 +101,13 @@ export class DocFileIndexContentValue<T extends DocCustomSchema> {
     config: DocClientConfig,
   ) {
     const engine = new DocMarkdownSystem()
+
     const frontMatter = DocFileIndexMetaValue.from(
       markdown,
       customSchema,
       config,
     )
+
     return new DocFileIndexContentValue<T>(
       {
         type: "markdown-index",
@@ -193,6 +195,12 @@ export class DocFileIndexContentValue<T extends DocCustomSchema> {
    * Output in JSON format
    */
   toJson(): DocFileIndexContent<T> {
-    return this.value
+    // Ensure meta includes the schema
+    const metaValue = this.meta()
+    const metaJson = metaValue.toJson()
+    return {
+      ...this.value,
+      meta: metaJson,
+    }
   }
 }

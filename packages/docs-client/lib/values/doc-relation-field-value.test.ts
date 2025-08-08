@@ -54,7 +54,7 @@ test("完全なリレーションパスを生成できる", () => {
     isArray: false,
   })
 
-  expect(field.getFullPath("/docs")).toBe("/docs/users/authors")
+  expect(field.fullPath("/docs")).toBe("/docs/users/authors")
 })
 
 test("絶対パスの場合はそのまま返す", () => {
@@ -64,7 +64,7 @@ test("絶対パスの場合はそのまま返す", () => {
     isArray: false,
   })
 
-  expect(field.getFullPath("/docs")).toBe("/users/authors")
+  expect(field.fullPath("/docs")).toBe("/users/authors")
 })
 
 test("等価性を判定できる", () => {

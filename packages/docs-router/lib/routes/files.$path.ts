@@ -15,7 +15,6 @@ export const GET = factory.createHandlers(
 
     const rawPath = param.path
 
-    // pathパラメータが文字列であることを確認
     if (!rawPath || typeof rawPath !== "string") {
       throw new HTTPException(400, {
         message: "Path parameter is required and must be a string",
@@ -24,7 +23,13 @@ export const GET = factory.createHandlers(
 
     const filePath = rawPath.startsWith("/") ? rawPath.slice(1) : rawPath
 
-    const file = c.var.client.mdFile(filePath)
+    const directoryRef = c.var.client.file(filePath).directory()
+
+    const indexFileRef = directoryRef.indexFile()
+
+    const schema = await indexFileRef.readSchemaValue()
+
+    const file = c.var.client.mdFile(filePath, schema)
 
     const entity = await file.read()
 
@@ -67,7 +72,13 @@ export const PUT = factory.createHandlers(
 
     const filePath = rawPath.startsWith("/") ? rawPath.slice(1) : rawPath
 
-    const fileRef = c.var.client.mdFile(filePath)
+    const directoryRef = c.var.client.file(filePath).directory()
+
+    const indexFileRef = directoryRef.indexFile()
+
+    const schema = await indexFileRef.readSchemaValue()
+
+    const fileRef = c.var.client.mdFile(filePath, schema)
 
     const exists = await fileRef.exists()
 
@@ -101,13 +112,6 @@ export const PUT = factory.createHandlers(
     }
 
     if (body.properties !== null) {
-      const indexFileRef = c.var.client.file(filePath).directory().indexFile()
-      const indexFile = await indexFileRef.read()
-      if (indexFile instanceof Error) {
-        throw new HTTPException(500, {
-          message: `Index file not found or error reading: ${indexFile.message}`,
-        })
-      }
       let updatedContent = file.content
       for (const [key, value] of Object.entries(body.properties)) {
         updatedContent = updatedContent.withMetaProperty(key, value as never)
@@ -180,7 +184,6 @@ export const DELETE = factory.createHandlers(
 
     const rawPath = param.path
 
-    // pathパラメータが文字列であることを確認
     if (!rawPath || typeof rawPath !== "string") {
       throw new HTTPException(400, {
         message: "Path parameter is required and must be a string",
@@ -189,7 +192,13 @@ export const DELETE = factory.createHandlers(
 
     const filePath = rawPath.startsWith("/") ? rawPath.slice(1) : rawPath
 
-    const fileRef = c.var.client.mdFile(filePath)
+    const directoryRef = c.var.client.file(filePath).directory()
+
+    const indexFileRef = directoryRef.indexFile()
+
+    const schema = await indexFileRef.readSchemaValue()
+
+    const fileRef = c.var.client.mdFile(filePath, schema)
 
     const exists = await fileRef.exists()
 

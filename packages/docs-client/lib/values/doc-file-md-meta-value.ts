@@ -39,39 +39,8 @@ export class DocFileMdMetaValue<T extends DocCustomSchema> {
     readonly value: SchemaToValueType<T>,
     readonly customSchema: T,
   ) {
-    // Runtime validation
     this.validateValue(value, customSchema)
     Object.freeze(this)
-  }
-
-  private validateValue(value: SchemaToValueType<T>, schema: T): void {
-    const keys = Object.keys(schema) as Array<keyof T>
-
-    for (const key of keys) {
-      const schemaField = schema[key]
-      const fieldValue = this.getValueField(value, key)
-
-      // Check required fields
-      if (schemaField.required && fieldValue === undefined) {
-        throw new Error(`Required field "${key as string}" is missing`)
-      }
-
-      // Type check when value exists
-      if (fieldValue !== undefined) {
-        const factory = new DocMetaFieldFactory()
-        // fromType method performs internal validation
-        factory.fromType(key, schemaField.type, fieldValue)
-      }
-    }
-  }
-
-  private getValueField<K extends keyof T>(
-    value: SchemaToValueType<T>,
-    key: K,
-  ): GetValueType<T, K> {
-    // Access type-safely by treating as Record type
-    const record = value as Record<keyof T, unknown>
-    return record[key] as GetValueType<T, K>
   }
 
   get keys(): Array<keyof T> {
@@ -98,34 +67,6 @@ export class DocFileMdMetaValue<T extends DocCustomSchema> {
     return new DocFileMdMetaValue<T>(
       { ...this.value, [key]: field.value } as SchemaToValueType<T>,
       this.customSchema,
-    )
-  }
-
-  /**
-   * Return a new instance with an unknown schema
-   * Allows accepting Record<string, unknown> schemas from external sources
-   */
-  withUnknownSchema(
-    draft: Record<string, unknown>,
-  ): DocFileMdMetaValue<DocCustomSchema> {
-    // Cast the unknown schema to DocCustomSchema
-    const typedSchema = draft as DocCustomSchema
-
-    // Convert current value to match new schema
-    const newValue = {} as Record<string, unknown>
-
-    // Copy existing values that exist in the new schema
-    for (const key in typedSchema) {
-      if (key in this.value) {
-        const unknownValue = this.value as Record<string, unknown>
-        newValue[key] = unknownValue[key]
-      }
-    }
-
-    // Validate and create new instance with new schema
-    return new DocFileMdMetaValue<DocCustomSchema>(
-      newValue as SchemaToValueType<DocCustomSchema>,
-      typedSchema,
     )
   }
 
@@ -249,6 +190,49 @@ export class DocFileMdMetaValue<T extends DocCustomSchema> {
     return true
   }
 
+  toJson(): SchemaToValueType<T> {
+    return this.value
+  }
+
+  toYaml(): string {
+    return stringify(this.value).trim()
+  }
+
+  private validateValue(value: SchemaToValueType<T>, schema: T): void {
+    // スキーマが空の場合はバリデーションをスキップ
+    if (Object.keys(schema).length === 0) {
+      return
+    }
+
+    const keys = Object.keys(schema) as Array<keyof T>
+
+    for (const key of keys) {
+      const schemaField = schema[key]
+      const fieldValue = this.getValueField(value, key)
+
+      // Check required fields
+      if (schemaField.required && fieldValue === undefined) {
+        throw new Error(`Required field "${key as string}" is missing`)
+      }
+
+      // Type check when value exists
+      if (fieldValue !== undefined) {
+        const factory = new DocMetaFieldFactory()
+        // fromType method performs internal validation
+        factory.fromType(key, schemaField.type, fieldValue)
+      }
+    }
+  }
+
+  private getValueField<K extends keyof T>(
+    value: SchemaToValueType<T>,
+    key: K,
+  ): GetValueType<T, K> {
+    // Access type-safely by treating as Record type
+    const record = value as Record<keyof T, unknown>
+    return record[key] as GetValueType<T, K>
+  }
+
   /**
    * Generate from Markdown text
    */
@@ -273,13 +257,15 @@ export class DocFileMdMetaValue<T extends DocCustomSchema> {
 
     const factory = new DocCustomSchemaFieldFactory()
 
-    const validatedRecord: Partial<Record<keyof T, unknown>> = {}
+    // まずYAMLのすべてのフィールドを保持
+    const validatedRecord: Record<string, unknown> = { ...record }
 
+    // スキーマに定義されたフィールドをバリデーション
     for (const key of schemaFieldKeys) {
       const schemaField = customSchema[key]
       const customSchemaField = factory.fromType(key, schemaField)
       const value = customSchemaField.validate(record[key])
-      validatedRecord[key] = value
+      validatedRecord[key as string] = value
     }
 
     return new DocFileMdMetaValue(
@@ -308,13 +294,5 @@ export class DocFileMdMetaValue<T extends DocCustomSchema> {
     }
 
     return new DocFileMdMetaValue(record, customSchema)
-  }
-
-  toJson(): SchemaToValueType<T> {
-    return this.value
-  }
-
-  toYaml(): string {
-    return stringify(this.value).trim()
   }
 }

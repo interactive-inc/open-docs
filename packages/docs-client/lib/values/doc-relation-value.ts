@@ -20,24 +20,34 @@ export class DocRelationValue {
   }
 
   /**
-   * List of related files (value objects)
-   */
-  get files(): DocRelationFileValue[] {
-    return this.value.files.map((file) => new DocRelationFileValue(file))
-  }
-
-  /**
    * Get file count
    */
   get fileCount(): number {
-    return this.files.length
+    return this.files().length
   }
 
   /**
    * Whether it's empty
    */
   get isEmpty(): boolean {
-    return this.files.length === 0
+    return this.files().length === 0
+  }
+
+  /**
+   * List of related files (value objects)
+   */
+  files(): DocRelationFileValue[] {
+    return this.value.files.map((file) => new DocRelationFileValue(file))
+  }
+
+  /**
+   * Export as JSON format
+   */
+  toJson(): DocRelation {
+    return {
+      path: this.path,
+      files: this.files().map((file) => file.toJson()),
+    }
   }
 
   /**
@@ -48,15 +58,5 @@ export class DocRelationValue {
       path,
       files: [],
     })
-  }
-
-  /**
-   * Export as JSON format
-   */
-  toJson(): DocRelation {
-    return {
-      path: this.path,
-      files: this.files.map((file) => file.toJson()),
-    }
   }
 }

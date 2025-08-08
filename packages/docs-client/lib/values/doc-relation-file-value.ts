@@ -33,16 +33,10 @@ export class DocRelationFileValue {
   }
 
   /**
-   * Create from file path and title
+   * Convert to JSON format
    */
-  static from(filePath: string, title: string | null): DocRelationFileValue {
-    const fileName = DocRelationFileValue.extractFileName(filePath)
-    return new DocRelationFileValue({
-      name: fileName,
-      label: title || fileName,
-      value: null,
-      path: null,
-    } satisfies DocRelationFile)
+  toJson(): DocRelationFile {
+    return { ...this.value }
   }
 
   /**
@@ -53,9 +47,15 @@ export class DocRelationFileValue {
   }
 
   /**
-   * Convert to JSON format
+   * Create from file path and title
    */
-  toJson(): DocRelationFile {
-    return { ...this.value }
+  static from(filePath: string, title: string | null): DocRelationFileValue {
+    const fileName = DocRelationFileValue.extractFileName(filePath)
+    return new DocRelationFileValue({
+      name: fileName,
+      label: title || fileName,
+      value: null,
+      path: null,
+    } satisfies DocRelationFile)
   }
 }

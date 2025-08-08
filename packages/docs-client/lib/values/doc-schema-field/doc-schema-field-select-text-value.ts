@@ -19,23 +19,23 @@ export class DocSchemaFieldSelectTextValue<T extends RecordKey> {
     Object.freeze(this)
   }
 
-  get type() {
+  get type(): "select-text" {
     return this.value.type
   }
 
-  get required() {
+  get required(): boolean {
     return this.value.required
   }
 
-  get title() {
+  get title(): string {
     return this.value.title ?? ""
   }
 
-  get description() {
+  get description(): string {
     return this.value.description ?? ""
   }
 
-  get default() {
+  get default(): string | null {
     return this.value.default
   }
 
@@ -73,14 +73,14 @@ export class DocSchemaFieldSelectTextValue<T extends RecordKey> {
     })
   }
 
-  static normalize(
+  static from(
     key: RecordKey,
     record: Record<RecordKey, unknown>,
   ): DocSchemaFieldSelectTextValue<RecordKey> {
     const value = record as DocSchemaFieldSelectText
     return new DocSchemaFieldSelectTextValue(key, {
       type: value.type,
-      required: value.required,
+      required: value.required ?? false,
       title: value.title ?? null,
       description: value.description ?? null,
       default: value.default ?? null,
