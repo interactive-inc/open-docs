@@ -1,5 +1,7 @@
 import { zValidator } from "@hono/zod-validator"
+import type { DocClient } from "@interactive-inc/docs-client"
 import { HTTPException } from "hono/http-exception"
+import { nanoid } from "nanoid"
 import { z } from "zod"
 import { factory } from "../utils/factory"
 
@@ -139,38 +141,88 @@ export const PUT = factory.createHandlers(
       }
 
       file = file.withContent(updatedContent)
-    } else {
-      // propertiesがない場合でも他の更新を処理
-      let updatedContent = file.content
 
-      // タイトルを更新
-      if (body.title !== null) {
-        updatedContent = updatedContent.withTitle(body.title)
-      }
+      // ファイルを書き込み
+      await fileRef.write(file)
 
-      // 説明を更新
-      if (body.description !== null) {
-        const pathSystem = c.var.client.pathSystem
-        const fileName = pathSystem.basename(filePath, ".md")
-        const defaultTitle = fileName === "index" ? "概要" : fileName
-        updatedContent = updatedContent.withDescription(
-          body.description,
-          defaultTitle,
-        )
-      }
-
-      // コンテンツを更新
-      if (body.content !== null) {
-        updatedContent = updatedContent.withContent(body.content)
-      }
-
-      file = file.withContent(updatedContent)
+      return c.json(file.toJson())
     }
+
+    let updatedContent = file.content
+
+    // タイトルを更新
+    if (body.title !== null) {
+      updatedContent = updatedContent.withTitle(body.title)
+    }
+
+    // 説明を更新
+    if (body.description !== null) {
+      const pathSystem = c.var.client.pathSystem
+      const fileName = pathSystem.basename(filePath, ".md")
+      const defaultTitle = fileName === "index" ? "概要" : fileName
+      updatedContent = updatedContent.withDescription(
+        body.description,
+        defaultTitle,
+      )
+    }
+
+    // コンテンツを更新
+    if (body.content !== null) {
+      updatedContent = updatedContent.withContent(body.content)
+    }
+
+    file = file.withContent(updatedContent)
 
     // ファイルを書き込み
     await fileRef.write(file)
 
     return c.json(file.toJson())
+  },
+)
+
+/**
+ * ファイルを作成する
+ */
+export const POST = factory.createHandlers(
+  zValidator("param", z.object({ path: z.string() })),
+  async (c) => {
+    const param = c.req.valid("param")
+
+    const rawPath = param.path
+
+    if (!rawPath || typeof rawPath !== "string") {
+      throw new HTTPException(400, {
+        message: "Path parameter is required and must be a string",
+      })
+    }
+
+    const dirPath = rawPath.startsWith("/") ? rawPath.slice(1) : rawPath
+
+    // ランダムなファイル名を生成
+    const fileName = `${nanoid()}.md`
+
+    const filePath = c.var.client.pathSystem.join(dirPath, fileName)
+
+    await initIndexFile(dirPath, c.var.client)
+
+    const directoryRef = c.var.client.file(filePath).directory()
+
+    const indexFileRef = directoryRef.indexFile()
+
+    const schema = await indexFileRef.readSchemaValue()
+
+    const fileRef = c.var.client.mdFile(filePath, schema)
+
+    // 空のファイルを作成
+    const draftFile = fileRef.empty()
+
+    const result = await fileRef.write(draftFile)
+
+    if (result instanceof Error) {
+      throw new HTTPException(500, { message: result.message })
+    }
+
+    return c.json(draftFile.toJson())
   },
 )
 
@@ -192,13 +244,7 @@ export const DELETE = factory.createHandlers(
 
     const filePath = rawPath.startsWith("/") ? rawPath.slice(1) : rawPath
 
-    const directoryRef = c.var.client.file(filePath).directory()
-
-    const indexFileRef = directoryRef.indexFile()
-
-    const schema = await indexFileRef.readSchemaValue()
-
-    const fileRef = c.var.client.mdFile(filePath, schema)
+    const fileRef = c.var.client.mdFile(filePath, {})
 
     const exists = await fileRef.exists()
 
@@ -217,3 +263,30 @@ export const DELETE = factory.createHandlers(
     return c.json({ success: true })
   },
 )
+
+/**
+ * ディレクトリのindex.mdを読み取り、存在しなければ作成して返す
+ */
+async function initIndexFile(dirPath: string, client: DocClient) {
+  const mdIndexRef = client.directory(dirPath, {}).indexFile()
+
+  const hasIndex = await mdIndexRef.exists()
+
+  if (hasIndex) {
+    const entity = await mdIndexRef.read()
+    if (entity instanceof Error) {
+      throw new HTTPException(500, { message: entity.message })
+    }
+    return null
+  }
+
+  const indexFile = mdIndexRef.empty()
+
+  const result = await mdIndexRef.write(indexFile)
+
+  if (result instanceof Error) {
+    throw new HTTPException(500, { message: result.message })
+  }
+
+  return null
+}

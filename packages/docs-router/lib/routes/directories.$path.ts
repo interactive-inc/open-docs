@@ -2,7 +2,6 @@ import { zValidator } from "@hono/zod-validator"
 import { HTTPException } from "hono/http-exception"
 import { z } from "zod"
 import { zDirectoryJson } from "@/models"
-import { cwd } from "@/utils/cwd"
 import { factory } from "@/utils/factory"
 
 /**
@@ -44,19 +43,8 @@ export const GET = factory.createHandlers(
 
     const indexFileJson = indexFile.toJson()
 
-    // スキーマのrequiredフィールドがundefinedの場合、falseに修正
-    if (indexFileJson.content?.meta?.schema) {
-      for (const key in indexFileJson.content.meta.schema) {
-        const field = indexFileJson.content.meta.schema[key]
-        if (field && field.required === undefined) {
-          field.required = false
-        }
-      }
-    }
-
     const json = zDirectoryJson.parse({
-      cwd: cwd(),
-      files: files.map((file) => file.toJson()) as never,
+      files: files.map((file) => file.toJson()),
       indexFile: indexFileJson,
       relations: relations.map((relation) => {
         return relation.toJson()
@@ -64,6 +52,70 @@ export const GET = factory.createHandlers(
     } satisfies z.infer<typeof zDirectoryJson>)
 
     return c.json(json)
+  },
+)
+
+/**
+ * POST /api/directories/:path - 空のindex.mdを作成
+ */
+export const POST = factory.createHandlers(
+  zValidator("param", z.object({ path: z.string().optional() })),
+  async (c) => {
+    const param = c.req.valid("param")
+
+    const rawPath = param.path
+
+    const currentPath = rawPath && typeof rawPath === "string" ? rawPath : ""
+
+    if (currentPath === "/") {
+      throw new HTTPException(400, { message: "パスが無効です。" })
+    }
+
+    const directoryRef = c.var.client.directory(currentPath)
+
+    const indexFileRef = directoryRef.indexFile()
+
+    const exists = await indexFileRef.exists()
+
+    if (exists) {
+      throw new HTTPException(409, {
+        message: `index.mdは既に存在します: ${currentPath}/index.md`,
+      })
+    }
+
+    // 空のindex.mdを作成
+    const dirName = c.var.client.pathSystem.basename(currentPath) || "Directory"
+
+    const emptyContent = `# ${dirName}\n`
+
+    await indexFileRef.writeContent(emptyContent)
+
+    // 作成したファイルを読み込む
+    const newIndexFile = await indexFileRef.read()
+
+    if (newIndexFile instanceof Error) {
+      throw new HTTPException(500, { message: newIndexFile.message })
+    }
+
+    const files = await directoryRef.readFiles()
+
+    const relations = await indexFileRef.readRelations()
+
+    if (relations instanceof Error) {
+      throw new HTTPException(500, { message: relations.message })
+    }
+
+    const indexFileJson = newIndexFile.toJson()
+
+    const json = zDirectoryJson.parse({
+      files: files.map((file) => file.toJson()),
+      indexFile: indexFileJson,
+      relations: relations.map((relation) => {
+        return relation.toJson()
+      }),
+    } satisfies z.infer<typeof zDirectoryJson>)
+
+    return c.json(json, 201)
   },
 )
 
@@ -154,8 +206,7 @@ export const PUT = factory.createHandlers(
     const indexFileJson = indexFile.toJson()
 
     const json = zDirectoryJson.parse({
-      cwd: cwd(),
-      files: files.map((file) => file.toJson()) as never,
+      files: files.map((file) => file.toJson()),
       indexFile: indexFileJson,
       relations: relations.map((relation) => {
         return relation.toJson()

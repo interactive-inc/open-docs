@@ -1,16 +1,16 @@
 import {
-  zDocFile,
   zDocFileIndex,
   zDocFileIndexSchemaField,
   zDocFileIndexSchemaInput,
+  zDocFileMd,
+  zDocFileUnknown,
   zDocRelation,
 } from "@interactive-inc/docs-client"
 import { z } from "zod"
 
 export const zDirectoryJson = z.object({
-  cwd: z.string(),
   indexFile: zDocFileIndex,
-  files: z.array(zDocFile),
+  files: z.array(z.union([zDocFileMd, zDocFileUnknown])),
   relations: z.array(zDocRelation),
 })
 

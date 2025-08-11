@@ -10,8 +10,9 @@
   },
   "dependencies": {
     "@hono/zod-validator": "^0.7.0",
-    "@interactive-inc/docs-client": "latest",
-    "hono": "^4.0.0"
+    "@interactive-inc/docs-client": "^1.0.5",
+    "hono": "^4.0.0",
+    "nanoid": "^5.1.5"
   },
   "peerDependencies": {
     "zod": "^4.0.0"
