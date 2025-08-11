@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query"
+import { ArrowDownIcon, ArrowRightIcon } from "lucide-react"
 import { useState } from "react"
 import { ArchivedFileItem } from "@/components/archived-file-item"
 import { Button } from "@/components/ui/button"
@@ -36,10 +37,6 @@ export function ArchivedFileListView(props: Props) {
     },
   })
 
-  if (!props.files || props.files.length === 0) {
-    return null
-  }
-
   const onRestore = (filePath: string) => {
     restoreFileMutation.mutate(filePath)
   }
@@ -50,15 +47,17 @@ export function ArchivedFileListView(props: Props) {
     <div className="space-y-2">
       <Button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="flex items-center gap-2"
+        className="flex w-full items-center justify-between gap-2"
         variant={"secondary"}
       >
-        <span>📦</span>
-        <span>
-          {props.files.filter((file) => file.type === "markdown").length}
-          件のファイルが整理されています。
+        <span className="flex gap-x-2">
+          <span>📦</span>
+          <span>
+            {props.files.filter((file) => file.type === "markdown").length}
+            件のファイルが整理されています。
+          </span>
         </span>
-        <span className="text-xs">{isExpanded ? "▼" : "▶"}</span>
+        {isExpanded ? <ArrowDownIcon /> : <ArrowRightIcon />}
       </Button>
       {isExpanded && (
         <Card className="gap-0 rounded-md p-0">

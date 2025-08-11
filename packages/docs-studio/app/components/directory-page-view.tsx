@@ -1,9 +1,11 @@
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query"
+import { marked } from "marked"
 import { startTransition, useContext, useState } from "react"
 import { ArchivedFileListView } from "@/components/archived-file-list-view"
 import { DirectoryFileListView } from "@/components/directory-file-list-view"
 import { DirectoryTableView } from "@/components/directory-table/directory-table-view"
 import { SidebarButton } from "@/components/sidebar-button"
+import { Card } from "@/components/ui/card"
 import { EmojiPicker } from "@/components/ui/emoji-picker"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -11,6 +13,8 @@ import { VscodeButton } from "@/components/vscode-button"
 import { RootStateContext } from "@/contexts/root-state"
 import { apiClient } from "@/lib/api-client"
 import { getDirectoryPath } from "@/lib/open-csv/get-directory-path"
+
+import "github-markdown-css"
 
 type Props = {
   currentPath: string
@@ -128,6 +132,9 @@ export function DirectoryPageView(props: Props) {
     })
   }
 
+  // index.mdのbodyからMarkdownをHTMLに変換
+  const bodyHtml = marked.parse(query.data.indexFile.content.body || "")
+
   return (
     <div className="h-full overflow-x-hidden">
       <div className="space-y-2 p-2">
@@ -163,15 +170,28 @@ export function DirectoryPageView(props: Props) {
           relations={query.data.relations}
           onDataChanged={() => query.refetch()}
         />
-        <ArchivedFileListView
-          files={archivedMdFiles}
-          directoryPath={props.currentPath}
-          refetch={() => query.refetch()}
-        />
-        <DirectoryFileListView
-          files={otherFiles}
-          onDataChanged={() => query.refetch()}
-        />
+        {archivedMdFiles.length !== 0 && (
+          <ArchivedFileListView
+            files={archivedMdFiles}
+            directoryPath={props.currentPath}
+            refetch={() => query.refetch()}
+          />
+        )}
+        {otherFiles.length !== 0 && (
+          <DirectoryFileListView
+            files={otherFiles}
+            onDataChanged={() => query.refetch()}
+          />
+        )}
+        {query.data.indexFile.content.body && (
+          <Card className="overflow-hidden rounded-md p-0">
+            <div
+              className="markdown-body p-4"
+              // biome-ignore lint/security/noDangerouslySetInnerHtml: markdown content needs HTML rendering
+              dangerouslySetInnerHTML={{ __html: bodyHtml }}
+            />
+          </Card>
+        )}
       </div>
     </div>
   )
