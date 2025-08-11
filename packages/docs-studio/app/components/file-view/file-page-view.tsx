@@ -31,6 +31,7 @@ export function FilePageView(props: Props) {
     typeof fileData?.content === "string"
       ? fileData.content
       : fileData?.content?.body || ""
+
   const [currentContent, setCurrentContent] = useState(initialContent)
 
   const updateProperties = useFilePropertiesMutation()
@@ -91,41 +92,7 @@ export function FilePageView(props: Props) {
           fileData={{ path: filePath, title: fileData.content.title || null }}
           content={currentContent}
           onChange={onChange}
-          meta={(() => {
-            // metaはcontent内にある
-            const fm = fileData.content.meta || {}
-            // スキーマやアイコンなどの複雑なオブジェクトを除外し、プリミティブ値のみを返す
-            const filtered: Record<
-              string,
-              string | number | boolean | string[] | number[] | boolean[] | null
-            > = {}
-            for (const [key, value] of Object.entries(fm)) {
-              if (key === "schema" || key === "icon") continue
-              if (
-                typeof value === "string" ||
-                typeof value === "number" ||
-                typeof value === "boolean" ||
-                value === null ||
-                (Array.isArray(value) &&
-                  value.every(
-                    (v) =>
-                      typeof v === "string" ||
-                      typeof v === "number" ||
-                      typeof v === "boolean",
-                  ))
-              ) {
-                filtered[key] = value as
-                  | string
-                  | number
-                  | boolean
-                  | string[]
-                  | number[]
-                  | boolean[]
-                  | null
-              }
-            }
-            return filtered
-          })()}
+          meta={fileData.content.meta || {}}
           onFrontMatterUpdate={handleFrontMatterUpdate}
           onReload={handleReload}
           isLoading={fileQuery.isLoading}
