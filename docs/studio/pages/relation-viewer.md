@@ -1,6 +1,6 @@
 ---
 features:
-  - manage-relations
+  - manage-schema
 ---
 
 # リレーション可視化ページ

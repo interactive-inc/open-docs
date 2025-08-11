@@ -77,9 +77,10 @@ export function MultiRelationSelect(props: Props) {
             )
           })}
         </div>
-        {selectedValues.length === 0 && availableOptions.length === 0 && (
+        {/* オプションが定義されていない場合のメッセージ */}
+        {options.length === 0 && (
           <div className="text-muted-foreground text-sm">
-            利用可能なオプションがありません
+            リレーションが設定されていません
           </div>
         )}
       </div>
@@ -119,9 +120,10 @@ export function MultiRelationSelect(props: Props) {
           </Button>
         )
       })}
-      {selectedValues.length === 0 && availableOptions.length === 0 && (
+      {/* オプションが定義されていない場合のメッセージ */}
+      {options.length === 0 && (
         <div className="text-muted-foreground text-sm">
-          利用可能なオプションがありません
+          リレーションが設定されていません
         </div>
       )}
     </div>

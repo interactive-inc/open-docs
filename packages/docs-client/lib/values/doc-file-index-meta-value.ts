@@ -222,7 +222,6 @@ export class DocFileIndexMetaValue<T extends DocCustomSchema> {
     if (typeof record.schema !== "object" || record.schema === null) {
       return DocFileIndexMetaValue.emptySchema<T>(customSchema)
     }
-
     return DocFileIndexMetaValue.normalizeSchema<T>(
       record.schema as never,
       customSchema,

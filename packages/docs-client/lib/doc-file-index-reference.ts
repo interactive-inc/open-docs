@@ -236,7 +236,7 @@ export class DocFileIndexReference<T extends DocCustomSchema> {
 
     const refs: DocFileRelationReference[] = []
 
-    const fieldKeys = Object.keys(schema) as Array<keyof T>
+    const fieldKeys = Object.keys(schema.value) as Array<keyof T>
 
     for (const key of fieldKeys) {
       const fieldValue = schema.value[key]
@@ -248,9 +248,10 @@ export class DocFileIndexReference<T extends DocCustomSchema> {
         continue
       }
       const field = schema.field(key)
+      const path = (field as unknown as { path: string }).path
       // field should be DocSchemaFieldRelationSingleValue or DocSchemaFieldMultiRelationValue
       const fileRef = new DocFileRelationReference({
-        filePath: (field as unknown as { path: string }).path,
+        filePath: path,
         fileSystem: this.fileSystem,
         pathSystem: this.pathSystem,
       })
@@ -271,8 +272,14 @@ export class DocFileIndexReference<T extends DocCustomSchema> {
 
     for (const relation of relations) {
       const entity = await relation.read()
-      if (entity === null) continue
-      if (entity instanceof Error) continue
+
+      if (entity === null) {
+        continue
+      }
+      if (entity instanceof Error) {
+        continue
+      }
+
       files.push(entity)
     }
 

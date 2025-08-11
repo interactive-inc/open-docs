@@ -66,6 +66,7 @@ export class DocFileRelationReference {
    * Read list of relation files
    */
   async readFiles(): Promise<DocRelationFileValue[] | Error> {
+    // fileSystemのexistsとreadDirectoryFilePathsは既にbasePathからの相対パスを期待している
     const exists = await this.fileSystem.exists(this.path)
 
     if (!exists) {
@@ -85,7 +86,9 @@ export class DocFileRelationReference {
       if (file instanceof Error) {
         return file
       }
-      if (file === null) continue
+      if (file === null) {
+        continue
+      }
       files.push(file)
     }
 
@@ -99,6 +102,11 @@ export class DocFileRelationReference {
     filePath: string,
   ): Promise<DocRelationFileValue | Error | null> {
     if (filePath.includes("index.md")) {
+      return null
+    }
+
+    // Skip directories
+    if (!filePath.endsWith(".md")) {
       return null
     }
 
