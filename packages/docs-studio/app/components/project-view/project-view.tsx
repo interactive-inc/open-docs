@@ -1,7 +1,6 @@
-import { useSuspenseQuery } from "@tanstack/react-query"
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { useFilePropertiesMutation } from "@/hooks/use-file-properties-mutation"
 import { apiClient } from "@/lib/api-client"
 import type {
   DocCustomSchema,
@@ -13,6 +12,7 @@ import type {
   PageCustomSchema,
   PageFile,
 } from "@/lib/types"
+import { normalizePath } from "@/utils"
 import { ProjectPageGroup } from "./project-page-group"
 import { UnlinkedFeaturesSection } from "./unlinked-features-section"
 
@@ -64,7 +64,29 @@ export function ProjectView(props: Props) {
 
   const [currentMilestone, setCurrentMilestone] = useState<string | null>(null)
 
-  const updatePropertiesMutation = useFilePropertiesMutation()
+  // フロントマター更新のためのmutation
+  const fileEndpoint = apiClient.api.files[":path{.+}"]
+
+  const updatePropertiesMutation = useMutation({
+    async mutationFn(params: { path: string; field: string; value: unknown }) {
+      const path = normalizePath(params.path)
+
+      const properties = { [params.field]: params.value }
+
+      const response = await fileEndpoint.$put({
+        param: { path },
+        json: {
+          properties,
+          content: null,
+          title: null,
+          description: null,
+          isArchived: null,
+        },
+      })
+
+      return response.json()
+    },
+  })
 
   const handleMilestoneUpdate = async (
     featurePath: string,

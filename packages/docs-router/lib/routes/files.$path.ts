@@ -31,7 +31,9 @@ export const GET = factory.createHandlers(
 
     const schema = await indexFileRef.readSchemaValue()
 
-    const file = c.var.client.mdFile(filePath, schema)
+    const file = filePath.endsWith(".md")
+      ? c.var.client.mdFile(filePath, schema)
+      : c.var.client.file(filePath, schema)
 
     const entity = await file.read()
 
@@ -74,6 +76,37 @@ export const PUT = factory.createHandlers(
 
     const filePath = rawPath.startsWith("/") ? rawPath.slice(1) : rawPath
 
+    // CSVとJSONファイルの場合はunknownFileとして処理
+    if (filePath.endsWith(".csv") || filePath.endsWith(".json")) {
+      const fileRef = c.var.client.file(filePath)
+
+      const exists = await fileRef.exists()
+
+      if (!exists) {
+        throw new HTTPException(404, {
+          message: `ファイルが見つかりません: ${filePath}`,
+        })
+      }
+
+      const file = await fileRef.read()
+
+      if (file instanceof Error) {
+        throw new HTTPException(500, { message: file.message })
+      }
+
+      let draft = file
+
+      if (body.content !== null) {
+        draft = file.withContent(body.content)
+      }
+
+      // ファイルを書き込み
+      await fileRef.write(draft)
+
+      return c.json(draft.toJson())
+    }
+
+    // Markdownファイルの処理
     const directoryRef = c.var.client.file(filePath).directory()
 
     const indexFileRef = directoryRef.indexFile()

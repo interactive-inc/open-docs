@@ -6,9 +6,7 @@ type Value = UseSuspenseQueryResult<DocTreeDirectoryNode[]>
 
 const value = new Proxy({} as Value, {
   get() {
-    throw new Error(
-      `useRootState must be used within RootStateProvider, but got ${String(prop)}`,
-    )
+    throw new Error(`useRootState must be used within RootStateProvider`)
   },
 })
 

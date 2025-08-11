@@ -1,12 +1,11 @@
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import { CsvFileView } from "@/components/file-view/csv-file-view"
 import { DefaultFileViewer } from "@/components/file-view/default-file-view"
 import { JsonFileEditor } from "@/components/file-view/json-file-editor"
 import { MarkdownFileView } from "@/components/file-view/markdown-file-view"
-import { useDirectoryQuery } from "@/hooks/use-directory-query"
-import { useFilePropertiesMutation } from "@/hooks/use-file-properties-mutation"
-import { useFileQuery } from "@/hooks/use-file-query"
 import { apiClient } from "@/lib/api-client"
+import { getDirectoryPath } from "@/lib/open-csv/get-directory-path"
 import { normalizePath } from "@/utils"
 
 type Props = {
@@ -14,14 +13,44 @@ type Props = {
 }
 
 export function FilePageView(props: Props) {
-  const fileQuery = useFileQuery(props.filePath)
+  const fileEndpoint = apiClient.api.files[":path{.+}"]
 
-  const directoryQuery = useDirectoryQuery(props.filePath)
+  const filePathParam = normalizePath(props.filePath)
+
+  const fileQuery = useSuspenseQuery({
+    queryKey: [fileEndpoint.$url({ param: { path: filePathParam } })],
+    async queryFn() {
+      const resp = await fileEndpoint.$get({ param: { path: filePathParam } })
+      return resp.json()
+    },
+  })
+
+  // ディレクトリデータの取得
+  const directoryEndpoint = apiClient.api.directories[":path{.+}"]
+  const directoryPath = getDirectoryPath(props.filePath)
+  const dirPath = normalizePath(directoryPath)
+
+  const directoryQuery = useSuspenseQuery({
+    queryKey: [directoryEndpoint.$url({ param: { path: dirPath } })],
+    async queryFn() {
+      try {
+        const resp = await directoryEndpoint.$get({ param: { path: dirPath } })
+        return resp.json()
+      } catch (error) {
+        // INDEX_NOT_FOUNDエラーの場合は空のデータを返す
+        if (error instanceof Error && error.message === "INDEX_NOT_FOUND") {
+          return { indexFile: null, relations: [] }
+        }
+        throw error
+      }
+    },
+  })
 
   const fileData = fileQuery.data
 
   const directorySchemaValue =
     directoryQuery.data?.indexFile?.content?.meta?.schema
+
   const directorySchema = directorySchemaValue || {}
 
   const relations = directoryQuery.data?.relations || []
@@ -34,7 +63,27 @@ export function FilePageView(props: Props) {
 
   const [currentContent, setCurrentContent] = useState(initialContent)
 
-  const updateProperties = useFilePropertiesMutation()
+  // フロントマター更新のためのmutation
+  const updateProperties = useMutation({
+    async mutationFn(params: { path: string; field: string; value: unknown }) {
+      const path = normalizePath(params.path)
+
+      const properties = { [params.field]: params.value }
+
+      const response = await fileEndpoint.$put({
+        param: { path },
+        json: {
+          properties,
+          content: null,
+          title: null,
+          description: null,
+          isArchived: null,
+        },
+      })
+
+      return response.json()
+    },
+  })
 
   const onChange = async (newContent: string) => {
     const normalizedPath = normalizePath(props.filePath)
@@ -51,12 +100,13 @@ export function FilePageView(props: Props) {
     })
 
     const data = await result.json()
+
     if ("content" in data && typeof data.content === "string") {
       setCurrentContent(data.content)
     }
   }
 
-  const handleReload = async () => {
+  const onReload = async () => {
     const result = await fileQuery.refetch()
     if (result.data === undefined) return
     const content =
@@ -66,14 +116,13 @@ export function FilePageView(props: Props) {
     setCurrentContent(content)
   }
 
-  const handleFrontMatterUpdate = async (key: string, value: unknown) => {
+  const onUpdateMeta = async (key: string, value: unknown) => {
     await updateProperties.mutateAsync({
       path: props.filePath,
       field: key,
       value: value,
     })
-    // フロントマター更新後にファイル内容を再取得
-    handleReload()
+    onReload()
   }
 
   if (!fileData) {
@@ -84,7 +133,7 @@ export function FilePageView(props: Props) {
   const filePath =
     typeof fileData.path === "string" ? fileData.path : fileData.path?.path
 
-  if (filePath?.endsWith(".md")) {
+  if (fileData.type === "markdown") {
     return (
       <main className="p-2">
         <MarkdownFileView
@@ -93,8 +142,8 @@ export function FilePageView(props: Props) {
           content={currentContent}
           onChange={onChange}
           meta={fileData.content.meta || {}}
-          onFrontMatterUpdate={handleFrontMatterUpdate}
-          onReload={handleReload}
+          onFrontMatterUpdate={onUpdateMeta}
+          onReload={onReload}
           isLoading={fileQuery.isLoading}
           schema={directorySchema}
           relations={relations}
@@ -103,22 +152,22 @@ export function FilePageView(props: Props) {
     )
   }
 
-  if (filePath?.endsWith(".csv")) {
+  if (fileData.type === "unknown" && filePath.endsWith(".csv")) {
     return (
       <main className="p-2">
         <CsvFileView
           filePath={props.filePath}
-          fileData={{ path: filePath, title: fileData.content.title || null }}
+          fileData={{ path: filePath, title: null }}
           content={currentContent}
           onChange={onChange}
-          onReload={handleReload}
+          onReload={onReload}
           isLoading={fileQuery.isLoading}
         />
       </main>
     )
   }
 
-  if (filePath?.endsWith(".json")) {
+  if (fileData.type === "unknown" && filePath.endsWith(".json")) {
     return (
       <main className="p-2">
         <JsonFileEditor content={currentContent} />
