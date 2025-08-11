@@ -294,7 +294,7 @@ test("DocFileContentIndexValue - toTextでFrontMatter付きテキストを生成
   expect(text).toContain("本文")
 })
 
-test("DocFileContentIndexValue - toMarkdownTextでbodyのみのテキストを生成", () => {
+test("DocFileContentIndexValue - bodyでコンテンツのみを取得", () => {
   const value = new DocFileIndexContentValue(
     {
       type: "markdown-index",
@@ -321,9 +321,9 @@ test("DocFileContentIndexValue - toMarkdownTextでbodyのみのテキストを�
     defaultTestConfig,
   )
 
-  const text = value.toMarkdownText()
+  const text = value.body
 
-  expect(text).toBe("# タイトル\n\n説明\n\n既存の本文")
+  expect(text).toBe("既存の本文")
   expect(text).not.toContain("---") // FrontMatterは含まない
 })
 

@@ -74,17 +74,16 @@ export class DocFileIndexContentValue<T extends DocCustomSchema> {
     description: string,
     defaultTitle?: string,
   ): DocFileIndexContentValue<T> {
-    const fullText = this.toText()
     const engine = new DocMarkdownSystem()
-    const updatedText = engine.updateDescription(
-      fullText,
+    const updatedBody = engine.updateDescription(
+      this.body,
       description,
       defaultTitle || this.title,
     )
     return new DocFileIndexContentValue<T>(
       {
         ...this.value,
-        body: engine.extractBody(updatedText),
+        body: updatedBody,
         description,
       },
       this.customSchema,
@@ -119,13 +118,6 @@ export class DocFileIndexContentValue<T extends DocCustomSchema> {
       customSchema,
       config,
     )
-  }
-
-  /**
-   * Generate complete Markdown text
-   */
-  toMarkdownText(): string {
-    return DocMarkdownSystem.from(this.title, this.description, this.body)
   }
 
   /**
@@ -188,7 +180,8 @@ export class DocFileIndexContentValue<T extends DocCustomSchema> {
       schema: this.meta().schema().toJson(),
     }
     const yamlStr = stringify(yamlData).trim()
-    return `---\n${yamlStr}\n---\n\n${this.toMarkdownText()}`
+    const text = `---\n${yamlStr}\n---\n\n${this.body.trim()}`
+    return `${text.trim()}\n`
   }
 
   /**

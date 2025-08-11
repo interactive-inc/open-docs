@@ -174,13 +174,6 @@ export class DocFileMdContentValue<T extends DocCustomSchema> {
   }
 
   /**
-   * Generate complete Markdown text
-   */
-  toMarkdownText(): string {
-    return DocMarkdownSystem.from(this.title, this.description, this.body)
-  }
-
-  /**
    * Generate complete text combining FrontMatter and body
    */
   toText(): string {

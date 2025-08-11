@@ -96,12 +96,11 @@ export class DocMarkdownSystem {
   }
 
   /**
-   * Update title in body
+   * Update title in body (returns body only, without FrontMatter)
    */
   updateTitle(text: string, newTitle: string): string {
-    const body = this.extractBody(text)
-
-    const lines = body.split("\n")
+    // textはbodyのみを想定（FrontMatterは含まない）
+    const lines = text.split("\n")
 
     const titleIndex = lines.findIndex((line) => line.match(/^#\s+/))
 
@@ -111,31 +110,23 @@ export class DocMarkdownSystem {
       lines.unshift(`# ${newTitle}`, "")
     }
 
-    const updatedBody = lines.join("\n")
-
-    const frontMatter = this.extractFrontMatter(text)
-    const separator = this.detectFrontMatterSeparator(text)
-
-    return frontMatter
-      ? `${separator}\n${frontMatter}\n${separator}\n\n${updatedBody}`
-      : updatedBody
+    return lines.join("\n")
   }
 
   /**
-   * Update description in body
+   * Update description in body (returns body only, without FrontMatter)
    */
   updateDescription(
     text: string,
     newDescription: string,
     defaultTitle: string,
   ): string {
-    const body = this.extractBody(text)
-    const lines = body.split("\n")
+    // textはbodyのみを想定（FrontMatterは含まない）
+    const lines = text.split("\n")
     const titleIndex = lines.findIndex((line) => line.match(/^#\s+/))
 
-    let updatedBody: string
     if (titleIndex === -1) {
-      updatedBody = `# ${defaultTitle}\n\n${newDescription}\n\n${body}`.trim()
+      return `# ${defaultTitle}\n\n${newDescription}\n\n${text}`.trim()
     } else {
       const descIndex = this.skipEmptyLines(lines, titleIndex + 1)
 
@@ -148,14 +139,8 @@ export class DocMarkdownSystem {
       } else {
         lines.splice(titleIndex + 1, 0, "", newDescription)
       }
-      updatedBody = lines.join("\n")
+      return lines.join("\n")
     }
-
-    const frontMatter = this.extractFrontMatter(text)
-    const separator = this.detectFrontMatterSeparator(text)
-    return frontMatter
-      ? `${separator}\n${frontMatter}\n${separator}\n\n${updatedBody}`
-      : updatedBody
   }
 
   /**

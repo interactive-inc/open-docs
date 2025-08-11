@@ -193,7 +193,7 @@ test("DocFileContentMdValue - toTextでFrontMatter付きテキストを生成", 
   expect(text).toContain("本文")
 })
 
-test("DocFileContentMdValue - toMarkdownTextでbodyのみのテキストを生成", () => {
+test("DocFileContentMdValue - bodyでコンテンツのみを取得", () => {
   const value = new DocFileMdContentValue(
     {
       type: "markdown-content",
@@ -205,11 +205,10 @@ test("DocFileContentMdValue - toMarkdownTextでbodyのみのテキストを生�
     {},
   )
 
-  const text = value.toMarkdownText()
+  const text = value.body
 
-  expect(text).toContain("# 新タイトル")
-  expect(text).toContain("新説明")
-  expect(text).toContain("既存の本文")
+  expect(text).toBe("既存の本文")
+  expect(text).not.toContain("---") // FrontMatterは含まない
 })
 
 test("DocFileContentMdValue - toJsonで元のデータ構造を返す", () => {
