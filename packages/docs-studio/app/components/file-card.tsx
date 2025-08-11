@@ -5,7 +5,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { apiClient } from "@/lib/api-client"
 import type { DocFileUnknown } from "@/lib/types"
-import { normalizePath } from "@/utils/path-utils"
+import { normalizePath } from "@/utils"
 
 type Props = {
   file: DocFileUnknown

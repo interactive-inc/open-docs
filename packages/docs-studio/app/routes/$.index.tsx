@@ -17,9 +17,11 @@ function Component() {
     return null
   }
 
+  const filePath = pathname.replace("/", "")
+
   if (isFile) {
-    return <FilePageView filePath={pathname} />
+    return <FilePageView filePath={filePath} />
   }
 
-  return <DirectoryPageView key={pathname} currentPath={pathname} />
+  return <DirectoryPageView key={pathname} currentPath={filePath} />
 }

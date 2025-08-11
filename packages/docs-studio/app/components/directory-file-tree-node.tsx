@@ -1,5 +1,12 @@
 import type { DocTreeDirectoryNode } from "@interactive-inc/docs-client"
-import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
+import {
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+} from "@/components/ui/sidebar"
+import { cn } from "@/lib/utils"
 
 type Props = {
   node: DocTreeDirectoryNode
@@ -12,45 +19,78 @@ type Props = {
 }
 
 export function DirectoryFileTreeNode(props: Props) {
-  const node = props.node
-
   const depth = props.depth || 0
 
-  const isSelected = props.selectedDirectory === node.path
+  const isSelected = props.selectedDirectory === props.node.path
 
   const onClick = (e: React.MouseEvent) => {
     e.preventDefault()
-    props.onSelectDirectory(node.path)
+    props.onSelectDirectory(props.node.path)
   }
 
-  const children = node.children.filter((node) => {
+  const children = props.node.children.filter((node) => {
     return node.type === "directory"
   })
 
-  return (
-    <>
+  if (depth === 0) {
+    return (
       <SidebarMenuItem>
         <SidebarMenuButton
-          style={{ paddingLeft: 8 + depth * 8 }}
-          className={isSelected ? "bg-sidebar-accent font-medium" : ""}
+          className={cn("h-7", { "bg-sidebar-accent": isSelected })}
           onClick={onClick}
         >
-          {node.icon && <span className="text-base">{node.icon}</span>}
-          <span>{node.title}</span>
+          {props.node.icon && (
+            <span className="text-base">{props.node.icon}</span>
+          )}
+          <span>{props.node.title}</span>
         </SidebarMenuButton>
+        {children.length !== 0 && (
+          <SidebarMenuSub>
+            {children.map((child) => (
+              <DirectoryFileTreeNode
+                key={child.path}
+                node={child}
+                depth={depth + 1}
+                currentPath={props.currentPath}
+                onSelectDirectory={props.onSelectDirectory}
+                openPaths={props.openPaths}
+                onToggleOpen={props.onToggleOpen}
+                selectedDirectory={props.selectedDirectory}
+              />
+            ))}
+          </SidebarMenuSub>
+        )}
       </SidebarMenuItem>
-      {children.map((child) => (
-        <DirectoryFileTreeNode
-          key={child.path}
-          node={child}
-          depth={depth + 1}
-          currentPath={props.currentPath}
-          onSelectDirectory={props.onSelectDirectory}
-          openPaths={props.openPaths}
-          onToggleOpen={props.onToggleOpen}
-          selectedDirectory={props.selectedDirectory}
-        />
-      ))}
-    </>
+    )
+  }
+
+  return (
+    <SidebarMenuSubItem>
+      <SidebarMenuSubButton
+        className={cn({ "bg-sidebar-accent": isSelected })}
+        onClick={onClick}
+      >
+        {props.node.icon && (
+          <span className="text-base">{props.node.icon}</span>
+        )}
+        <span>{props.node.title}</span>
+      </SidebarMenuSubButton>
+      {children.length !== 0 && (
+        <SidebarMenuSub>
+          {children.map((child) => (
+            <DirectoryFileTreeNode
+              key={child.path}
+              node={child}
+              depth={depth + 1}
+              currentPath={props.currentPath}
+              onSelectDirectory={props.onSelectDirectory}
+              openPaths={props.openPaths}
+              onToggleOpen={props.onToggleOpen}
+              selectedDirectory={props.selectedDirectory}
+            />
+          ))}
+        </SidebarMenuSub>
+      )}
+    </SidebarMenuSubItem>
   )
 }

@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { apiClient } from "@/lib/api-client"
-import { normalizePath } from "@/utils/path-utils"
+import { normalizePath } from "@/utils"
 
 type Props = {
   filePath: string

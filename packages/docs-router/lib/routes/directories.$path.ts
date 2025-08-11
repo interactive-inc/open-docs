@@ -3,6 +3,7 @@ import { HTTPException } from "hono/http-exception"
 import { z } from "zod"
 import { zDirectoryJson } from "@/models"
 import { factory } from "@/utils/factory"
+import { initIndexFile } from "@/utils/init-index-file"
 
 /**
  * GET /api/directories/:path - ディレクトリデータ取得（ディレクトリ専用）
@@ -148,6 +149,8 @@ export const PUT = factory.createHandlers(
     }
 
     const directoryRef = c.var.client.directory(directoryPath)
+
+    await initIndexFile(directoryRef.relativePath, c.var.client)
 
     const indexFileRef = directoryRef.indexFile()
 

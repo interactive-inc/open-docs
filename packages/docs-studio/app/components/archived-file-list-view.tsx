@@ -1,15 +1,11 @@
 import { useMutation } from "@tanstack/react-query"
-import { Link } from "@tanstack/react-router"
 import { useState } from "react"
+import { ArchivedFileItem } from "@/components/archived-file-item"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { apiClient } from "@/lib/api-client"
-import type { DocCustomSchema, DocFile, DocFileMd } from "@/lib/types"
-import { normalizePath } from "@/utils/path-utils"
-
-function isDocFileMd(file: DocFile): file is DocFileMd<DocCustomSchema> {
-  return file.type === "markdown"
-}
+import type { DocFile } from "@/lib/types"
+import { normalizePath } from "@/utils"
 
 type Props = {
   files: DocFile[]
@@ -44,9 +40,11 @@ export function ArchivedFileListView(props: Props) {
     return null
   }
 
-  const handleRestore = (filePath: string) => {
+  const onRestore = (filePath: string) => {
     restoreFileMutation.mutate(filePath)
   }
+
+  const mdFiles = props.files.filter((file) => file.type === "markdown")
 
   return (
     <div className="space-y-2">
@@ -57,7 +55,7 @@ export function ArchivedFileListView(props: Props) {
       >
         <span>📦</span>
         <span>
-          {props.files.filter(isDocFileMd).length}
+          {props.files.filter((file) => file.type === "markdown").length}
           件のファイルが整理されています。
         </span>
         <span className="text-xs">{isExpanded ? "▼" : "▶"}</span>
@@ -65,34 +63,13 @@ export function ArchivedFileListView(props: Props) {
       {isExpanded && (
         <Card className="gap-0 rounded-md p-0">
           <div className="divide-y">
-            {props.files.filter(isDocFileMd).map((file) => (
-              <div
+            {mdFiles.map((file) => (
+              <ArchivedFileItem
                 key={file.path.path}
-                className="flex items-center justify-between p-2"
-              >
-                <div className="flex-1">
-                  <div className="font-medium text-sm">
-                    <Link
-                      to="/$"
-                      params={{ _splat: normalizePath(file.path.path) }}
-                      className="text-blue-600 hover:underline"
-                    >
-                      {file.content.title || file.path.name}
-                    </Link>
-                  </div>
-                  {file.content.description && (
-                    <div className="text-xs">{file.content.description}</div>
-                  )}
-                </div>
-                <Button
-                  variant={"outline"}
-                  size={"sm"}
-                  onClick={() => handleRestore(file.path.path)}
-                  disabled={restoreFileMutation.isPending}
-                >
-                  {"復元"}
-                </Button>
-              </div>
+                file={file}
+                onRestore={onRestore}
+                isRestorePending={restoreFileMutation.isPending}
+              />
             ))}
           </div>
         </Card>

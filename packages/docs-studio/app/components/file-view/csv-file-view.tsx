@@ -10,7 +10,6 @@ export type Props = {
     path: string
     title: string | null
   }
-  cwd: string
   content: string
   onChange(content: string): void
   onReload: () => void
@@ -29,7 +28,6 @@ export function CsvFileView(props: Props) {
       <FileHeader
         filePath={props.filePath}
         fileData={props.fileData}
-        cwd={props.cwd}
         onReload={props.onReload}
         isLoading={props.isLoading}
       >

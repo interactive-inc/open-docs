@@ -19,7 +19,6 @@ type Props = {
     path: string
     title: string | null
   }
-  cwd: string
   content: string
   onChange(content: string): void
   meta: DocFileMdMeta<RecordKey>
@@ -52,7 +51,6 @@ export function MarkdownFileView(props: Props): ReactNode {
       <FileHeader
         filePath={props.filePath}
         fileData={props.fileData}
-        cwd={props.cwd}
         onReload={props.onReload}
         isLoading={props.isLoading}
       />

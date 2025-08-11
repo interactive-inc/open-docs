@@ -1,11 +1,11 @@
 import { useMutation } from "@tanstack/react-query"
 import { apiClient } from "@/lib/api-client"
-import { normalizePath } from "@/utils/path-utils"
+import { normalizePath } from "@/utils"
 
 type Params = {
   path: string
-  field?: string
-  value?: unknown
+  field: string
+  value: unknown
 }
 
 const endpoint = apiClient.api.files[":path{.+}"]
@@ -19,7 +19,7 @@ export function useFilePropertiesMutation() {
         ? normalizedPath.substring(1)
         : normalizedPath
 
-      const properties = params.field ? { [params.field]: params.value } : {}
+      const properties = { [params.field]: params.value }
 
       const response = await endpoint.$put({
         param: { path },

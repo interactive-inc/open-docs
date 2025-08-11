@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { VscodeButton } from "@/components/vscode-button"
 import { apiClient } from "@/lib/api-client"
-import { normalizePath } from "@/utils/path-utils"
+import { normalizePath } from "@/utils"
 
 type Props = {
   filePath: string
@@ -16,7 +16,6 @@ type Props = {
     path: string
     title: string | null
   }
-  cwd: string
   onReload: () => void
   isLoading: boolean
   children?: React.ReactNode
@@ -86,7 +85,6 @@ export function FileHeader(props: Props) {
     <div className="flex items-center gap-2">
       <SidebarButton />
       <VscodeButton
-        cwd={props.cwd}
         filePath={props.fileData.path}
         size="icon"
         variant="outline"

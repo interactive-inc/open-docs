@@ -2,7 +2,7 @@ import { createRootRoute, Outlet } from "@tanstack/react-router"
 import { Suspense } from "react"
 import { RootViewSkeleton } from "@/components/app-skeleton"
 import { DirectoryLayoutSidebar } from "@/components/directory-layout-sidebar"
-import { SidebarProvider } from "@/components/ui/sidebar"
+import { RootStateProvider } from "@/providers/root-state-provider"
 
 export const Route = createRootRoute({
   component: Component,
@@ -10,12 +10,12 @@ export const Route = createRootRoute({
 
 export default function Component() {
   return (
-    <SidebarProvider>
-      <Suspense fallback={<RootViewSkeleton />}>
+    <Suspense fallback={<RootViewSkeleton />}>
+      <RootStateProvider>
         <DirectoryLayoutSidebar>
           <Outlet />
         </DirectoryLayoutSidebar>
-      </Suspense>
-    </SidebarProvider>
+      </RootStateProvider>
+    </Suspense>
   )
 }

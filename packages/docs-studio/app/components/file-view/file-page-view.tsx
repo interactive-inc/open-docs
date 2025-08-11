@@ -7,7 +7,7 @@ import { useDirectoryQuery } from "@/hooks/use-directory-query"
 import { useFilePropertiesMutation } from "@/hooks/use-file-properties-mutation"
 import { useFileQuery } from "@/hooks/use-file-query"
 import { apiClient } from "@/lib/api-client"
-import { normalizePath } from "@/utils/path-utils"
+import { normalizePath } from "@/utils"
 
 type Props = {
   filePath: string
@@ -89,7 +89,6 @@ export function FilePageView(props: Props) {
         <MarkdownFileView
           filePath={props.filePath}
           fileData={{ path: filePath, title: fileData.content.title || null }}
-          cwd={directoryQuery.data.cwd}
           content={currentContent}
           onChange={onChange}
           meta={(() => {
@@ -143,7 +142,6 @@ export function FilePageView(props: Props) {
         <CsvFileView
           filePath={props.filePath}
           fileData={{ path: filePath, title: fileData.content.title || null }}
-          cwd={directoryQuery.data.cwd}
           content={currentContent}
           onChange={onChange}
           onReload={handleReload}

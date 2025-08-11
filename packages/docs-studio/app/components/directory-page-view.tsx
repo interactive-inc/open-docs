@@ -1,159 +1,131 @@
-import { useEffect, useState } from "react"
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query"
+import { startTransition, useContext, useState } from "react"
+import { ArchivedFileListView } from "@/components/archived-file-list-view"
 import { DirectoryFileListView } from "@/components/directory-file-list-view"
-import { DirectoryTableView } from "@/components/directory-table-view"
+import { DirectoryTableView } from "@/components/directory-table/directory-table-view"
 import { SidebarButton } from "@/components/sidebar-button"
 import { EmojiPicker } from "@/components/ui/emoji-picker"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { VscodeButton } from "@/components/vscode-button"
-import { useDirectoryQuery } from "@/hooks/use-directory-query"
+import { RootStateContext } from "@/contexts/root-state"
 import { apiClient } from "@/lib/api-client"
-import type {
-  DocCustomSchema,
-  DocFile,
-  DocFileMd,
-  DocFileUnknown,
-  DocMetaFieldType,
-} from "@/lib/types"
-
-/**
- * テーブルカラムの型定義
- */
-type DocTableColumn = {
-  key: string
-  label: string
-  type: DocMetaFieldType
-  path: string
-  options: string[] | number[]
-}
-
-function isDocFileMd(file: DocFile): file is DocFileMd<DocCustomSchema> {
-  return file.type === "markdown"
-}
-
-function isDocFileUnknown(file: DocFile): file is DocFileUnknown {
-  return file.type === "unknown"
-}
-
-function hasIsArchived(
-  file: DocFile,
-): file is DocFileMd<DocCustomSchema> | DocFileUnknown {
-  return file.type === "markdown" || file.type === "unknown"
-}
+import { getDirectoryPath } from "@/lib/open-csv/get-directory-path"
 
 type Props = {
   currentPath: string
 }
 
+const endpoint = apiClient.api.directories[":path{.+}"]
+
+const directoryEndpoint = apiClient.api.directories[":path{.+}"]
+
 export function DirectoryPageView(props: Props) {
-  const query = useDirectoryQuery(props.currentPath)
+  const rootStateQuery = useContext(RootStateContext)
 
-  const directoryData = query.data
+  const directoryPath = getDirectoryPath(props.currentPath)
 
-  // アーカイブファイルの表示状態
-  const [showArchived, setShowArchived] = useState(false)
+  const path = directoryPath.startsWith("/")
+    ? directoryPath.substring(1)
+    : directoryPath
+
+  const query = useSuspenseQuery({
+    queryKey: [endpoint.$url({ param: { path } })],
+    async queryFn() {
+      const resp = await endpoint.$get({ param: { path } })
+      return resp.json()
+    },
+  })
+
+  const updateDirectoryMutation = useMutation({
+    async mutationFn(params: {
+      title: string | null
+      description: string | null
+      icon: string | null
+      schema: Record<string, unknown> | null
+    }) {
+      const response = await directoryEndpoint.$put({
+        param: { path: props.currentPath },
+        json: {
+          title: params.title,
+          description: params.description,
+          icon: params.icon,
+          schema: params.schema,
+        },
+      })
+      return response.json()
+    },
+    async onSuccess() {
+      query.refetch()
+      startTransition(async () => {
+        rootStateQuery.refetch()
+      })
+    },
+  })
+
+  const [title, setTitle] = useState(query.data.indexFile.content.title)
+
+  const [description, setDescription] = useState(() => {
+    return query.data.indexFile.content.description
+  })
+
+  const [icon, setIcon] = useState(() => {
+    return query.data.indexFile.content.meta.icon ?? "📂"
+  })
 
   // ファイルをタイプ別にフィルタリング
-  const allMdFiles = directoryData.files.filter((file) =>
-    isDocFileMd(file as DocFile),
-  )
+  const allMdFiles = query.data.files.filter((file) => {
+    return file.type === "markdown"
+  })
 
+  // アーカイブされていないMarkdownファイル
   const activeMdFiles = allMdFiles.filter((file) => {
-    return !hasIsArchived(file as DocFile) || !file.isArchived
+    return !file.isArchived
   })
 
+  // アーカイブされたMarkdownファイル
   const archivedMdFiles = allMdFiles.filter((file) => {
-    return hasIsArchived(file as DocFile) && file.isArchived
+    return file.isArchived
   })
 
-  // 表示するファイルを決定
-  const mdFiles = showArchived ? allMdFiles : activeMdFiles
-
-  const otherFiles = directoryData.files.filter((file) => {
-    const docFile = file as DocFile
-    return (
-      isDocFileUnknown(docFile) &&
-      (hasIsArchived(docFile) ? !docFile.isArchived : true)
-    )
+  const otherFiles = query.data.files.filter((file) => {
+    return file.type === "unknown"
   })
 
-  const [title, setTitle] = useState("")
-  const [description, setDescription] = useState("")
-  const [icon, setIcon] = useState("📁")
-
-  useEffect(() => {
-    if (directoryData?.indexFile) {
-      setTitle(directoryData.indexFile.content.title || "")
-      setDescription(directoryData.indexFile.content.description || "")
-      setIcon(directoryData.indexFile.content.meta?.icon || "📁")
-    }
-  }, [directoryData])
-
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onChangeTitle = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value)
   }
 
-  const handleTitleBlur = async () => {
-    await apiClient.api.directories[":path{.+}"].$put({
-      param: {
-        path: props.currentPath.startsWith("/")
-          ? props.currentPath.substring(1)
-          : props.currentPath,
-      },
-      json: {
-        title: title,
-        description: null,
-        icon: null,
-        schema: null,
-      },
+  const onBlurTitle = () => {
+    updateDirectoryMutation.mutate({
+      title: title,
+      description: null,
+      icon: null,
+      schema: null,
     })
   }
 
-  const handleDescriptionChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement>,
-  ) => {
+  const onChangeDescription = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setDescription(e.target.value)
   }
 
-  const handleDescriptionBlur = async () => {
-    await apiClient.api.directories[":path{.+}"].$put({
-      param: {
-        path: props.currentPath.startsWith("/")
-          ? props.currentPath.substring(1)
-          : props.currentPath,
-      },
-      json: {
-        title: null,
-        description: description,
-        icon: null,
-        schema: null,
-      },
+  const onBlurDescription = () => {
+    updateDirectoryMutation.mutate({
+      title: null,
+      description: description,
+      icon: null,
+      schema: null,
     })
   }
 
-  const handleIconSelect = async (newIcon: string) => {
+  const onSelectIcon = (newIcon: string) => {
     setIcon(newIcon)
-    try {
-      const response = await apiClient.api.directories[":path{.+}"].$put({
-        param: {
-          path: props.currentPath.startsWith("/")
-            ? props.currentPath.substring(1)
-            : props.currentPath,
-        },
-        json: {
-          title: null,
-          description: null,
-          icon: newIcon,
-          schema: null,
-        },
-      })
-      const result = await response.json()
-      console.log("API response:", result)
-      // キャッシュを更新して最新データを取得
-      await query.refetch()
-    } catch (error) {
-      console.error("Error updating icon:", error)
-    }
+    updateDirectoryMutation.mutate({
+      title: null,
+      description: null,
+      icon: newIcon,
+      schema: null,
+    })
   }
 
   return (
@@ -161,73 +133,43 @@ export function DirectoryPageView(props: Props) {
       <div className="space-y-2 p-2">
         <div className="flex items-center gap-2">
           <SidebarButton />
-          {directoryData.indexFile && (
+          {query.data.indexFile && (
             <VscodeButton
-              cwd={directoryData.cwd}
-              filePath={directoryData.indexFile.path.fullPath}
+              filePath={query.data.indexFile.path.fullPath}
               size="icon"
               variant="outline"
             />
           )}
-          <EmojiPicker currentIcon={icon} onIconSelect={handleIconSelect} />
+          <EmojiPicker currentIcon={icon} onIconSelect={onSelectIcon} />
           <Input
             value={title}
-            onChange={handleTitleChange}
-            onBlur={handleTitleBlur}
+            onChange={onChangeTitle}
+            onBlur={onBlurTitle}
             placeholder="タイトルを入力"
             className="flex-1"
           />
         </div>
         <Textarea
           value={description}
-          onChange={handleDescriptionChange}
-          onBlur={handleDescriptionBlur}
+          onChange={onChangeDescription}
+          onBlur={onBlurDescription}
           placeholder="説明を入力"
           rows={2}
         />
         <DirectoryTableView
-          files={mdFiles as DocFile[]}
-          columns={(() => {
-            const schema = directoryData.indexFile?.content.meta?.schema
-            if (!schema) return []
-
-            const columns = Object.entries(schema)
-              .map(([key, fieldValue]) => {
-                // fieldValueが正しいオブジェクトであることを確認
-                if (
-                  !fieldValue ||
-                  typeof fieldValue !== "object" ||
-                  !("type" in fieldValue)
-                ) {
-                  return null
-                }
-
-                const value = fieldValue as Record<string, unknown>
-                return {
-                  key,
-                  label: typeof value.title === "string" ? value.title : key,
-                  type: String(value.type) as DocTableColumn["type"],
-                  path:
-                    (value.type === "relation" ||
-                      value.type === "multi-relation") &&
-                    typeof value.path === "string"
-                      ? value.path
-                      : "",
-                  options: Array.isArray(value.options) ? value.options : [],
-                }
-              })
-              .filter((col): col is NonNullable<typeof col> => col !== null)
-            return columns
-          })()}
+          files={activeMdFiles}
+          schema={query.data.indexFile.content.meta.schema}
           directoryPath={props.currentPath}
-          relations={directoryData.relations}
+          relations={query.data.relations}
           onDataChanged={() => query.refetch()}
-          archivedCount={archivedMdFiles.length}
-          showArchived={showArchived}
-          onToggleArchived={() => setShowArchived(!showArchived)}
+        />
+        <ArchivedFileListView
+          files={archivedMdFiles}
+          directoryPath={props.currentPath}
+          refetch={() => query.refetch()}
         />
         <DirectoryFileListView
-          files={otherFiles as DocFile[]}
+          files={otherFiles}
           onDataChanged={() => query.refetch()}
         />
       </div>
