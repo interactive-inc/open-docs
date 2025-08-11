@@ -3,7 +3,6 @@ import {
   zDocFileMdMeta,
   zDocFileMdMetaInput,
   zDocMetaFieldBoolean,
-  zDocMetaFieldMultiBoolean,
   zDocMetaFieldMultiNumber,
   zDocMetaFieldMultiRelation,
   zDocMetaFieldMultiText,
@@ -15,7 +14,6 @@ import type {
   BaseFieldValueType,
   DocCustomSchema,
   DocMetaFieldBoolean,
-  DocMetaFieldMultiBoolean,
   DocMetaFieldMultiNumber,
   DocMetaFieldMultiRelation,
   DocMetaFieldMultiText,
@@ -164,14 +162,6 @@ export class DocFileMdMetaValue<T extends DocCustomSchema> {
     }
 
     return zDocMetaFieldMultiNumber.parse(this.value[key])
-  }
-
-  multiBoolean(key: keyof T): DocMetaFieldMultiBoolean {
-    if (this.hasKey(key) === false) {
-      return []
-    }
-
-    return zDocMetaFieldMultiBoolean.parse(this.value[key])
   }
 
   hasKey(key: keyof T): boolean {

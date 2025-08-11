@@ -1,3 +1,5 @@
+import type { DocFileDirectoryReference } from "@/doc-file-reference"
+import type { DocFileDirectoryEntity } from "@/entities/doc-file-entity"
 import { DocFileIndexReference } from "./doc-file-index-reference"
 import { DocFileMdReference } from "./doc-file-md-reference"
 import type { DocFileSystem } from "./doc-file-system"
@@ -100,7 +102,7 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
   }
 
   async *filesGenerator(): AsyncGenerator<
-    DocFileMdReference<T> | DocFileUnknownReference,
+    DocFileDirectoryReference<T>,
     void,
     unknown
   > {
@@ -126,6 +128,7 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
         fileSystem: this.fileSystem,
         pathSystem: this.pathSystem,
         config: this.props.config,
+        customSchema: this.customSchema,
       })
     }
 
@@ -159,6 +162,7 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
         fileSystem: this.fileSystem,
         pathSystem: this.pathSystem,
         config: this.props.config,
+        customSchema: this.customSchema,
       })
     }
   }
@@ -181,8 +185,8 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
     }
   }
 
-  async files(): Promise<(DocFileMdReference<T> | DocFileUnknownReference)[]> {
-    const files: (DocFileMdReference<T> | DocFileUnknownReference)[] = []
+  async files(): Promise<DocFileDirectoryReference<T>[]> {
+    const files: DocFileDirectoryReference<T>[] = []
 
     for await (const ref of this.filesGenerator()) {
       if (ref instanceof Error) continue
@@ -205,7 +209,7 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
 
   file<FileName extends string>(fileName: FileName): InferReference<FileName, T>
 
-  file(fileName: string): DocFileMdReference<T> | DocFileUnknownReference {
+  file(fileName: string): DocFileDirectoryReference<T> {
     const filePath = this.pathSystem.join(this.relativePath, fileName)
 
     if (fileName.endsWith(".md")) {
@@ -223,6 +227,7 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
       fileSystem: this.fileSystem,
       pathSystem: this.pathSystem,
       config: this.props.config,
+      customSchema: this.customSchema,
     })
   }
 
@@ -238,8 +243,8 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
     })
   }
 
-  async readFiles(): Promise<(DocFileMdEntity<T> | DocFileUnknownEntity)[]> {
-    const entities: (DocFileMdEntity<T> | DocFileUnknownEntity)[] = []
+  async readFiles(): Promise<DocFileDirectoryEntity<T>[]> {
+    const entities: DocFileDirectoryEntity<T>[] = []
 
     for await (const file of this.filesGenerator()) {
       const entity = await file.read()

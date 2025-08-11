@@ -7,3 +7,7 @@ export type DocFileEntity<T extends DocCustomSchema> =
   | DocFileMdEntity<T>
   | DocFileIndexEntity<T>
   | DocFileUnknownEntity
+
+export type DocFileDirectoryEntity<T extends DocCustomSchema> =
+  | DocFileMdEntity<T>
+  | DocFileUnknownEntity

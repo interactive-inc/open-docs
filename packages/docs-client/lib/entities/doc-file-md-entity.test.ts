@@ -80,7 +80,10 @@ test("DocFileMdEntity - path getterが値オブジェクトを返す", () => {
         body: "",
         title: "",
         description: "",
-        meta: {},
+        meta: {
+          title: "メタタイトル",
+          tags: ["tag1", "tag2"],
+        },
       },
       path: {
         path: "docs/test.md",
@@ -112,7 +115,10 @@ test("DocFileMdEntity - withContentで新しいインスタンスを作成", () 
         body: "# 古いタイトル",
         title: "古いタイトル",
         description: "",
-        meta: {},
+        meta: {
+          title: "古いタイトル",
+          tags: [],
+        },
       },
       path: {
         path: "docs/test.md",
@@ -145,7 +151,10 @@ test("DocFileMdEntity - withPathで新しいインスタンスを作成", () => 
         body: "",
         title: "",
         description: "",
-        meta: {},
+        meta: {
+          tags: [],
+          title: "タイトル",
+        },
       },
       path: {
         path: "docs/old.md",
@@ -213,7 +222,10 @@ test("DocFileMdEntity - 不変性の確認", () => {
         body: "",
         title: "",
         description: "",
-        meta: {},
+        meta: {
+          tags: [],
+          title: "タイトル",
+        },
       },
       path: {
         path: "docs/test.md",
@@ -255,6 +267,7 @@ test("DocFileMdEntity - ジェネリック型パラメータの推論", () => {
           title: "記事タイトル",
           publishedAt: "2024-01-01",
           tags: ["tech", "typescript"],
+          author: "作者名",
         },
       },
       path: {

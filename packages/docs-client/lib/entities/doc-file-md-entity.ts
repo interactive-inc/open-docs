@@ -1,3 +1,4 @@
+import type { z } from "zod"
 import { zDocFileMd } from "@/models"
 import type { DocCustomSchema, DocFileMd, DocFilePath } from "@/types"
 import type { DocFileMdMetaValue } from "@/values/doc-file-md-meta-value"
@@ -86,9 +87,9 @@ export class DocFileMdEntity<T extends DocCustomSchema> {
   }
 
   /**
-   * Convert to JSON format
+   * z.infer<typeof zDocFileMd>
    */
-  toJson(): DocFileMd<T> {
-    return this.value
+  toJson(): z.infer<typeof zDocFileMd> {
+    return zDocFileMd.parse(this.value)
   }
 }

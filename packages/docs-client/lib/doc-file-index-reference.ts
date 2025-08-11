@@ -133,6 +133,37 @@ export class DocFileIndexReference<T extends DocCustomSchema> {
   }
 
   /**
+   * Create empty DocFileIndexEntity
+   */
+  empty(): DocFileIndexEntity<T> {
+    const dirPath = this.pathSystem.dirname(this.filePath)
+
+    const dirName = this.pathSystem.basename(dirPath) || "/"
+
+    const pathValue = DocFilePathValue.fromPathWithSystem(
+      this.filePath,
+      this.pathSystem,
+      this.basePath,
+    )
+
+    const contentValue = DocFileIndexContentValue.empty(
+      dirName,
+      this.customSchema,
+      this.props.config,
+    )
+
+    return new DocFileIndexEntity<T>(
+      {
+        type: "index",
+        path: pathValue.toJson(),
+        content: contentValue.toJson(),
+        isArchived: false,
+      },
+      this.customSchema,
+    )
+  }
+
+  /**
    * Write content to file
    */
   async writeContent(content: string): Promise<Error | null> {

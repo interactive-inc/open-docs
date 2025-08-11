@@ -49,6 +49,7 @@ test("DocFileMdMetaValue - hasKeyメソッド", () => {
   const value = new DocFileMdMetaValue(
     {
       title: "タイトル",
+      description: "説明",
     },
     {
       title: { type: "text", required: false },
@@ -57,7 +58,7 @@ test("DocFileMdMetaValue - hasKeyメソッド", () => {
   )
 
   expect(value.hasKey("title")).toBe(true)
-  expect(value.hasKey("description")).toBe(false)
+  expect(value.hasKey("description")).toBe(true)
 })
 
 test("DocFileMdMetaValue - requiredフィールド", () => {

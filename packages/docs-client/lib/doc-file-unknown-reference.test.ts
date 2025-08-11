@@ -19,6 +19,7 @@ test("DocFileUnknownReference - readメソッドが正しくエンティティ�
     fileSystem,
     pathSystem: fileSystem.getPathSystem(),
     config: defaultTestConfig,
+    customSchema: {},
   })
 
   const pngEntity = await pngRef.read()
@@ -37,6 +38,7 @@ test("DocFileUnknownReference - readメソッドが正しくエンティティ�
     fileSystem,
     pathSystem: fileSystem.getPathSystem(),
     config: defaultTestConfig,
+    customSchema: {},
   })
 
   const jsonEntity = await jsonRef.read()
@@ -57,6 +59,7 @@ test("DocFileUnknownReference - writeメソッドがファイルを書き込む"
     fileSystem,
     pathSystem: fileSystem.getPathSystem(),
     config: defaultTestConfig,
+    customSchema: {},
   })
 
   // 新しいエンティティを作成
@@ -88,6 +91,7 @@ test("DocFileUnknownReference - 存在しないファイルを読み込もうと
     fileSystem,
     pathSystem: fileSystem.getPathSystem(),
     config: defaultTestConfig,
+    customSchema: {},
   })
 
   const result = await ref.read()

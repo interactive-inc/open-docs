@@ -162,6 +162,29 @@ export class DocFileMdReference<T extends DocCustomSchema> {
   }
 
   /**
+   * Create empty DocFileMdEntity
+   */
+  empty(): DocFileMdEntity<T> {
+    const contentValue = DocFileMdContentValue.empty("", this.customSchema)
+
+    const pathValue = DocFilePathValue.fromPathWithSystem(
+      this.path,
+      this.pathSystem,
+      this.basePath,
+    )
+
+    return new DocFileMdEntity<T>(
+      {
+        type: "markdown",
+        content: contentValue.value,
+        path: pathValue.value,
+        isArchived: false,
+      },
+      this.customSchema,
+    )
+  }
+
+  /**
    * Write entity
    */
   async write(entity: DocFileMdEntity<T>): Promise<Error | null> {
@@ -300,6 +323,21 @@ export class DocFileMdReference<T extends DocCustomSchema> {
   }
 
   directory(): DocDirectoryReference<T> {
+    const paths = this.directoryPath.split(this.pathSystem.separator)
+
+    if (paths[paths.length - 1] === this.props.config.archiveDirectoryName) {
+      const path = paths.slice(0, -1).join(this.pathSystem.separator)
+      return new DocDirectoryReference<T>({
+        archiveDirectoryName: this.props.config.archiveDirectoryName,
+        indexFileName: this.props.config.indexFileName,
+        fileSystem: this.fileSystem,
+        path: path,
+        pathSystem: this.pathSystem,
+        customSchema: this.customSchema,
+        config: this.props.config,
+      })
+    }
+
     return new DocDirectoryReference<T>({
       archiveDirectoryName: this.props.config.archiveDirectoryName,
       indexFileName: this.props.config.indexFileName,

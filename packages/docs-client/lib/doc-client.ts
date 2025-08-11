@@ -104,6 +104,7 @@ export class DocClient {
       fileSystem: this.fileSystem,
       pathSystem: this.pathSystem,
       config: this.config,
+      customSchema: {},
     })
   }
 

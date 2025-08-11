@@ -5,21 +5,25 @@ import { DocFileUnknownEntity } from "./entities/doc-file-unknown-entity"
 import type { DocClientConfig, DocCustomSchema } from "./types"
 import { DocFilePathValue } from "./values/doc-file-path-value"
 
-type Props = {
+type Props<T extends DocCustomSchema> = {
   path: string
   fileSystem: DocFileSystem
   pathSystem: DocPathSystem
+  customSchema: T
   config: DocClientConfig
 }
 
 /**
  * File reference
  */
-export class DocFileUnknownReference {
+export class DocFileUnknownReference<T extends DocCustomSchema> {
   private readonly pathSystem: DocPathSystem
 
-  constructor(private readonly props: Props) {
+  private readonly customSchema: T
+
+  constructor(private readonly props: Props<T>) {
     this.pathSystem = props.pathSystem
+    this.customSchema = props.customSchema
     Object.freeze(this)
   }
 
@@ -43,24 +47,30 @@ export class DocFileUnknownReference {
     return this.pathSystem.join(this.basePath, this.path)
   }
 
-  get durectoryPath(): string {
-    return this.pathSystem.dirname(this.path)
-  }
+  directory(): DocDirectoryReference<T> {
+    const paths = this.directoryPath.split(this.pathSystem.separator)
 
-  directory<T extends DocCustomSchema>(
-    customSchema: T,
-  ): DocDirectoryReference<T>
+    if (paths[paths.length - 1] === this.props.config.archiveDirectoryName) {
+      const path = paths.slice(0, -1).join(this.pathSystem.separator)
+      return new DocDirectoryReference<T>({
+        archiveDirectoryName: this.props.config.archiveDirectoryName,
+        indexFileName: this.props.config.indexFileName,
+        fileSystem: this.fileSystem,
+        path: path,
+        pathSystem: this.pathSystem,
+        customSchema: this.customSchema,
+        config: this.props.config,
+      })
+    }
 
-  directory(): DocDirectoryReference<DocCustomSchema>
-
-  directory<T extends DocCustomSchema>(customSchema?: T) {
-    return new DocDirectoryReference({
+    // 通常のファイルの場合は、同じディレクトリを返す
+    return new DocDirectoryReference<T>({
       archiveDirectoryName: this.props.config.archiveDirectoryName,
       indexFileName: this.props.config.indexFileName,
       fileSystem: this.fileSystem,
       path: this.directoryPath,
       pathSystem: this.pathSystem,
-      customSchema: customSchema ?? {},
+      customSchema: this.customSchema,
       config: this.props.config,
     })
   }
@@ -109,6 +119,26 @@ export class DocFileUnknownReference {
       return entity
     }
     return entity.value.content
+  }
+
+  /**
+   * Create empty DocFileUnknownEntity
+   */
+  empty(): DocFileUnknownEntity {
+    const pathValue = DocFilePathValue.fromPathWithSystem(
+      this.path,
+      this.pathSystem,
+      this.basePath,
+    )
+    const extension = this.pathSystem.extname(this.path).substring(1) // Remove dot
+
+    return new DocFileUnknownEntity({
+      type: "unknown",
+      path: pathValue.value,
+      content: "",
+      extension: extension || "txt",
+      isArchived: false,
+    })
   }
 
   /**
@@ -186,7 +216,7 @@ export class DocFileUnknownReference {
    */
   async archive(
     archiveDirectoryName = this.props.config.archiveDirectoryName,
-  ): Promise<DocFileUnknownReference> {
+  ): Promise<DocFileUnknownReference<T>> {
     const dirPath = this.pathSystem.dirname(this.path)
     const fileName = this.pathSystem.basename(this.path)
     const archivePath = this.pathSystem.join(
@@ -205,6 +235,7 @@ export class DocFileUnknownReference {
       fileSystem: this.fileSystem,
       pathSystem: this.pathSystem,
       config: this.props.config,
+      customSchema: this.customSchema,
     })
   }
 
@@ -213,7 +244,7 @@ export class DocFileUnknownReference {
    */
   async restore(
     archiveDirectoryName = this.props.config.archiveDirectoryName,
-  ): Promise<DocFileUnknownReference> {
+  ): Promise<DocFileUnknownReference<T>> {
     const dirPath = this.pathSystem.dirname(this.path)
     const parentDirName = this.pathSystem.basename(dirPath)
 
@@ -238,6 +269,7 @@ export class DocFileUnknownReference {
       fileSystem: this.fileSystem,
       pathSystem: this.pathSystem,
       config: this.props.config,
+      customSchema: this.customSchema,
     })
   }
 }

@@ -116,7 +116,7 @@ test("DocFileContentMdValue - withFrontMatterで新しいインスタンスを�
       body: "本文",
       title: "タイトル",
       description: "説明",
-      meta: { author: "旧作者" },
+      meta: { author: "旧作者", tags: [] },
     },
     customSchema,
   )

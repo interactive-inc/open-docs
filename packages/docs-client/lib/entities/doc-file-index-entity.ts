@@ -3,6 +3,7 @@ import type {
   DocClientConfig,
   DocCustomSchema,
   DocFileIndex,
+  DocFileIndexAny,
   DocFilePath,
 } from "@/types"
 import { DocFileIndexContentValue } from "../values/doc-file-index-content-value"
@@ -66,9 +67,9 @@ export class DocFileIndexEntity<T extends DocCustomSchema> {
   }
 
   /**
-   * Convert to index file schema format
+   * z.infer<typeof zDocFileIndex>
    */
-  toJson(): DocFileIndex<T> {
+  toJson(): DocFileIndexAny {
     return this.value
   }
 }

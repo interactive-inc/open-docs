@@ -211,8 +211,6 @@ export const zDocMetaFieldMultiText = z.string().array()
 
 export const zDocMetaFieldMultiNumber = z.number().array()
 
-export const zDocMetaFieldMultiBoolean = z.boolean().array()
-
 export const zDocMetaFieldMultiSelectText = z.string().array()
 
 export const zDocMetaFieldMultiSelectNumber = z.number().array()
@@ -228,11 +226,9 @@ export const zDocMetaField = z.union([
   zDocMetaFieldRelation,
   zDocMetaFieldMultiText,
   zDocMetaFieldMultiNumber,
-  zDocMetaFieldMultiBoolean,
   zDocMetaFieldMultiSelectText,
   zDocMetaFieldMultiSelectNumber,
   zDocMetaFieldMultiRelation,
-  z.null(),
 ])
 
 /**
@@ -468,6 +464,8 @@ export const zDocFileMdInput = z.object({
  * File union type (index.md, regular md, other)
  */
 export const zDocFile = z.union([zDocFileIndex, zDocFileMd, zDocFileUnknown])
+
+export const zDocFileDirectory = z.union([zDocFileMd, zDocFileUnknown])
 
 /**
  * File node (for files only)

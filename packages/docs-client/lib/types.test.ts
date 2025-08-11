@@ -193,18 +193,16 @@ test("複雑なスキーマの型変換", () => {
     status: "published",
     author: "author-id",
     tags: ["tag1", "tag2"],
-
-    // オプショナルフィールド（すべて省略可能）
-    // description: "...",
-    // discount: 10,
-    // isFeatured: false,
-    // priority: 1,
-    // reviewer: "reviewer-id",
-    // categories: ["cat1"],
-    // ratings: [4, 5],
-    // relatedItems: ["item1", "item2"],
-    // statuses: ["status1"],
-    // priorities: [1, 2],
+    description: "...",
+    discount: 10,
+    isFeatured: false,
+    priority: 1,
+    reviewer: "reviewer-id",
+    categories: ["cat1"],
+    ratings: [4, 5],
+    relatedItems: ["item1", "item2"],
+    statuses: ["status1"],
+    priorities: [1, 2],
   }
 
   expectType<ComplexValue>(value)

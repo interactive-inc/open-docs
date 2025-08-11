@@ -4,12 +4,13 @@ import type { DocFileMdReference } from "./doc-file-md-reference"
 import type { DocFileUnknownReference } from "./doc-file-unknown-reference"
 import type {
   zDocClientConfig,
+  zDocFileIndex,
   zDocFileIndexSchemaField,
+  zDocFileMd,
   zDocFilePath,
   zDocFileUnknown,
   zDocMetaField,
   zDocMetaFieldBoolean,
-  zDocMetaFieldMultiBoolean,
   zDocMetaFieldMultiNumber,
   zDocMetaFieldMultiRelation,
   zDocMetaFieldMultiSelectNumber,
@@ -126,8 +127,6 @@ export type DocMetaFieldMultiText = z.infer<typeof zDocMetaFieldMultiText>
 
 export type DocMetaFieldMultiNumber = z.infer<typeof zDocMetaFieldMultiNumber>
 
-export type DocMetaFieldMultiBoolean = z.infer<typeof zDocMetaFieldMultiBoolean>
-
 export type DocMetaFieldMultiSelectText = z.infer<
   typeof zDocMetaFieldMultiSelectText
 >
@@ -141,6 +140,8 @@ export type DocMetaFieldMultiRelation = z.infer<
 >
 
 export type DocFileMdMeta<T extends RecordKey> = Record<T, DocMetaField>
+
+export type DocFileMdMetaAny = DocFileMdMeta<RecordKey>
 
 export type DocMetaFieldTypeText = z.infer<typeof zDocMetaFieldTypeText>
 
@@ -226,7 +227,7 @@ export type DocFileIndexSchemaField = z.infer<typeof zDocFileIndexSchemaField>
 /**
  * Schema definition type
  */
-export type DocFileIndexSchema<T extends RecordKey> = Record<
+export type DocFileIndexSchema<T extends RecordKey = string> = Record<
   T,
   DocFileIndexSchemaField
 >
@@ -267,7 +268,7 @@ export type DocFieldTypeLiteral =
 /**
  * Minimal schema definition type
  */
-export type DocCustomSchema<T extends RecordKey = RecordKey> = Record<
+export type DocCustomSchema<T extends RecordKey = string> = Record<
   T,
   DocCustomSchemaField
 >
@@ -363,6 +364,19 @@ export type DocFile<T extends DocCustomSchema = DocCustomSchema> =
   | DocFileMd<T>
   | DocFileUnknown
 
+export type DocDirectoryFile<T extends DocCustomSchema = DocCustomSchema> =
+  | DocFileMd<T>
+  | DocFileUnknown
+
+export type DocFileIndexAny = z.infer<typeof zDocFileIndex>
+
+export type DocFileMdAny = z.infer<typeof zDocFileMd>
+
+/**
+ * DocFile<DocCustomSchema<RecordKey>>
+ */
+export type DocFileAny = DocFileIndexAny | DocFileMdAny | DocFileUnknown
+
 /**
  * Directory FrontMatter type
  */
@@ -429,7 +443,7 @@ type FileTypeToReference<
   ? DocFileIndexReference<Schema>
   : FileType extends "markdown"
     ? DocFileMdReference<Schema>
-    : DocFileUnknownReference
+    : DocFileUnknownReference<Schema>
 
 /**
  * Infer reference type from path
@@ -539,13 +553,11 @@ export type OptionalKeys<T extends DocCustomSchema> = {
 /**
  * Generate expected value type from schema (considering required)
  */
-export type SchemaToValueType<T extends DocCustomSchema> =
-  // Required fields
-  {
-    [K in RequiredKeys<T>]: BaseFieldValueType<ExtractFieldType<T[K]>>
-  } & {
-    [K in OptionalKeys<T>]?: BaseFieldValueType<ExtractFieldType<T[K]>> | null
-  } // Optional fields
+export type SchemaToValueType<T extends DocCustomSchema> = {
+  [K in RequiredKeys<T>]: BaseFieldValueType<ExtractFieldType<T[K]>>
+} & {
+  [K in OptionalKeys<T>]: BaseFieldValueType<ExtractFieldType<T[K]>> | null
+}
 
 /**
  * Helper type for type-safe property access

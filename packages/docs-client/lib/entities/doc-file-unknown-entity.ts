@@ -1,3 +1,4 @@
+import type { z } from "zod"
 import { zDocFileUnknown } from "@/models"
 import type { DocFilePath, DocFileUnknown } from "@/types"
 
@@ -44,7 +45,7 @@ export class DocFileUnknownEntity {
     })
   }
 
-  toJson(): DocFileUnknown {
-    return this.value
+  toJson(): z.infer<typeof zDocFileUnknown> {
+    return zDocFileUnknown.parse(this.value)
   }
 }
