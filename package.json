@@ -23,6 +23,7 @@
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.0",
+    "react-error-boundary": "^6.0.0",
     "vitepress": "^1.6.3",
     "zod": "^4.0.10"
   },

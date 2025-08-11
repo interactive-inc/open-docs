@@ -66,5 +66,9 @@ install:
 	rm -rf packages/docs-client/node_modules
 	rm -rf packages/docs-router/node_modules
 	rm -rf packages/docs-studio/node_modules
-	bun i --cwd packages/docs-router @interactive-inc/docs-client@latest
+	bun run --cwd packages/docs-client build
+	bun run --cwd packages/docs-router build
+	bun run --cwd packages/docs-studio build
+	bun run --cwd packages/docs build
+	bun i --cwd packages/docs-router @interactive-inc/docs-client
 	bun i
