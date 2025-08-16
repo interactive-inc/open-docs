@@ -1,10 +1,13 @@
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query"
+import { Settings2 } from "lucide-react"
 import { marked } from "marked"
 import { startTransition, useContext, useState } from "react"
 import { ArchivedFileListView } from "@/components/archived-file-list-view"
 import { DirectoryFileListView } from "@/components/directory-file-list-view"
 import { DirectoryTableView } from "@/components/directory-table/directory-table-view"
+import { SchemaBuilder } from "@/components/schema-builder"
 import { SidebarButton } from "@/components/sidebar-button"
+import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { EmojiPicker } from "@/components/ui/emoji-picker"
 import { Input } from "@/components/ui/input"
@@ -77,6 +80,8 @@ export function DirectoryPageView(props: Props) {
     return query.data.indexFile.content.meta.icon ?? "📂"
   })
 
+  const [showSchemaBuilder, setShowSchemaBuilder] = useState(false)
+
   // ファイルをタイプ別にフィルタリング
   const allMdFiles = query.data.files.filter((file) => {
     return file.type === "markdown"
@@ -132,6 +137,15 @@ export function DirectoryPageView(props: Props) {
     })
   }
 
+  const onSchemaChange = (newSchema: Record<string, unknown>) => {
+    updateDirectoryMutation.mutate({
+      title: null,
+      description: null,
+      icon: null,
+      schema: newSchema,
+    })
+  }
+
   // index.mdのbodyからMarkdownをHTMLに変換
   const bodyHtml = marked.parse(query.data.indexFile.content.body || "")
 
@@ -155,6 +169,14 @@ export function DirectoryPageView(props: Props) {
             placeholder="タイトルを入力"
             className="flex-1"
           />
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setShowSchemaBuilder(!showSchemaBuilder)}
+            title={showSchemaBuilder ? "スキーマを閉じる" : "スキーマを開く"}
+          >
+            <Settings2 className="h-4 w-4" />
+          </Button>
         </div>
         <Textarea
           value={description}
@@ -163,6 +185,12 @@ export function DirectoryPageView(props: Props) {
           placeholder="説明を入力"
           rows={2}
         />
+        {showSchemaBuilder && (
+          <SchemaBuilder
+            schema={query.data.indexFile.content.meta.schema}
+            onSchemaChange={onSchemaChange}
+          />
+        )}
         <DirectoryTableView
           files={activeMdFiles}
           schema={query.data.indexFile.content.meta.schema}
