@@ -46,12 +46,26 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
     return this.props.config
   }
 
-  get relativePath(): string {
+  get path(): string {
     return this.props.path
   }
 
+  /**
+   * @deprecated
+   */
+  get relativePath(): string {
+    return this.path
+  }
+
+  get fullPath(): string {
+    return this.pathSystem.join(this.basePath, this.path)
+  }
+
+  /**
+   * @deprecated
+   */
   get absolutePath(): string {
-    return this.pathSystem.join(this.basePath, this.relativePath)
+    return this.fullPath
   }
 
   get indexFileName(): string {
@@ -68,6 +82,10 @@ export class DocDirectoryReference<T extends DocCustomSchema> {
 
   get archiveDirectoryName(): string {
     return this.props.archiveDirectoryName
+  }
+
+  get name(): string {
+    return this.pathSystem.basename(this.path)
   }
 
   async fileNames(): Promise<string[] | Error> {

@@ -137,6 +137,53 @@ test("DocDirectoryReference - directory メソッドで単一のサブディレ�
   expect(subdir.archiveDirectoryName).toBe("_")
 })
 
+test("DocDirectoryReference - get name()でディレクトリ名を取得できる", () => {
+  const mockFileSystem = {
+    getBasePath: () => "/test",
+  } as unknown as DocFileSystem
+
+  const pathSystem = new DocPathSystem()
+
+  // ルートディレクトリのテスト
+  const rootRef = new DocDirectoryReference({
+    path: "docs",
+    indexFileName: "index.md",
+    archiveDirectoryName: "_",
+    fileSystem: mockFileSystem,
+    pathSystem,
+    customSchema: {},
+    config: defaultTestConfig,
+  })
+
+  expect(rootRef.name).toBe("docs")
+
+  // ネストしたディレクトリのテスト
+  const nestedRef = new DocDirectoryReference({
+    path: "docs/products/features",
+    indexFileName: "index.md",
+    archiveDirectoryName: "_",
+    fileSystem: mockFileSystem,
+    pathSystem,
+    customSchema: {},
+    config: defaultTestConfig,
+  })
+
+  expect(nestedRef.name).toBe("features")
+
+  // 単一階層のテスト
+  const singleRef = new DocDirectoryReference({
+    path: "packages",
+    indexFileName: "index.md",
+    archiveDirectoryName: "_",
+    fileSystem: mockFileSystem,
+    pathSystem,
+    customSchema: {},
+    config: defaultTestConfig,
+  })
+
+  expect(singleRef.name).toBe("packages")
+})
+
 test("DocDirectoryReference - directoryExcludesで指定されたディレクトリが除外される", async () => {
   const mockFileSystem = {
     getBasePath: () => "/test",

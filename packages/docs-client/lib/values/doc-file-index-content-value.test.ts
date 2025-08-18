@@ -163,7 +163,7 @@ test("DocFileContentIndexValue - withContentで新しいインスタンスを作
     defaultTestConfig,
   )
 
-  const newValue = value.withContent("新しい内容")
+  const newValue = value.withBody("新しい内容")
 
   expect(newValue).not.toBe(value)
   expect(newValue.body).toBe("新しい内容")

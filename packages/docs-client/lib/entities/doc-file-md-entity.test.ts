@@ -142,6 +142,141 @@ test("DocFileMdEntity - withContentで新しいインスタンスを作成", () 
   expect(entity.content.title).toBe("古いタイトル") // 元は変更されない
 })
 
+test("DocFileMdEntity - withContent関数オーバーロードで新しいインスタンスを作成", () => {
+  const entity = new DocFileMdEntity(
+    {
+      type: "markdown",
+      content: {
+        type: "markdown-content",
+        body: "# 古いタイトル\n\n古い本文",
+        title: "古いタイトル",
+        description: "古い説明",
+        meta: {
+          title: "古いタイトル",
+          tags: ["old"],
+        },
+      },
+      path: {
+        path: "docs/test.md",
+        name: "test",
+        fullPath: "/Users/test/docs/test.md",
+        nameWithExtension: "test.md",
+      },
+      isArchived: false,
+    },
+    {
+      title: { type: "text", required: false },
+      tags: { type: "multi-text", required: false },
+    },
+  )
+
+  // 関数を使ったコンテンツの更新
+  const newEntity = entity.withContent((content) =>
+    content.withTitle("更新されたタイトル").withDescription("更新された説明"),
+  )
+
+  expect(newEntity).not.toBe(entity) // 新しいインスタンス
+  expect(newEntity.content.title).toBe("更新されたタイトル")
+  expect(newEntity.content.description).toBe("更新された説明")
+  expect(entity.content.title).toBe("古いタイトル") // 元は変更されない
+  expect(entity.content.description).toBe("古い説明") // 元は変更されない
+
+  // チェーンされた更新も可能
+  const chainedEntity = entity
+    .withContent((content) => content.withTitle("チェーン1"))
+    .withContent((content) => content.withDescription("チェーン2"))
+
+  expect(chainedEntity.content.title).toBe("チェーン1")
+  expect(chainedEntity.content.description).toBe("チェーン2")
+})
+
+test("DocFileMdEntity - withPath関数オーバーロードで新しいインスタンスを作成", () => {
+  const entity = new DocFileMdEntity(
+    {
+      type: "markdown",
+      content: {
+        type: "markdown-content",
+        body: "",
+        title: "",
+        description: "",
+        meta: {
+          tags: [],
+          title: "タイトル",
+        },
+      },
+      path: {
+        path: "docs/old.md",
+        name: "old",
+        fullPath: "/Users/test/docs/old.md",
+        nameWithExtension: "old.md",
+      },
+      isArchived: false,
+    },
+    {
+      title: { type: "text", required: false },
+      tags: { type: "multi-text", required: false },
+    },
+  )
+
+  // 関数を使ったパスの更新
+  const newEntity = entity.withPath((path) => ({
+    ...path,
+    path: "docs/updated.md",
+    name: "updated",
+    nameWithExtension: "updated.md",
+  }))
+
+  expect(newEntity).not.toBe(entity) // 新しいインスタンス
+  expect(newEntity.path.path).toBe("docs/updated.md")
+  expect(newEntity.path.name).toBe("updated")
+  expect(entity.path.path).toBe("docs/old.md") // 元は変更されない
+})
+
+test("DocFileMdEntity - withMeta関数オーバーロードで新しいインスタンスを作成", () => {
+  const entity = new DocFileMdEntity(
+    {
+      type: "markdown",
+      content: {
+        type: "markdown-content",
+        body: "本文",
+        title: "タイトル",
+        description: "説明",
+        meta: {
+          title: "元のタイトル",
+          tags: ["old"],
+          priority: 1,
+        },
+      },
+      path: {
+        path: "docs/test.md",
+        name: "test",
+        fullPath: "/Users/test/docs/test.md",
+        nameWithExtension: "test.md",
+      },
+      isArchived: false,
+    },
+    {
+      title: { type: "text", required: false },
+      tags: { type: "multi-text", required: false },
+      priority: { type: "number", required: false },
+    },
+  )
+
+  // 関数を使ったメタデータの更新
+  const newEntity = entity.withMeta((meta) =>
+    meta.withProperty("tags", ["new", "updated"]).withProperty("priority", 5),
+  )
+
+  expect(newEntity).not.toBe(entity) // 新しいインスタンス
+  const newMeta = newEntity.content.meta()
+  expect(newMeta.multiText("tags")).toEqual(["new", "updated"])
+  expect(newMeta.number("priority")).toBe(5)
+
+  const oldMeta = entity.content.meta()
+  expect(oldMeta.multiText("tags")).toEqual(["old"]) // 元は変更されない
+  expect(oldMeta.number("priority")).toBe(1) // 元は変更されない
+})
+
 test("DocFileMdEntity - withPathで新しいインスタンスを作成", () => {
   const entity = new DocFileMdEntity(
     {

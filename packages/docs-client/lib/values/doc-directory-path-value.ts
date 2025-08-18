@@ -136,13 +136,13 @@ export class DocDirectoryPathValue {
   /**
    * Create subdirectory path
    */
-  subdirectory(dirName: string): DocDirectoryPathValue {
-    const subPath = this.pathSystem.join(this.path, dirName)
+  subdirectory(directoryName: string): DocDirectoryPathValue {
+    const subPath = this.pathSystem.join(this.path, directoryName)
     return new DocDirectoryPathValue(
       {
         path: subPath,
-        name: dirName,
-        fullPath: this.pathSystem.join(this.fullPath, dirName),
+        name: directoryName,
+        fullPath: this.pathSystem.join(this.fullPath, directoryName),
       },
       this.pathSystem,
     )

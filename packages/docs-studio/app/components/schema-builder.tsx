@@ -29,7 +29,7 @@ export function SchemaBuilder(props: Props) {
       key: string
       type: FieldType
       required: boolean
-      options?: string[]
+      options?: string[] | number[]
       min?: number
       max?: number
       relationTo?: string
@@ -39,14 +39,86 @@ export function SchemaBuilder(props: Props) {
 
     return Object.entries(props.schema).map(([key, value]) => {
       const field = value as DocFileIndexSchemaField
+
+      const getNumericValue = (
+        obj: unknown,
+        prop: string,
+      ): number | undefined => {
+        if (obj && typeof obj === "object" && prop in obj) {
+          const val = (obj as Record<string, unknown>)[prop]
+          return typeof val === "number" ? val : undefined
+        }
+        return undefined
+      }
+
+      const getStringArrayValue = (
+        obj: unknown,
+        prop: string,
+      ): string[] | undefined => {
+        if (obj && typeof obj === "object" && prop in obj) {
+          const val = (obj as Record<string, unknown>)[prop]
+          return Array.isArray(val) && val.every((v) => typeof v === "string")
+            ? val
+            : undefined
+        }
+        return undefined
+      }
+
+      const getNumberArrayValue = (
+        obj: unknown,
+        prop: string,
+      ): number[] | undefined => {
+        if (obj && typeof obj === "object" && prop in obj) {
+          const val = (obj as Record<string, unknown>)[prop]
+          return Array.isArray(val) && val.every((v) => typeof v === "number")
+            ? val
+            : undefined
+        }
+        return undefined
+      }
+
+      const getStringValue = (
+        obj: unknown,
+        prop: string,
+      ): string | undefined => {
+        if (obj && typeof obj === "object" && prop in obj) {
+          const val = (obj as Record<string, unknown>)[prop]
+          return typeof val === "string" ? val : undefined
+        }
+        return undefined
+      }
+
+      const options =
+        getStringArrayValue(field, "options") ||
+        getNumberArrayValue(field, "options")
+
+      const isValidFieldType = (type: string): type is FieldType => {
+        const validTypes: FieldType[] = [
+          "text",
+          "number",
+          "boolean",
+          "multi-text",
+          "multi-number",
+          "relation",
+          "multi-relation",
+          "select-text",
+          "select-number",
+          "multi-select-text",
+          "multi-select-number",
+        ]
+        return (validTypes as readonly string[]).includes(type)
+      }
+
+      const fieldType = isValidFieldType(field.type) ? field.type : "text"
+
       return {
         key,
-        type: field.type as FieldType,
+        type: fieldType,
         required: field.required ?? false,
-        options: (field as any).options,
-        min: (field as any).min,
-        max: (field as any).max,
-        relationTo: (field as any).relationTo,
+        options,
+        min: getNumericValue(field, "min"),
+        max: getNumericValue(field, "max"),
+        relationTo: getStringValue(field, "path"),
       }
     })
   })
@@ -79,9 +151,12 @@ export function SchemaBuilder(props: Props) {
 
   const updateField = (index: number, updates: Partial<(typeof fields)[0]>) => {
     const updatedFields = [...fields]
-    updatedFields[index] = { ...updatedFields[index], ...updates }
-    setFields(updatedFields)
-    updateSchema(updatedFields)
+    const currentField = updatedFields[index]
+    if (currentField) {
+      updatedFields[index] = { ...currentField, ...updates }
+      setFields(updatedFields)
+      updateSchema(updatedFields)
+    }
   }
 
   const updateSchema = (updatedFields: typeof fields) => {
@@ -191,14 +266,18 @@ export function SchemaBuilder(props: Props) {
             {field.type.includes("select") ? (
               <Input
                 value={field.options?.join(", ") || ""}
-                onChange={(e) =>
-                  updateField(index, {
-                    options: e.target.value
-                      .split(",")
-                      .map((s) => s.trim())
-                      .filter(Boolean),
-                  })
-                }
+                onChange={(e) => {
+                  const values = e.target.value
+                    .split(",")
+                    .map((s) => s.trim())
+                    .filter(Boolean)
+
+                  const convertedOptions = field.type.includes("number")
+                    ? values.map(Number).filter((n) => !Number.isNaN(n))
+                    : values
+
+                  updateField(index, { options: convertedOptions })
+                }}
                 placeholder="選択肢 (カンマ区切り)"
                 className="text-sm"
               />

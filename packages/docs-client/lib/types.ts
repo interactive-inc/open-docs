@@ -45,6 +45,11 @@ import type {
 } from "./models"
 
 /**
+ * Generic updater function type that takes a value and returns the same type
+ */
+export type UpdateFunction<T> = (current: T) => T
+
+/**
  * Text field type
  */
 export type DocSchemaFieldText = z.infer<typeof zDocSchemaFieldText>

@@ -1,6 +1,6 @@
 import type { z } from "zod"
 import { zDocFileUnknown } from "@/models"
-import type { DocFilePath, DocFileUnknown } from "@/types"
+import type { DocFilePath, DocFileUnknown, UpdateFunction } from "@/types"
 
 /**
  * Unknown file entity
@@ -38,10 +38,23 @@ export class DocFileUnknownEntity {
   /**
    * Update path
    */
-  withPath(path: DocFilePath): DocFileUnknownEntity {
+  withPath(path: DocFilePath): DocFileUnknownEntity
+
+  withPath(updater: UpdateFunction<DocFilePath>): DocFileUnknownEntity
+
+  withPath(
+    pathOrUpdater: DocFilePath | UpdateFunction<DocFilePath>,
+  ): DocFileUnknownEntity {
+    if (typeof pathOrUpdater === "function") {
+      const updatedPath = pathOrUpdater(this.path)
+      return new DocFileUnknownEntity({
+        ...this.value,
+        path: updatedPath,
+      })
+    }
     return new DocFileUnknownEntity({
       ...this.value,
-      path: path,
+      path: pathOrUpdater,
     })
   }
 

@@ -1,20 +1,6 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(bun biome check:*)",
-      "Bash(bun run:*)",
-      "Bash(find:*)",
-      "Bash(mkdir:*)",
-      "Bash(mv:*)",
-      "Bash(rm:*)",
-      "mcp__ide__getDiagnostics",
-      "Bash(curl:*)",
-      "Bash(bun test:*)",
-      "Bash(ls:*)",
-      "Bash(grep:*)",
-      "Bash(bun tsgo:*)",
-      "Bash(bun tsc:*)"
-    ],
-    "deny": []
-  }
+    "defaultMode": "bypassPermissions"
+  },
+  "enableAllProjectMcpServers": true
 }

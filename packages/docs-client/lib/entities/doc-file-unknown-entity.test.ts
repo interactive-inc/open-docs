@@ -108,6 +108,34 @@ test("DocFileUnknownEntity - withPathで新しいインスタンスを作成", (
   expect(entity.path.path).toBe("docs/old.txt") // 元は変更されない
 })
 
+test("DocFileUnknownEntity - withPath関数オーバーロードで新しいインスタンスを作成", () => {
+  const entity = new DocFileUnknownEntity({
+    type: "unknown",
+    content: "内容",
+    path: {
+      path: "docs/old.txt",
+      name: "old",
+      fullPath: "/Users/test/docs/old.txt",
+      nameWithExtension: "old.txt",
+    },
+    extension: ".txt",
+    isArchived: false,
+  })
+
+  // 関数を使ったパスの更新
+  const newEntity = entity.withPath((path) => ({
+    ...path,
+    path: "docs/updated.txt",
+    name: "updated",
+    nameWithExtension: "updated.txt",
+  }))
+
+  expect(newEntity).not.toBe(entity) // 新しいインスタンス
+  expect(newEntity.path.path).toBe("docs/updated.txt")
+  expect(newEntity.path.name).toBe("updated")
+  expect(entity.path.path).toBe("docs/old.txt") // 元は変更されない
+})
+
 test("DocFileUnknownEntity - toJsonで元のデータ構造を返す", () => {
   const data = {
     type: "unknown" as const,

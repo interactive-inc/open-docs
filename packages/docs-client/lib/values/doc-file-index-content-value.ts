@@ -123,19 +123,26 @@ export class DocFileIndexContentValue<T extends DocCustomSchema> {
   /**
    * Update content
    */
-  withContent(content: string): DocFileIndexContentValue<T> {
+  withBody(body: string): DocFileIndexContentValue<T> {
     const engine = new DocMarkdownSystem()
     return new DocFileIndexContentValue<T>(
       {
         type: "markdown-index",
-        body: content,
-        title: engine.extractTitle(content) || "",
-        description: engine.extractDescription(content) || "",
+        body: body,
+        title: engine.extractTitle(body) || "",
+        description: engine.extractDescription(body) || "",
         meta: this.value.meta,
       },
       this.customSchema,
       this.config,
     )
+  }
+
+  /**
+   * @deprecated Use `withBody` instead
+   */
+  withContent(body: string): DocFileIndexContentValue<T> {
+    return this.withBody(body)
   }
 
   /**

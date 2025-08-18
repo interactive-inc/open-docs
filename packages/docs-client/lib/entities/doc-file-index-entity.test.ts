@@ -135,6 +135,94 @@ test("DocFileIndexEntity - withContentで新しいインスタンスを作成", 
   expect(entity.content.title).toBe("古いタイトル") // 元は変更されない
 })
 
+test("DocFileIndexEntity - withContent関数オーバーロードで新しいインスタンスを作成", () => {
+  const entity = new DocFileIndexEntity(
+    {
+      type: "index",
+      content: {
+        type: "markdown-index",
+        body: "# 古いタイトル\n\n古い説明",
+        title: "古いタイトル",
+        description: "古い説明",
+        meta: {
+          type: "index-meta",
+          icon: "📁",
+          schema: {},
+        },
+      },
+      path: {
+        path: "docs/index.md",
+        name: "index",
+        fullPath: "/Users/test/docs/index.md",
+        nameWithExtension: "index.md",
+      },
+      isArchived: false,
+    },
+    {},
+    defaultTestConfig,
+  )
+
+  // 関数を使ったコンテンツの更新
+  const newEntity = entity.withContent((content) =>
+    content.withTitle("更新されたタイトル").withDescription("更新された説明"),
+  )
+
+  expect(newEntity).not.toBe(entity) // 新しいインスタンス
+  expect(newEntity.content.title).toBe("更新されたタイトル")
+  expect(newEntity.content.description).toBe("更新された説明")
+  expect(entity.content.title).toBe("古いタイトル") // 元は変更されない
+  expect(entity.content.description).toBe("古い説明") // 元は変更されない
+
+  // チェーンされた更新も可能
+  const chainedEntity = entity
+    .withContent((content) => content.withTitle("チェーン1"))
+    .withContent((content) => content.withDescription("チェーン2"))
+
+  expect(chainedEntity.content.title).toBe("チェーン1")
+  expect(chainedEntity.content.description).toBe("チェーン2")
+})
+
+test("DocFileIndexEntity - withPath関数オーバーロードで新しいインスタンスを作成", () => {
+  const entity = new DocFileIndexEntity(
+    {
+      type: "index",
+      content: {
+        type: "markdown-index",
+        body: "",
+        title: "",
+        description: "",
+        meta: {
+          type: "index-meta",
+          icon: "",
+          schema: {},
+        },
+      },
+      path: {
+        path: "docs/index.md",
+        name: "index",
+        fullPath: "/Users/test/docs/index.md",
+        nameWithExtension: "index.md",
+      },
+      isArchived: false,
+    },
+    {},
+    defaultTestConfig,
+  )
+
+  // 関数を使ったパスの更新
+  const newEntity = entity.withPath((path) => ({
+    ...path,
+    path: "docs/updated-index.md",
+    name: "updated-index",
+    nameWithExtension: "updated-index.md",
+  }))
+
+  expect(newEntity).not.toBe(entity) // 新しいインスタンス
+  expect(newEntity.path.path).toBe("docs/updated-index.md")
+  expect(newEntity.path.name).toBe("updated-index")
+  expect(entity.path.path).toBe("docs/index.md") // 元は変更されない
+})
+
 test("DocFileIndexEntity - withPathで新しいインスタンスを作成", () => {
   const entity = new DocFileIndexEntity(
     {

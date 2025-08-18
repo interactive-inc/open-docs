@@ -4,6 +4,7 @@ import type {
   DocCustomSchema,
   DocFileMdContent,
   ExtractFieldType,
+  UpdateFunction,
 } from "@/types"
 import { DocMarkdownSystem } from "../doc-markdown-system"
 import { DocFileMdMetaValue } from "./doc-file-md-meta-value"
@@ -100,16 +101,16 @@ export class DocFileMdContentValue<T extends DocCustomSchema> {
   }
 
   /**
-   * Update content
+   * Update body
    */
-  withContent(content: string): DocFileMdContentValue<T> {
+  withBody(body: string): DocFileMdContentValue<T> {
     const engine = new DocMarkdownSystem()
     return new DocFileMdContentValue(
       {
         type: "markdown-content",
-        body: content,
-        title: engine.extractTitle(content) || "",
-        description: engine.extractDescription(content) || "",
+        body: body,
+        title: engine.extractTitle(body) || "",
+        description: engine.extractDescription(body) || "",
         meta: this.value.meta,
       },
       this.customSchema,
@@ -117,11 +118,42 @@ export class DocFileMdContentValue<T extends DocCustomSchema> {
   }
 
   /**
+   * @deprecated Use `withBody` instead
+   */
+  withContent(content: string): DocFileMdContentValue<T> {
+    return this.withBody(content)
+  }
+
+  /**
    * Update FrontMatter
    */
   withMeta<U extends DocCustomSchema>(
     meta: DocFileMdMetaValue<U>,
-  ): DocFileMdContentValue<U> {
+  ): DocFileMdContentValue<U>
+
+  withMeta(
+    updater: UpdateFunction<DocFileMdMetaValue<T>>,
+  ): DocFileMdContentValue<T>
+
+  withMeta<U extends DocCustomSchema>(
+    metaOrUpdater:
+      | DocFileMdMetaValue<U>
+      | UpdateFunction<DocFileMdMetaValue<T>>,
+  ): DocFileMdContentValue<U> | DocFileMdContentValue<T> {
+    if (typeof metaOrUpdater === "function") {
+      const updatedMeta = metaOrUpdater(this.meta())
+      return new DocFileMdContentValue(
+        {
+          type: "markdown-content",
+          body: this.body,
+          title: this.title,
+          description: this.description,
+          meta: updatedMeta.value,
+        },
+        updatedMeta.customSchema,
+      )
+    }
+    const meta = metaOrUpdater
     return new DocFileMdContentValue(
       {
         type: "markdown-content",

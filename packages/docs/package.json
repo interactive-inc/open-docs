@@ -1,6 +1,6 @@
 {
   "name": "@interactive-inc/docs",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "type": "module",
   "scripts": {
     "check": "tsgo --noEmit",

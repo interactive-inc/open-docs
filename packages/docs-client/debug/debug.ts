@@ -24,13 +24,13 @@ if (mdFile instanceof Error) {
 
 const _features = mdFile.content.meta().field("features")
 
-mdFile.withContent(
-  mdFile.content.withMetaProperty("features", [
+mdFile.content.withMeta((meta) => {
+  return meta.withProperty("features", [
     "edit-document-content",
     "delete-document",
     "foo",
-  ]),
-)
+  ])
+})
 
 // Method 2: Using field helpers
 const featureSchema = defineSchema({
