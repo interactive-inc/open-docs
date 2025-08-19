@@ -43,7 +43,7 @@ export function MultiRelationSelect(props: Props) {
   // wrapありの場合（ファイル詳細用）
   if (props.wrap) {
     return (
-      <div className="space-y-2">
+      <div className="items-center space-y-2">
         {/* 新しい値を追加するSelect */}
         {availableOptions.length > 0 && (
           <Select onValueChange={addValue}>
@@ -89,7 +89,7 @@ export function MultiRelationSelect(props: Props) {
 
   // wrapなしの場合（テーブル用）
   return (
-    <div className="flex gap-2">
+    <div className="flex items-center gap-2">
       {/* 新しい値を追加するSelect */}
       {availableOptions.length > 0 && (
         <Select onValueChange={addValue}>
