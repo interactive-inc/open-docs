@@ -1,8 +1,7 @@
-export function getDirectoryPath(filePath: string): string {
+export function getDirectoryPath(filePath: string, isFile: boolean): string {
   const pathSegments = filePath.split("/")
 
-  if (pathSegments[pathSegments.length - 1]?.includes(".")) {
-    // 最後のセグメントがファイル名を含む場合は、ディレクトリパスから削除
+  if (isFile) {
     pathSegments.pop()
   }
 

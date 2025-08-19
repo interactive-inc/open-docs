@@ -51,6 +51,7 @@ export function MultiTextEditableCell(props: Props) {
 
   return (
     <Input
+      className="w-full min-w-max"
       type="text"
       value={editValue}
       onChange={(e) => setEditValue(e.target.value)}

@@ -30,7 +30,7 @@ const directoryEndpoint = apiClient.api.directories[":path{.+}"]
 export function DirectoryPageView(props: Props) {
   const rootStateQuery = useContext(RootStateContext)
 
-  const directoryPath = getDirectoryPath(props.currentPath)
+  const directoryPath = getDirectoryPath(props.currentPath, false)
 
   const path = directoryPath.startsWith("/")
     ? directoryPath.substring(1)

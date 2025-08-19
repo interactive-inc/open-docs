@@ -18,8 +18,4 @@ const concurrentlyResult = concurrently(
   },
 )
 
-try {
-  await concurrentlyResult.result
-} catch (error) {
-  console.error(error)
-}
+await concurrentlyResult.result

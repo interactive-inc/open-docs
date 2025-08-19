@@ -27,7 +27,7 @@ export function FilePageView(props: Props) {
 
   // ディレクトリデータの取得
   const directoryEndpoint = apiClient.api.directories[":path{.+}"]
-  const directoryPath = getDirectoryPath(props.filePath)
+  const directoryPath = getDirectoryPath(props.filePath, true)
   const dirPath = normalizePath(directoryPath)
 
   const directoryQuery = useSuspenseQuery({

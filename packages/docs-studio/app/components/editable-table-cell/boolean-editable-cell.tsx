@@ -31,7 +31,7 @@ export function BooleanEditableCell(props: Props) {
         }
       }}
     >
-      <SelectTrigger className="w-full">
+      <SelectTrigger className="w-20">
         <SelectValue placeholder="選択してください" />
       </SelectTrigger>
       <SelectContent>

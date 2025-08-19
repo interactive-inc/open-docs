@@ -44,6 +44,7 @@ export function NumberEditableCell(props: Props) {
 
   return (
     <Input
+      className="w-max"
       type="number"
       value={editValue}
       onChange={(e) => setEditValue(e.target.value)}
