@@ -12,13 +12,11 @@
     "*.json": "json"
   },
   "files.exclude": {
-    ".clinerules": true,
     "**/.tanstack": true,
     "**/node_modules": false,
     "**/route-tree.gen.ts": true,
     "**/tsconfig.tsbuildinfo": true,
-    "bun.lock": true,
-    "CLAUDE.md": true
+    "bun.lock": true
   },
   "search.exclude": {
     "**/build": true,
