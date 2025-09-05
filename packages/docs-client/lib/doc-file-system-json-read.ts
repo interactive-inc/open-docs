@@ -38,7 +38,7 @@ export class DocFileSystemJsonRead implements DocFileSystemReadType {
     }
 
     this.data = parsed
-    this.basePath = props.basePath ?? "json://"
+    this.basePath = props.basePath ?? "docs"
     this.pathSystem = props.pathSystem ?? new DocPathSystem()
     Object.freeze(this)
   }

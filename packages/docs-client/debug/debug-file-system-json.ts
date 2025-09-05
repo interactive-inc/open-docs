@@ -29,7 +29,7 @@ try {
 // Setup JSON reader
 const jsonReader = new DocFileSystemJsonRead({
   data: jsonData,
-  basePath: "json://docs-sample",
+  basePath: "docs",
 })
 
 // Setup local writer (not used)
@@ -39,7 +39,7 @@ const localWriter = new DocFileSystemWrite({
 
 // Create file system
 const fileSystem = new DocFileSystem({
-  basePath: "json://docs-sample",
+  basePath: "docs",
   reader: jsonReader,
   writer: localWriter,
 })

@@ -20,7 +20,7 @@ describe("DocFileSystemJsonRead", () => {
     })
 
     expect(fileSystem).toBeDefined()
-    expect(fileSystem.getBasePath()).toBe("json://")
+    expect(fileSystem.getBasePath()).toBe("docs")
   })
 
   test("should create instance with custom base path", () => {
@@ -199,9 +199,9 @@ describe("DocFileSystemJsonRead", () => {
         data: sampleJsonData,
       })
 
-      expect(fileSystem.resolve("README.md")).toBe("json:/README.md")
+      expect(fileSystem.resolve("README.md")).toBe("docs/README.md")
       expect(fileSystem.resolve("docs/api/index.md")).toBe(
-        "json:/docs/api/index.md",
+        "docs/docs/api/index.md",
       )
     })
   })

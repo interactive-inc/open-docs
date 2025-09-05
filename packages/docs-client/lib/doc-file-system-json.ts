@@ -40,7 +40,7 @@ export class DocFileSystemJson extends DocFileSystem {
 
     // Call parent constructor with reader and writer
     super({
-      basePath: props.basePath ?? "json://",
+      basePath: props.basePath ?? "docs",
       pathSystem: props.pathSystem,
       reader,
       writer,

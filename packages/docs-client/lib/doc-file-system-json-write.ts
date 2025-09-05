@@ -46,7 +46,7 @@ export class DocFileSystemJsonWrite implements DocFileSystemWriteType {
       this.data = {}
     }
 
-    this.basePath = props.basePath ?? "json://"
+    this.basePath = props.basePath ?? "docs"
     this.pathSystem = props.pathSystem ?? new DocPathSystem()
     this.reader = props.reader
     this.onDataChange = props.onDataChange
