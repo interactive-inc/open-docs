@@ -5,9 +5,11 @@ import { routes } from "@interactive-inc/docs-router"
 import { createHandlers } from "@interactive-inc/docs-studio"
 import { Hono } from "hono"
 import { cors } from "hono/cors"
+import { docsToJson } from "./export-docs-json"
 
 const help = `Usage:
   docs [<docs-path>] -p <port>
+  docs export -o <output-path> [<docs-path>]
   docs --help`
 
 const args = parseArgs({
@@ -16,13 +18,28 @@ const args = parseArgs({
     help: { type: "boolean", short: "h" },
     version: { type: "boolean", short: "v" },
     port: { type: "string", short: "p", default: "4244" },
+    export: { type: "string" },
+    output: { type: "string", short: "o", default: "docs.json" },
   },
   strict: true,
   allowPositionals: true,
 })
 
 if (args.values.help) {
-  showUsage()
+  console.log(help)
+
+  process.exit(0)
+}
+
+if (args.positionals.includes("export")) {
+  const [, path = "docs"] = args.positionals
+
+  const outputPath = args.values.output
+
+  console.log("outputPath", outputPath)
+
+  await docsToJson({ basePath: path, outputPath: outputPath })
+
   process.exit(0)
 }
 
@@ -36,10 +53,6 @@ const port = args.values.port ? parseInt(args.values.port, 10) : 4244
 serve({ fetch: app.fetch, port }, (info) => {
   console.log(`Server running at http://localhost:${info.port}`)
 })
-
-function showUsage(): void {
-  console.log(help)
-}
 
 type Props = {
   docsPath: string
