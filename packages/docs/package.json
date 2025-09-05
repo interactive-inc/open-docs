@@ -1,11 +1,11 @@
 {
   "name": "@interactive-inc/docs",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "type": "module",
   "scripts": {
     "check": "tsgo --noEmit",
     "build": "tsup",
-    "deploy": "bun run build && npm publish"
+    "deploy": "bun run build && bun publish"
   },
   "dependencies": {
     "@hono/node-server": "latest",

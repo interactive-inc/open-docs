@@ -1,13 +1,14 @@
 {
   "name": "@interactive-inc/docs-client",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "type": "module",
   "scripts": {
     "check": "tsgo --noEmit",
     "build": "tsup",
-    "deploy": "bun run build && npm publish"
+    "deploy": "bun run build && bun publish"
   },
   "dependencies": {
+    "@octokit/rest": "^22.0.0",
     "yaml": "^2.0.0"
   },
   "peerDependencies": {

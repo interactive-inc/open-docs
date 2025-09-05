@@ -5,7 +5,7 @@ import { routes } from "@interactive-inc/docs-router"
 import { createHandlers } from "@interactive-inc/docs-studio"
 import { Hono } from "hono"
 import { cors } from "hono/cors"
-import { docsToJson } from "./export-docs-json"
+import { docsToJson } from "./index"
 
 const help = `Usage:
   docs [<docs-path>] -p <port>

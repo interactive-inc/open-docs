@@ -1,39 +1,51 @@
-import * as fs from "node:fs/promises"
+import { DocFileSystemRead } from "./doc-file-system-read"
+import { DocFileSystemWrite } from "./doc-file-system-write"
 import { DocPathSystem } from "./doc-path-system"
+import type { DocFileSystemReadType, DocFileSystemWriteType } from "./types"
 
 type Props = {
   basePath: string
   pathSystem?: DocPathSystem
+  reader?: DocFileSystemReadType
+  writer?: DocFileSystemWriteType
 }
 
 /**
- * File system wrapper
+ * File system wrapper with optional dependency injection for read/write operations
  */
 export class DocFileSystem {
-  private readonly basePath: string
-  private readonly pathSystem: DocPathSystem
+  protected readonly reader: DocFileSystemReadType
+  protected readonly writer: DocFileSystemWriteType
+  protected readonly basePath: string
+  protected readonly pathSystem: DocPathSystem
 
   constructor(props: Props) {
     this.basePath = props.basePath
     this.pathSystem = props.pathSystem ?? new DocPathSystem()
+
+    // Use injected reader or create default
+    this.reader =
+      props.reader ??
+      new DocFileSystemRead({
+        basePath: this.basePath,
+        pathSystem: this.pathSystem,
+      })
+
+    // Use injected writer or create default
+    this.writer =
+      props.writer ??
+      new DocFileSystemWrite({
+        basePath: this.basePath,
+        pathSystem: this.pathSystem,
+        reader: this.reader,
+      })
   }
 
   /**
    * Read file content at the specified path
    */
   async readFile(relativePath: string): Promise<string | null | Error> {
-    try {
-      const exists = await this.exists(relativePath)
-
-      if (!exists) return null
-
-      const fullPath = this.pathSystem.join(this.basePath, relativePath)
-      return await fs.readFile(fullPath, "utf-8")
-    } catch (error) {
-      return error instanceof Error
-        ? error
-        : new Error(`Failed to read file at ${relativePath}`)
-    }
+    return this.reader.readFile(relativePath)
   }
 
   /**
@@ -43,201 +55,118 @@ export class DocFileSystem {
     relativePath: string,
     content: string,
   ): Promise<Error | null> {
-    try {
-      const fullPath = this.pathSystem.join(this.basePath, relativePath)
-      const dirPath = this.pathSystem.dirname(fullPath)
-      await fs.mkdir(dirPath, { recursive: true })
-      await fs.writeFile(fullPath, content, "utf-8")
-      return null
-    } catch (error) {
-      return error instanceof Error
-        ? error
-        : new Error(`Failed to write file at ${relativePath}`)
-    }
+    return this.writer.writeFile(relativePath, content)
   }
 
   /**
    * Delete file at the specified path
    */
   async deleteFile(relativePath: string): Promise<Error | null> {
-    try {
-      const fullPath = this.pathSystem.join(this.basePath, relativePath)
-      await fs.unlink(fullPath)
-      return null
-    } catch (error) {
-      return new Error(`Failed to delete file at ${relativePath}: ${error}`)
-    }
+    return this.writer.deleteFile(relativePath)
   }
 
   /**
    * Get file name from path
    */
   readFileName(relativePath: string): string {
-    return this.pathSystem.basename(relativePath)
+    return this.reader.readFileName(relativePath)
   }
 
   /**
    * Get file extension from path
    */
   readFileExtension(relativePath: string): string {
-    return this.pathSystem.extname(relativePath)
+    return this.reader.readFileExtension(relativePath)
   }
 
   /**
    * Get directory path where the file exists
    */
   readFileDirectory(relativePath: string): string {
-    return this.pathSystem.dirname(relativePath)
+    return this.reader.readFileDirectory(relativePath)
   }
 
   /**
    * Get list of entries in directory
    */
   async readDirectoryFileNames(relativePath = ""): Promise<string[] | Error> {
-    try {
-      const fullPath = this.pathSystem.join(this.basePath, relativePath)
-      return await fs.readdir(fullPath)
-    } catch (error) {
-      return error instanceof Error
-        ? error
-        : new Error(`Failed to read directory at ${relativePath}`)
-    }
+    return this.reader.readDirectoryFileNames(relativePath)
   }
 
   async readDirectoryFilePaths(
     relativePath: string,
   ): Promise<string[] | Error> {
-    try {
-      const fileNames = await this.readDirectoryFileNames(relativePath)
-
-      if (fileNames instanceof Error) {
-        return fileNames
-      }
-
-      return fileNames.map((fileName) =>
-        this.pathSystem.join(relativePath, fileName),
-      )
-    } catch (error) {
-      return error instanceof Error
-        ? error
-        : new Error(`Failed to read directory file paths at ${relativePath}`)
-    }
+    return this.reader.readDirectoryFilePaths(relativePath)
   }
 
   /**
    * Check if path is a directory
    */
   async isDirectory(relativePath: string): Promise<boolean> {
-    try {
-      const fullPath = this.pathSystem.join(this.basePath, relativePath)
-      const stats = await fs.stat(fullPath)
-      return stats.isDirectory()
-    } catch {
-      return false
-    }
+    return this.reader.isDirectory(relativePath)
   }
 
   /**
    * Check if path is a file
    */
   async isFile(relativePath: string): Promise<boolean> {
-    try {
-      const fullPath = this.pathSystem.join(this.basePath, relativePath)
-      const stats = await fs.stat(fullPath)
-      return stats.isFile()
-    } catch {
-      return false
-    }
+    return this.reader.isFile(relativePath)
   }
 
   /**
    * Check if file or directory exists
    */
   async exists(relativePath: string): Promise<boolean> {
-    try {
-      const fullPath = this.pathSystem.join(this.basePath, relativePath)
-      await fs.access(fullPath)
-      return true
-    } catch {
-      return false
-    }
+    return this.reader.exists(relativePath)
   }
 
   /**
    * Check if directory exists
    */
   async directoryExists(relativePath: string): Promise<boolean> {
-    return this.isDirectory(relativePath)
+    return this.reader.directoryExists(relativePath)
   }
 
   /**
    * Check if file exists
    */
   async fileExists(relativePath: string): Promise<boolean> {
-    return this.isFile(relativePath)
+    return this.reader.fileExists(relativePath)
   }
 
   /**
    * Get base path
    */
   getBasePath(): string {
-    return this.basePath
+    return this.reader.getBasePath()
   }
 
   /**
    * Convert relative path to absolute path
    */
   resolve(relativePath: string): string {
-    return this.pathSystem.join(this.basePath, relativePath)
+    return this.reader.resolve(relativePath)
   }
 
   /**
    * Create directory
    */
   async createDirectory(relativePath: string): Promise<Error | null> {
-    try {
-      const fullPath = this.pathSystem.join(this.basePath, relativePath)
-      await fs.mkdir(fullPath, { recursive: true })
-      return null
-    } catch (error) {
-      return error instanceof Error
-        ? error
-        : new Error(`Failed to create directory at ${relativePath}`)
-    }
+    return this.writer.createDirectory(relativePath)
   }
 
   /**
    * Get file size in bytes
    */
   async getFileSize(relativePath: string): Promise<number | Error> {
-    try {
-      const fullPath = this.pathSystem.join(this.basePath, relativePath)
-      const stats = await fs.stat(fullPath)
-      return stats.size
-    } catch (error) {
-      return error instanceof Error
-        ? error
-        : new Error(`Failed to get file size at ${relativePath}`)
-    }
+    return this.reader.getFileSize(relativePath)
   }
 
   /**
    * Create directory if it doesn't exist
    */
   async ensureDirectoryExists(relativePath: string): Promise<Error | null> {
-    try {
-      if (!(await this.exists(relativePath))) {
-        const result = await this.createDirectory(relativePath)
-        if (result instanceof Error) {
-          return result
-        }
-      }
-      return null
-    } catch (error) {
-      return error instanceof Error
-        ? error
-        : new Error(`Failed to ensure directory exists at ${relativePath}`)
-    }
+    return this.writer.ensureDirectoryExists(relativePath)
   }
 
   /**
@@ -247,18 +176,7 @@ export class DocFileSystem {
     sourcePath: string,
     destinationPath: string,
   ): Promise<Error | null> {
-    try {
-      const sourceFullPath = this.pathSystem.join(this.basePath, sourcePath)
-      const destFullPath = this.pathSystem.join(this.basePath, destinationPath)
-      await fs.copyFile(sourceFullPath, destFullPath)
-      return null
-    } catch (error) {
-      return error instanceof Error
-        ? error
-        : new Error(
-            `Failed to copy file from ${sourcePath} to ${destinationPath}`,
-          )
-    }
+    return this.writer.copyFile(sourcePath, destinationPath)
   }
 
   /**
@@ -268,47 +186,20 @@ export class DocFileSystem {
     sourcePath: string,
     destinationPath: string,
   ): Promise<Error | null> {
-    try {
-      const sourceFullPath = this.pathSystem.join(this.basePath, sourcePath)
-      const destFullPath = this.pathSystem.join(this.basePath, destinationPath)
-      await fs.rename(sourceFullPath, destFullPath)
-      return null
-    } catch (error) {
-      return error instanceof Error
-        ? error
-        : new Error(
-            `Failed to move file from ${sourcePath} to ${destinationPath}`,
-          )
-    }
+    return this.writer.moveFile(sourcePath, destinationPath)
   }
 
   /**
    * Get file last modified time
    */
   async getFileModifiedTime(relativePath: string): Promise<Date | Error> {
-    try {
-      const fullPath = this.pathSystem.join(this.basePath, relativePath)
-      const stats = await fs.stat(fullPath)
-      return stats.mtime
-    } catch (error) {
-      return error instanceof Error
-        ? error
-        : new Error(`Failed to get file modified time at ${relativePath}`)
-    }
+    return this.reader.getFileModifiedTime(relativePath)
   }
 
   /**
    * Get file creation time
    */
   async getFileCreatedTime(relativePath: string): Promise<Date | Error> {
-    try {
-      const fullPath = this.pathSystem.join(this.basePath, relativePath)
-      const stats = await fs.stat(fullPath)
-      return stats.birthtime
-    } catch (error) {
-      return error instanceof Error
-        ? error
-        : new Error(`Failed to get file created time at ${relativePath}`)
-    }
+    return this.reader.getFileCreatedTime(relativePath)
   }
 }

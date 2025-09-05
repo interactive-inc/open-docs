@@ -6,7 +6,7 @@
     "check": "tsgo --noEmit",
     "build": "tsup",
     "dev": "bun run server.ts --watch",
-    "deploy": "bun run build && npm publish"
+    "deploy": "bun run build && bun publish"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.7.0",

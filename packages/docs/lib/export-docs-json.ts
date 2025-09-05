@@ -3,22 +3,22 @@ import { join, relative } from "node:path"
 
 type Props = {
   basePath: string
-  outputPath: string
+  outputPath?: string
 }
 
 /**
- * Convert markdown docs to JSON format and write to file
- * 
+ * Convert markdown docs to JSON format and optionally write to file
+ *
  * Recursively reads all .md files from the specified basePath,
  * ignoring hidden files/directories (starting with '.').
- * 
+ *
  * Output JSON format:
  * {
  *   "file1.md": "# File 1 content...",
  *   "subdir/file2.md": "# File 2 content...",
  *   "subdir/nested/file3.md": "# File 3 content..."
  * }
- * 
+ *
  * Keys are relative paths from basePath
  * Values are raw markdown file contents
  */
@@ -68,11 +68,11 @@ export async function docsToJson(
     result[relativePath] = content
   }
 
-  const outputPath = `${process.cwd()}/${props.outputPath}`
-
-  const text = JSON.stringify(result, null, 2)
-
-  await writeFile(outputPath, text)
+  if (props.outputPath) {
+    const outputPath = `${process.cwd()}/${props.outputPath}`
+    const text = JSON.stringify(result, null, 2)
+    await writeFile(outputPath, text)
+  }
 
   return result
 }

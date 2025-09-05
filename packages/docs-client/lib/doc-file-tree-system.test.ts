@@ -188,3 +188,110 @@ test("FileTreeSystem - directoryExcludesで指定されたディレクトリが�
   expect(directoryTree.length).toBe(1)
   expect(directoryTree[0].name).toBe("docs")
 })
+
+test("FileTreeSystem - buildTreeメソッドが正しくツリーを構築する", async () => {
+  const mockFileSystem = {
+    getBasePath: () => "/test",
+    readDirectoryFileNames: async (path: string) => {
+      if (path === "") return ["file1.md", "dir1", "dir2"]
+      if (path === "dir1") return ["file2.md", "subdir"]
+      if (path === "dir1/subdir") return ["file3.md"]
+      if (path === "dir2") return ["index.md"]
+      return []
+    },
+    isDirectory: async (path: string) => {
+      return ["dir1", "dir2", "dir1/subdir"].includes(path)
+    },
+    readFile: async (path: string) => {
+      const files: Record<string, string> = {
+        "file1.md": "# File 1\n\nContent",
+        "dir1/file2.md": "# File 2\n\nContent",
+        "dir1/subdir/file3.md": "# File 3\n\nContent",
+        "dir2/index.md": "# Directory 2\n\nContent",
+      }
+      return files[path] || ""
+    },
+    exists: async (path: string) => {
+      return [
+        "file1.md",
+        "dir1/file2.md",
+        "dir1/subdir/file3.md",
+        "dir2/index.md",
+      ].includes(path)
+    },
+  } as unknown as DocFileSystem
+
+  const pathSystem = new DocPathSystem()
+  const fileTreeSystem = new DocFileTreeSystem({
+    fileSystem: mockFileSystem,
+    pathSystem,
+    indexFileName: "index.md",
+    archiveDirectoryName: "_archive",
+    config: defaultTestConfig,
+  })
+
+  const tree = await fileTreeSystem.buildFileTree("")
+  if (tree instanceof Error) {
+    throw tree
+  }
+
+  expect(tree.length).toBe(3) // file1.md, dir1, dir2
+  expect(tree[0].name).toBe("file1.md")
+  expect(tree[0].type).toBe("file")
+
+  const dir1 = tree[1]
+  expect(dir1.name).toBe("dir1")
+  expect(dir1.type).toBe("directory")
+  if (dir1.type === "directory") {
+    expect(dir1.children.length).toBe(2) // file2.md, subdir
+    const subdir = dir1.children[1]
+    expect(subdir.name).toBe("subdir")
+    if (subdir.type === "directory") {
+      expect(subdir.children.length).toBe(1) // file3.md
+    }
+  }
+})
+
+test("FileTreeSystem - buildFileTreeがファイルを除外できる", async () => {
+  const mockFileSystem = {
+    getBasePath: () => "/test",
+    readDirectoryFileNames: async (path: string) => {
+      if (path === "") return ["file1.md", "dir1", "dir2", "file2.md"]
+      if (path === "dir1") return ["subdir", "file.md"]
+      if (path === "dir1/subdir") return []
+      if (path === "dir2") return []
+      return []
+    },
+    isDirectory: async (path: string) => {
+      return ["dir1", "dir2", "dir1/subdir"].includes(path)
+    },
+    readFile: async () => "",
+    exists: async () => false,
+  } as unknown as DocFileSystem
+
+  const pathSystem = new DocPathSystem()
+  const fileTreeSystem = new DocFileTreeSystem({
+    fileSystem: mockFileSystem,
+    pathSystem,
+    indexFileName: "index.md",
+    archiveDirectoryName: "_archive",
+    config: defaultTestConfig,
+  })
+
+  const tree = await fileTreeSystem.buildFileTree("")
+  if (tree instanceof Error) {
+    throw tree
+  }
+
+  expect(tree.length).toBe(4) // file1.md, dir1, dir2, file2.md
+  expect(tree.filter((node) => node.type === "directory").length).toBe(2) // dir1, dir2
+
+  const directories = tree.filter((node) => node.type === "directory")
+  const dir1 = directories.find((d) => d.name === "dir1")
+  if (dir1 && dir1.type === "directory") {
+    expect(dir1.children.length).toBe(2) // index.md, subdir
+    const subdirChild = dir1.children.find((c) => c.name === "subdir")
+    expect(subdirChild).toBeDefined()
+    expect(subdirChild?.type).toBe("directory")
+  }
+})

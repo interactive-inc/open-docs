@@ -8,7 +8,7 @@
     "build:app": "vite build",
     "build:lib": "tsup --tsconfig tsconfig.lib.json",
     "build": "bun run build:app && bun run build:lib",
-    "deploy": "bun run build && npm publish"
+    "deploy": "bun run build && bun publish"
   },
   "dependencies": {
     "@hono/node-server": "^1.0.0"

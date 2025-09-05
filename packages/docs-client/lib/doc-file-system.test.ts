@@ -57,7 +57,9 @@ test("DocFileSystem - コンストラクタのProps型", () => {
   // 必須とオプショナルのプロパティ
   type RequiredProps = Required<ConstructorProps>
   type RequiredKeys = keyof RequiredProps
-  assertType<Equals<RequiredKeys, "basePath" | "pathSystem">>()
+  assertType<
+    Equals<RequiredKeys, "basePath" | "pathSystem" | "reader" | "writer">
+  >()
 })
 
 test("DocFileSystem - moveFile と copyFile の型", () => {
